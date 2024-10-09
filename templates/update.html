@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<form action="/update/{{categoria.id}}" method="POST">
+    <h2>Actualizar Categoria</h2>
+    <input type="text" name="nombre" placeholder="Categoria" value="{{categoria.nombre}}" required>
+    <button>Guardar</button>
+</form>
+
+{% endblock %}

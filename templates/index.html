@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<form action="/add" method="POST">
+    <h3>Agregar Categoria</h3>
+    <input type="text" name="nombre" placeholder="categorias" required>
+    <button>Guardar</button>
+</form>
+<div>
+
+    <div>
+        <h2>Listar Categorias</h2>
+        {% for categoria in categorias %}
+        <div>
+            <p>{{ categoria.nombre }}</p>
+            <div>
+                <a href="{{ url_for('categorias.update', id=categoria.id) }}">Actualizar</a>
+                <a href="{{ url_for('categorias.delete', id=categoria.id) }}">Eliminar</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+</div>
+
+<form action="/add" method="POST">
+    <h3>Agregar Producto</h3>
+    <input type="text" name="nombre" placeholder="nombre" required>
+    <input type="text" name="precio" placeholder="precio" required>
+    <select name="categoria" id="">
+            <option value="">Seleccionar</option>
+        {% for categoria in categorias %}
+            <option value="{{ categoria.nombre }}">{{ categoria.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button>Guardar</button>
+</form>
+<div>
+
+    <div>
+        <h2>Listar Productos</h2>
+        {% for producto in productos %}
+        <div>
+            <p>{{ producto.nombre }}</p>
+            <p>{{ producto.precio }}</p>
+            <p>{{ producto.categoria }}</p>
+            <div>
+                <a href="{{ url_for('productos.update', id=producto.id) }}">Actualizar</a>
+                <a href="{{ url_for('productos.delete', id=producto.id) }}">Eliminar</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+</div>
+
+{% endblock %}
