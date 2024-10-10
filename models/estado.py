@@ -1,6 +1,6 @@
 from utils.db import db
 from sqlalchemy import column, Integer, String, Numeric, ForeignKey
-from sqlalchemy.orm import declarative_base, ForeignKey
+from sqlalchemy.orm import declarative_base
 
 class Estado(db.Model):
     __tablename__ = 'estado'

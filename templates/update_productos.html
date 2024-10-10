@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<form action="/update_productos/{{producto.id}}" method="POST">
+    <h2>Actualizar Producto</h2>
+    <input type="text" name="nombre" placeholder="nombre" value="{{producto.nombre}}">
+    <input type="text" name="precio" placeholder="precio" value="{{producto.precio}}">
+    <select name="categoria" id="">
+        <option value="">seleccionar</option>
+        {% for categoria in categorias %}
+            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button>Guardar</button>
+</form>
+
+{% endblock %}

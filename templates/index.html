@@ -52,8 +52,7 @@
                 <p>{{ producto.precio }}</p>
                 <p>{{ producto.categoria }}</p>
                 <div>
-                    <a href="{{ url_for('productos.update', id=producto.id) }}">Actualizar</a>
-                    <a href="{{ url_for('productos.delete', id=producto.id) }}">Eliminar</a>
+                    
                 </div>
             </div>
             {% endfor %}
