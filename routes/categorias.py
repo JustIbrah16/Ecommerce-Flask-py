@@ -3,6 +3,10 @@ from models.categorias import Categorias
 from utils.db import db
 
 categorias = Blueprint('categorias', __name__)
+
+def obtener_categorias():
+    return Categorias.query.all()
+
 @categorias.route("/")
 def index():
     categorias = Categorias.query.all()

@@ -1,8 +1,8 @@
 from utils.db import db
 from sqlalchemy import column, Integer, String, Numeric, ForeignKey, DateTime
-from sqlalchemy.orm import declarative_base, ForeignKey, relationship
+from sqlalchemy.orm import declarative_base, relationship
 import datetime
-from estado import Estado
+from .estado import Estado
 
 class Pedidos(db.Model):
     __tablename__ = 'pedidos'

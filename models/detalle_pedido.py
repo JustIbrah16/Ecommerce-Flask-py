@@ -1,9 +1,9 @@
 from utils.db import db
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
-from sqlalchemy.orm import declarative_base, ForeignKey, relationship
-from pedidos import Pedidos
-from productos import Productos
-from categorias import Categorias
+from sqlalchemy.orm import declarative_base, relationship
+from .pedidos import Pedidos
+from .productos import Productos
+from .categorias import Categorias
 
 class Detalle_pedido(db.Model):
     __tablename__ = 'detalle_pedido'
