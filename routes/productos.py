@@ -10,11 +10,11 @@ def obtener_categoria():
     return Categorias.query.all()
 
 def obtener_productos():
-    return Productos.query.all()
+    return Productos.query.filter_by(fk_estado = 2)
 
 @productos.route("/add_productos")
 def index():
-    productos = Productos.query.filter_by(fk_estado = 2)
+    productos = Productos.query.all()
     categorias = obtener_categoria()
     return render_template('productos.html', productos = productos, categorias = categorias)
 

@@ -5,6 +5,7 @@ from .categorias import Categorias
 from utils.db import db
 from models.pedidos import Pedidos
 from models.detalle_pedido import Detalle_pedido
+from models.estado import Estado
 
 
 pedidos = Blueprint('pedidos', __name__)
@@ -45,3 +46,21 @@ def agregar_producto_a_pedido(producto_id):
 
     flash(f'{cantidad} producto(s) agregado(s) al pedido', 'success')
     return redirect(url_for('productos.index'))
+
+@pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
+def filtrar_pedidos():
+    estado_id = request.form.get('estado') 
+    fecha = request.form.get('fecha')  
+
+    query = Pedidos.query
+
+    if estado_id:
+        query = query.filter(Pedidos.fk_estado == estado_id)
+
+    if fecha:
+        query = query.filter(db.func.date(Pedidos.fecha) == fecha)
+
+    pedidos_filtrados = query.all()
+
+    estados = Estado.query.all()  
+    return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
