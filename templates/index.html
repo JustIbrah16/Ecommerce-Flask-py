@@ -73,7 +73,10 @@
                 <td>{{ pedido.fecha.strftime('%Y-%m-%d') }}</td>
                 <td>{{ pedido.total }}</td>
                 <td>{{ pedido.estado.nombre }}</td>
-                <td><!-- acciones como ver o modificar el pedido --></td>
+                <td>
+                  <button type="button" class="btn btn-primary">Actualizar</button>
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDetalles">Detalles</button>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
