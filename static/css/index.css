@@ -1,0 +1,26 @@
+body{
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container{
+    margin: 0%;
+    height: 100%;
+    padding: 25px;
+}
+
+.row{
+    height: 100%;
+}
+
+.productos{
+    
+}
+
+.pedidos{
+    border: 2px solid gray;
+    box-sizing: border-box;
+}
+
+

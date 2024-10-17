@@ -12,30 +12,33 @@ def obtener_categoria():
 def obtener_productos():
     return Productos.query.all()
 
-@productos.route("/index_productos")
+@productos.route("/add_productos")
 def index():
     productos = Productos.query.filter_by(fk_estado = 2)
     categorias = obtener_categoria()
-    return render_template('index.html', productos = productos, categorias = categorias)
+    return render_template('productos.html', productos = productos, categorias = categorias)
 
-@productos.route("/add_productos", methods = ['POST'])
+@productos.route("/add_productos", methods = ['POST', 'GET'])
 def add_productos():
-    nombre = request.form['nombre']
-    precio = request.form['precio']
-    categoria_id = request.form['categoria']
-    estado = 2
+    if request.method == 'POST':    
+        nombre = request.form['nombre']
+        precio = request.form['precio']
+        categoria_id = request.form['categoria']
+        estado = 2
 
-    categoria = Categorias.query.get(categoria_id)
-    if not categoria:
-        flash('Categoria no valida', 'error')
-        return redirect(url_for('main.index'))
+        categoria = Categorias.query.get(categoria_id)
+        if not categoria:
+            flash('Categoria no valida', 'error')
+            return redirect(url_for('main.index'))
 
-    nuevo_producto = Productos(fk_categoria = categoria_id, nombre = nombre, precio = precio, fk_estado = estado)
-    db.session.add(nuevo_producto)
-    db.session.commit()
+        nuevo_producto = Productos(fk_categoria = categoria_id, nombre = nombre, precio = precio, fk_estado = estado)
+        db.session.add(nuevo_producto)
+        db.session.commit()
 
     # print(f"Nombre: {nombre}, Precio: {precio}, Categoria ID: {categoria_id}")
-    return redirect(url_for('main.index'))
+        return redirect(url_for('main.index'))
+    
+    return render_template('productos.html')
 
 @productos.route("/update_productos/<id>", methods = ['POST', 'GET'])
 def update_productos(id):

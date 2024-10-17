@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, get_flashed_messages
+from flask import Blueprint, render_template, request, redirect, url_for, flash, get_flashed_messages,session
 import datetime
 from models.productos import Productos
 from .categorias import Categorias
@@ -8,6 +8,10 @@ from models.detalle_pedido import Detalle_pedido
 
 
 pedidos = Blueprint('pedidos', __name__)
+
+def obtener_pedidos():
+    return Pedidos.query.all()
+
 
 @pedidos.route("/add_to_pedido/<producto_id>", methods=['POST'])
 def agregar_producto_a_pedido(producto_id):

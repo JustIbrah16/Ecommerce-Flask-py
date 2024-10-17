@@ -7,21 +7,25 @@ categorias = Blueprint('categorias', __name__)
 def obtener_categorias():
     return Categorias.query.all()
 
-@categorias.route("/")
+@categorias.route("/add")
 def index():
     categorias = Categorias.query.all()
-    return render_template('index.html', categorias = categorias)
+    return render_template('categorias.html', categorias = categorias)
 
-@categorias.route("/add", methods = ['POST'])
+@categorias.route("/add", methods = ['POST', 'GET'])
 def add():
-    nombre = request.form['nombre']
+    if request.method == 'POST':
 
-    nueva_categoria = Categorias(nombre)
+        nombre = request.form['nombre']
 
-    db.session.add(nueva_categoria)
-    db.session.commit()
+        nueva_categoria = Categorias(nombre)
 
-    return redirect(url_for('categorias.index'))
+        db.session.add(nueva_categoria)
+        db.session.commit()
+
+        return redirect(url_for('categorias.index'))
+
+    return render_template('categorias.html')
 
 @categorias.route("/update/<id>", methods = ['POST', 'GET'])
 def update(id):
