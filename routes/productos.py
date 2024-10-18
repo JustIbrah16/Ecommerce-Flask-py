@@ -10,6 +10,13 @@ productos = Blueprint('productos', __name__)
 def obtener_categoria():
     return Categorias.query.all()
 
+@productos.route("/productos/<id>", methods = ['GET'])
+def obtener_productos_all():
+    producto = Productos.query.get(id)
+    if producto:
+        return jsonify({'id': producto.id, 'nombre': producto.nombre, 'precio': str(producto.precio)})
+    return jsonify({'error': 'Producto no encontrado'}), 404
+
 def obtener_productos():
     return Productos.query.filter_by(fk_estado = 2)
 

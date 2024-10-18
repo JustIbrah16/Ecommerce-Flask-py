@@ -60,7 +60,7 @@ def agregar_producto_a_pedido(producto_id):
     flash(f'{cantidad} producto(s) agregado(s) al pedido', 'success')
     return redirect(url_for('productos.index'))
 
-@pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
+@pedidos.route("/filtrar_pedidos", methods=['POST'])
 def filtrar_pedidos():
     estado_id = request.form.get('estado') 
     fecha = request.form.get('fecha')  
@@ -74,9 +74,37 @@ def filtrar_pedidos():
         query = query.filter(db.func.date(Pedidos.fecha) == fecha)
 
     pedidos_filtrados = query.all()
+    
+    # Preparar los datos para JSON
+    result = []
+    for pedido in pedidos_filtrados:
+        result.append({
+            'id': pedido.id,
+            'fecha': pedido.fecha.strftime('%Y-%m-%d'), # Asegúrate de formatear la fecha como necesites
+            'total': pedido.total,
+            'estado': pedido.estado.nombre
+        })
 
-    estados = Estado.query.all()  
-    return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
+    return jsonify({'pedidos': result})
+
+@pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
+def detalle_pedido(id):
+    detalles = (Detalle_pedido.query
+                .join(Productos)  # Asegúrate de hacer el join con Productos
+                .filter(Detalle_pedido.fk_pedido == id)
+                .add_columns(Productos.nombre, Productos.precio, Detalle_pedido.cantidad, Detalle_pedido.subtotal)  # Agregar campos necesarios
+                .all())
+
+    resultados = [{
+        'nombre': detalle.nombre,  # Nombre del producto
+        'precio': detalle.precio,   # Precio del producto
+        'cantidad': detalle.cantidad, 
+        'subtotal': detalle.subtotal
+    } for detalle in detalles]
+
+    return jsonify(resultados)
+
+
 
 @pedidos.route('/finalizar_compra', methods=['POST'])
 def finalizar_compra():
@@ -101,3 +129,5 @@ def finalizar_compra():
 
     flash('Pedido realizado con éxito', 'success')  # Mensaje de éxito
     return jsonify({'redirect': url_for('main.index')}), 201
+
+
