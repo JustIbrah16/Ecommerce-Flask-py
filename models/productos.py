@@ -19,3 +19,10 @@ class Productos(db.Model):
         self.fk_estado = fk_estado
         self.nombre = nombre
         self.precio = precio
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'precio': self.precio
+        }    

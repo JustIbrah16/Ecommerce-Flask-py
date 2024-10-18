@@ -5,13 +5,15 @@ from routes.productos import productos
 from routes.pedidos import pedidos
 from routes.main import main
 from utils.db import db
+import pymysql
+pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
 
 bootstrap = Bootstrap5(app)
 
 app.secret_key = 'secret key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3306/flask_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost:3306/flask_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)

@@ -29,8 +29,9 @@
               <div class="ms-2 me-auto">
                 <div class="fw-bold">{{ producto.nombre }}</div>
                 ${{ producto.precio }}
+            
               </div>
-              <button class="btn btn-primary" type="button">Agregar al
+              <button class="btn btn-primary" type="button" onclick="search('{{producto.id}}')">Agregar al
                 Pedido</button>
             </li>
             {% endfor %}
@@ -135,7 +136,7 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <table class="table">
+            <table class="table" id="carrito_modal">
               <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -147,25 +148,129 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Audifonos</td>
-                  <td>260000</td>
-                  <td>2</td>
-                  <td>520000</td>
-                  <td><button type="button"
-                      class="btn btn-danger">Eliminar</button></td>
-                </tr>
+                
               </tbody>
             </table>
           </div>
           <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="btnFinalizarCompra"
+           ">Agregar pedido</button>
             <button type="button" class="btn btn-secondary"
               data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
+
+    <script>
+
+let cont_productos_carrito = 0;
+let productos_carrito = [];
+
+async function search(id) {
+    const peticion = await fetch(window.location.origin + '/buscar_prod_id', {
+        method: "POST",
+        body: JSON.stringify({ id_prod: id }),
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+    });
+
+    const rs = await peticion.json();
+
+    const tbody = document.querySelector("#carrito_modal tbody");
+
+    const precio = parseFloat(rs.precio);
+    
+    // Comprobar si el producto ya está en el carrito
+    const existingProductIndex = productos_carrito.findIndex(pro => pro.id === rs.id);
+    if (existingProductIndex !== -1) {
+        const cantidadInput = document.querySelector(`input[name="productos[${existingProductIndex}][cantidad]"]`);
+        cantidadInput.value = parseInt(cantidadInput.value || 0) + 1; // Aumentar cantidad
+        updateSubtotal(existingProductIndex, { target: cantidadInput }, precio);
+        return; // Salir de la función
+    }
+
+    const row = `
+        <tr id="row_product_${cont_productos_carrito}">
+            <td>${rs.id}
+                <input type="hidden" name="productos[${cont_productos_carrito}][id]" value="${rs.id}">
+                <input type="hidden" name="productos[${cont_productos_carrito}][nombre]" value="${rs.nombre}">
+                <input type="hidden" name="productos[${cont_productos_carrito}][precio]" value="${precio}">
+                <input type="hidden" id="producto_subtotal_${cont_productos_carrito}" name="productos[${cont_productos_carrito}][subtotal]">
+            </td>
+            <td>${rs.nombre}</td>
+            <td>${precio.toFixed(2)}</td>
+            <td>
+                <input type="number" name="productos[${cont_productos_carrito}][cantidad]" 
+                       oninput="updateSubtotal(${cont_productos_carrito}, event, ${precio})" 
+                       placeholder="Ingrese la cantidad" min="1">  
+            </td>
+            <td>
+                <span id="text_subtotal_${cont_productos_carrito}"></span>
+            </td>
+            <td>
+                <button type="button" onclick="removeProduct('row_product_${cont_productos_carrito}')" class="btn btn-danger">Eliminar</button>
+            </td>
+        </tr>
+    `;
+    tbody.innerHTML += row;
+    
+    productos_carrito.push(rs);
+    
+    cont_productos_carrito += 1;
+}
+
+function updateSubtotal(index, event, precio) {
+    const cantidad = event.target.value ? parseInt(event.target.value) : 0;
+    const subtotal = document.getElementById(`producto_subtotal_${index}`);
+    const subtotalText = document.getElementById(`text_subtotal_${index}`);
+
+    const subtotalValue = cantidad * precio;
+    subtotal.value = subtotalValue;
+    subtotalText.innerText = subtotalValue.toFixed(2);
+}
+
+function removeProduct(rowId) {
+    document.getElementById(rowId).remove();
+}
+
+document.getElementById('btnFinalizarCompra').addEventListener('click', async () => {
+    const productos = [];
+
+    for (let i = 0; i < cont_productos_carrito; i++) {
+        const cantidadInput = document.querySelector(`input[name="productos[${i}][cantidad]"]`);
+        if (cantidadInput) {
+            const cantidad = parseInt(cantidadInput.value) || 0;
+            const subtotal = document.getElementById(`producto_subtotal_${i}`).value;
+            const id = document.querySelector(`input[name="productos[${i}][id]"]`).value;
+
+            if (cantidad > 0) {
+                productos.push({
+                    id: id,
+                    cantidad: cantidad,
+                    subtotal: parseFloat(subtotal)
+                });
+            }
+        }
+    }
+
+    const peticion = await fetch(window.location.origin + '/finalizar_compra', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productos })
+    });
+
+    const response = await peticion.json();
+    if (response.redirect) {
+        window.location.href = response.redirect;  // Redirige al índice
+    } else {
+        alert('Hubo un error al realizar el pedido');
+    }
+});
+
+
+    </script>
 
   </body>
 </html>

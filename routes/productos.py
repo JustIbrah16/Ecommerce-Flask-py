@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, get_flashed_messages
 from models.productos import Productos
 from .categorias import Categorias
-from utils.db import db
-
+from utils.db import db 
+import json
+from flask import request, jsonify
 
 productos = Blueprint('productos', __name__)
 
@@ -12,11 +13,22 @@ def obtener_categoria():
 def obtener_productos():
     return Productos.query.filter_by(fk_estado = 2)
 
+@productos.route("/buscar_prod_id", methods = ['POST'])
+def buscar_prod_id():
+    data = request.get_json()
+    id_prod = data.get('id_prod')
+    producto = Productos.query.filter_by(id = id_prod).first()
+    if producto:
+        return jsonify(producto.to_dict())  # Asegúrate de tener un método to_dict() en tu modelo
+    else:
+        return jsonify({'error': 'Producto no encontrado'}), 404
+
+
 @productos.route("/add_productos")
 def index():
     productos = Productos.query.all()
     categorias = obtener_categoria()
-    return render_template('productos.html', productos = productos, categorias = categorias)
+    return render_template('productos.html', productos = productos, categorias = categorias,)
 
 @productos.route("/add_productos", methods = ['POST', 'GET'])
 def add_productos():

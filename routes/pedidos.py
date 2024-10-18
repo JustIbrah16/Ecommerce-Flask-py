@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, get_flashed_messages,session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, get_flashed_messages,session, jsonify
 import datetime
 from models.productos import Productos
 from .categorias import Categorias
@@ -12,6 +12,19 @@ pedidos = Blueprint('pedidos', __name__)
 
 def obtener_pedidos():
     return Pedidos.query.all()
+
+@pedidos.route('/buscar_prod_id', methods=['POST'])
+def buscar_prod_id():
+    data = request.get_json()
+    producto = Productos.query.get(data['id_prod'])
+
+    if producto:
+        return jsonify({
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'precio': str(producto.precio)  # Asegúrate de que sea un string
+        })
+    return jsonify({'error': 'Producto no encontrado'}), 404
 
 
 @pedidos.route("/add_to_pedido/<producto_id>", methods=['POST'])
@@ -64,3 +77,27 @@ def filtrar_pedidos():
 
     estados = Estado.query.all()  
     return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
+
+@pedidos.route('/finalizar_compra', methods=['POST'])
+def finalizar_compra():
+    data = request.get_json()
+    
+    total = sum(item['subtotal'] for item in data['productos'])
+    
+    nuevo_pedido = Pedidos(fk_estado=3, total=total, fecha=datetime.datetime.utcnow())
+    db.session.add(nuevo_pedido)
+    db.session.commit()
+
+    for item in data['productos']:
+        detalle = Detalle_pedido(
+            fk_pedido=nuevo_pedido.id,
+            fk_producto=item['id'],
+            cantidad=item['cantidad'],
+            subtotal=item['subtotal']
+        )
+        db.session.add(detalle)
+
+    db.session.commit()
+
+    flash('Pedido realizado con éxito', 'success')  # Mensaje de éxito
+    return jsonify({'redirect': url_for('main.index')}), 201

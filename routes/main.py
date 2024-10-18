@@ -10,10 +10,11 @@ from models.categorias import Categorias
 
 main = Blueprint('main', __name__)
 
-@main.route("/")
+@main.route("/", methods = ['POST', 'GET'])
 def index():
     productos = Productos.query.filter_by(fk_estado = 2)
     categorias = Categorias.query.all()
     pedidos = Pedidos.query.all()
     estados = Estado.query.all()
+
     return render_template('index.html', productos = productos, categorias = categorias, pedidos = pedidos, estados= estados)
