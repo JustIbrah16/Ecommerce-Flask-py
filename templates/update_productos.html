@@ -1,18 +1,44 @@
 {% extends 'layout.html' %}
 
-{% block body %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Actualizar Producto</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('productos.update_productos', id=producto.id) }}" method="POST">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre del Producto</label>
+                            <input type="text" name="nombre" id="nombre" class="form-control" value="{{ producto.nombre }}" required>
+                        </div>
 
-<form action="/update_productos/{{producto.id}}" method="POST">
-    <h2>Actualizar Producto</h2>
-    <input type="text" name="nombre" placeholder="nombre" value="{{producto.nombre}}">
-    <input type="text" name="precio" placeholder="precio" value="{{producto.precio}}">
-    <select name="categoria" id="">
-        <option value="">seleccionar</option>
-        {% for categoria in categorias %}
-            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
-        {% endfor %}
-    </select>
-    <button>Guardar</button>
-</form>
+                        <div class="mb-3">
+                            <label for="precio" class="form-label">Precio</label>
+                            <input type="number" step="0.01" name="precio" id="precio" class="form-control" value="{{ producto.precio }}" required>
+                        </div>
 
+                        <div class="mb-3">
+                            <label for="categoria" class="form-label">Categoría</label>
+                            <select name="categoria" id="categoria" class="form-select" required>
+                                <option value="" disabled>Seleccionar</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}" {% if categoria.id == producto.categoria_id %}selected{% endif %}>
+                                        {{ categoria.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
