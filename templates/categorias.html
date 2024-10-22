@@ -3,25 +3,30 @@
 
 {% include 'header.html' %}
 
-<form action="{{ url_for('categorias.add') }}" method="POST">
-    <h3>Agregar Categoria</h3>
-    <input type="text" name="nombre" placeholder="categorias" required>
-    <button>Guardar</button>
-</form>
-
-<div>
-    
-    <div>
-        <h2>Categorias disponibles</h2>
-        {% for categoria in categorias %}
-        <div>
-            <p>{{ categoria.nombre }}</p>
-            <div>
-                <a href="{{ url_for('categorias.update', id=categoria.id) }}">Actualizar</a>
-                <a href="{{ url_for('categorias.delete', id=categoria.id) }}">Eliminar</a>
+<div class="container mt-4">
+    <div class="card shadow p-4 mb-5">
+        <h3 class="card-title mb-4">Agregar Categoría</h3>
+        <form action="{{ url_for('categorias.add') }}" method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre de la Categoría</label>
+                <input type="text" name="nombre" class="form-control" placeholder="Categoría" required>
             </div>
-        </div>
-        {% endfor %}
+            <button type="submit" class="btn btn-primary w-100">Agregar Categoría</button>
+        </form>
     </div>
-    
+
+    <div class="card shadow p-4">
+        <h2 class="card-title mb-4">Categorías disponibles</h2>
+        <ul class="list-group">
+            {% for categoria in categorias %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ categoria.nombre }}</span>
+                <div>
+                    <a href="{{ url_for('categorias.update', id=categoria.id) }}" class="btn btn-warning btn-sm me-2">Actualizar</a>
+                    <a href="{{ url_for('categorias.delete', id=categoria.id) }}" class="btn btn-danger btn-sm">Eliminar</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>

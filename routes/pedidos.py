@@ -60,7 +60,7 @@ def agregar_producto_a_pedido(producto_id):
     flash(f'{cantidad} producto(s) agregado(s) al pedido', 'success')
     return redirect(url_for('productos.index'))
 
-@pedidos.route("/filtrar_pedidos", methods=['POST'])
+@pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
 def filtrar_pedidos():
     estado_id = request.form.get('estado') 
     fecha = request.form.get('fecha')  
@@ -74,18 +74,9 @@ def filtrar_pedidos():
         query = query.filter(db.func.date(Pedidos.fecha) == fecha)
 
     pedidos_filtrados = query.all()
-    
-    # Preparar los datos para JSON
-    result = []
-    for pedido in pedidos_filtrados:
-        result.append({
-            'id': pedido.id,
-            'fecha': pedido.fecha.strftime('%Y-%m-%d'), # Asegúrate de formatear la fecha como necesites
-            'total': pedido.total,
-            'estado': pedido.estado.nombre
-        })
 
-    return jsonify({'pedidos': result})
+    estados = Estado.query.all()  
+    return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
 
 @pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
 def detalle_pedido(id):
@@ -130,4 +121,22 @@ def finalizar_compra():
     flash('Pedido realizado con éxito', 'success')  # Mensaje de éxito
     return jsonify({'redirect': url_for('main.index')}), 201
 
-
+@pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
+def actualizar_estado(pedido_id):
+    
+    pedido = Pedidos.query.get(pedido_id) 
+    
+    if not pedido:
+        flash('Pedido no encontrado', 'error')
+        return redirect(url_for('main.index'))
+    
+    
+    estado_actual = pedido.fk_estado
+    
+    pedido.fk_estado = estado_actual + 1
+    
+    
+    db.session.commit()
+    
+    flash('Estado del pedido actualizado', 'success')
+    return redirect(url_for('main.index'))
