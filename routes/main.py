@@ -1,8 +1,5 @@
 from flask import Blueprint, render_template
 from utils.db import db
-# from .productos import obtener_productos
-# from .categorias import obtener_categorias
-# from .pedidos import obtener_pedidos
 from models.productos import Productos
 from models.pedidos import Pedidos
 from models.estado import Estado

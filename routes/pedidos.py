@@ -20,7 +20,7 @@ def buscar_prod_id():
         return jsonify({
             'id': producto.id,
             'nombre': producto.nombre,
-            'precio': str(producto.precio)  # Asegúrate de que sea un string
+            'precio': str(producto.precio)  
         })
     return jsonify({'error': 'Producto no encontrado'}), 404
 
@@ -96,7 +96,7 @@ def finalizar_compra():
 
     db.session.commit()
 
-    flash('Pedido realizado con éxito', 'success')  # Mensaje de éxito
+    flash('Pedido realizado con éxito', 'success')  
     return jsonify({'redirect': url_for('main.index')}), 201
 
 
