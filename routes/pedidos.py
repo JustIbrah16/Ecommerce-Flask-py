@@ -1,20 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-import datetime
-from models.productos import Productos
-from utils.db import db
-from models.pedidos import Pedidos
-from models.detalle_pedido import Detalle_pedido
-from models.estado import Estado
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from services.order_queries import OrderQueries  # Importar la clase que maneja las consultas
 
 pedidos = Blueprint('pedidos', __name__)
-
-def obtener_pedidos():
-    return Pedidos.query.all()
 
 @pedidos.route('/buscar_prod_id', methods=['POST'])
 def buscar_prod_id():
     data = request.get_json()
-    producto = Productos.query.get(data['id_prod'])
+    producto = OrderQueries.buscar_producto_por_id(data['id_prod'])
 
     if producto:
         return jsonify({
@@ -26,114 +18,59 @@ def buscar_prod_id():
 
 @pedidos.route("/add_to_pedido/<producto_id>", methods=['POST'])
 def agregar_producto_a_pedido(producto_id):
-    producto = Productos.query.get(producto_id)
+    producto = OrderQueries.buscar_producto_por_id(producto_id)
 
-    if not producto or producto.fk_estado != 2: 
+    if not producto or producto.fk_estado != 2:
         flash("Producto no válido o inactivo", 'error')
         return redirect(url_for('productos.index'))
 
-    
     cantidad = int(request.form['cantidad']) if 'cantidad' in request.form else 1
-    subtotal = cantidad * float(producto.precio)
+    nuevo_pedido = OrderQueries.agregar_pedido_y_detalle(producto, cantidad)
 
-    
-    pedido = Pedidos(fk_estado=3, total=subtotal, fecha=datetime.datetime.utcnow())
-    db.session.add(pedido)
-    db.session.commit()
-
-   
-    detalle = Detalle_pedido(fk_pedido=pedido.id, fk_producto=producto.id, fk_categoria=producto.fk_categoria, cantidad=cantidad, subtotal=subtotal)
-    db.session.add(detalle)
-    db.session.commit()
-
-    
-    pedido.total = subtotal
-    db.session.commit()
-
-    
-    producto.fk_estado = 1  
-    db.session.commit()
+    OrderQueries.actualizar_total_pedido(nuevo_pedido.id, nuevo_pedido.total)
+    OrderQueries.marcar_producto_inactivo(producto)
 
     flash(f'{cantidad} producto(s) agregado(s) al pedido', 'success')
     return redirect(url_for('productos.index'))
 
 @pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
 def filtrar_pedidos():
-    estado_id = request.form.get('estado') 
-    fecha = request.form.get('fecha')  
+    estado_id = request.form.get('estado')
+    fecha = request.form.get('fecha')
+    
+    pedidos_filtrados = OrderQueries.filtrar_pedidos(estado_id, fecha)
+    estados = OrderQueries.obtener_estados()  # Si necesitas listar los estados
 
-    query = Pedidos.query
-
-    if estado_id:
-        query = query.filter(Pedidos.fk_estado == estado_id)
-
-    if fecha:
-        query = query.filter(db.func.date(Pedidos.fecha) == fecha)
-
-    pedidos_filtrados = query.all()
-
-    estados = Estado.query.all()  
     return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
 
 @pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
 def detalle_pedido(id):
-    detalles = (Detalle_pedido.query
-                .join(Productos)  # Asegúrate de hacer el join con Productos
-                .filter(Detalle_pedido.fk_pedido == id)
-                .add_columns(Productos.nombre, Productos.precio, Detalle_pedido.cantidad, Detalle_pedido.subtotal)  # Agregar campos necesarios
-                .all())
+    detalles = OrderQueries.obtener_detalles_pedido(id)
 
     resultados = [{
-        'nombre': detalle.nombre,  # Nombre del producto
-        'precio': detalle.precio,   # Precio del producto
-        'cantidad': detalle.cantidad, 
+        'nombre': detalle.nombre,
+        'precio': detalle.precio,
+        'cantidad': detalle.cantidad,
         'subtotal': detalle.subtotal
     } for detalle in detalles]
 
     return jsonify(resultados)
 
-
-
 @pedidos.route('/finalizar_compra', methods=['POST'])
 def finalizar_compra():
     data = request.get_json()
-    
-    total = sum(item['subtotal'] for item in data['productos'])
-    
-    nuevo_pedido = Pedidos(fk_estado=3, total=total, fecha=datetime.datetime.utcnow())
-    db.session.add(nuevo_pedido)
-    db.session.commit()
+    nuevo_pedido = OrderQueries.finalizar_pedido(data['productos'])
 
-    for item in data['productos']:
-        detalle = Detalle_pedido(
-            fk_pedido=nuevo_pedido.id,
-            fk_producto=item['id'],
-            cantidad=item['cantidad'],
-            subtotal=item['subtotal']
-        )
-        db.session.add(detalle)
-
-    db.session.commit()
-
-    flash('Pedido realizado con éxito', 'success')  
+    flash('Pedido realizado con éxito', 'success')
     return jsonify({'redirect': url_for('main.index')}), 201
 
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
 def actualizar_estado(pedido_id):
-    
-    pedido = Pedidos.query.get(pedido_id) 
-    
-    if not pedido:
+    pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id)
+
+    if not pedido_actualizado:
         flash('Pedido no encontrado', 'error')
         return redirect(url_for('main.index'))
-    
-    
-    estado_actual = pedido.fk_estado
-    
-    pedido.fk_estado = estado_actual + 1
-    
-    
-    db.session.commit()
-    
+
     flash('Estado del pedido actualizado', 'success')
     return redirect(url_for('main.index'))
