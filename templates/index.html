@@ -34,36 +34,148 @@
                 onclick="search('{{producto.id}}')">Agregar al Pedido</button>
             </li>
             {% endfor %}
-          </ul>
+          </select>
+          <label for="fecha">Por fecha:</label>
+          <input type="date" name="fecha" class="form-control">
+
+          <button type="submit" class="btn btn-success mt-3">Buscar</button>
+        </form>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+          data-bs-target="#exampleModal">
+          Productos agregados
+        </button>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Num pedido</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+              <td>{{ pedido.id }}</td>
+              <td>{{ pedido.fecha.strftime('%Y-%m-%d') }}</td>
+              <td>{{ pedido.total }}</td>
+              <td>{{ pedido.estado.nombre }}</td>
+              <td>
+                <form action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}"
+                method="POST">
+                {% if pedido.estado.id == 3 %}
+                <button type="submit" class="btn btn-primary">Actualizar a
+                  Preparación</button>
+                {% elif pedido.estado.id == 4 %}
+                <button type="submit" class="btn btn-secondary">Actualizar a
+                  Reparto</button>
+                {% elif pedido.estado.id == 5 %}
+                <button type="submit" class="btn btn-success">Actualizar a
+                  Entregado</button>
+                {% elif pedido.estado.id == 6 %}
+                <button type="button" class="btn btn-outline-secondary"
+                  disabled>Entregado</button>
+                {% else %}
+                <button type="button" class="btn btn-outline-secondary"
+                  disabled>Inhabilitado</button>
+                {% endif %}
+                </form>
+              </td>             
+              <td>               
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalDetalles"
+                  onclick="cargarDetalles({{ pedido.id }})">
+                  Detalles
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <script>
+          document.getElementById('filtrarForm').onsubmit = function (event) {
+            event.preventDefault(); // Evita que se recargue la página
+            var formData = new FormData(this);
+
+            fetch('/filtrar_pedidos', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                const tbody = document.querySelector('#pedidosTable tbody');
+                tbody.innerHTML = ''; // Limpiar la tabla existente
+                data.pedidos.forEach(pedido => {
+                  tbody.innerHTML += `
+                                <tr>
+                                    <td>${pedido.id}</td>
+                                    <td>${pedido.fecha}</td>
+                                    <td>${pedido.total}</td>
+                                    <td>${pedido.estado}</td>
+                                    <td>
+                                      
+                                        <button type="button" class="btn btn-primary">Actualizar</button>
+                                        <button type="button" class="btn btn-warning" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalDetalles" 
+                                                onclick="cargarDetalles(${pedido.id})">
+                                            Detalles
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                });
+              })
+              .catch(error => console.error('Error:', error));
+          };
+
+          function cargarDetalles(pedidoId) {
+            fetch(`/pedidos/${pedidoId}/detalles`)
+              .then(response => response.json())
+              .then(data => {
+                const tbody = document.querySelector('#modalDetalles tbody');
+                tbody.innerHTML = ''; // Limpiar contenido existente
+
+                data.forEach((detalle, index) => {
+                  const row = document.createElement('tr');
+                  row.innerHTML = `
+                    <th scope="row">${index + 1}</th>
+                    <td>${detalle.nombre}</td> <!-- Nombre del producto -->
+                    <td>${detalle.precio ? detalle.precio : 'No disponible'}</td> <!-- Precio del producto -->
+                    <td>${detalle.cantidad}</td>
+                    <td>${detalle.subtotal}</td>
+                `;
+                  tbody.appendChild(row);
+                });
+              })
+              .catch(error => console.error('Error al cargar detalles:', error));
+          }
+
+
+        </script>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalles del Pedido</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
-        <div class="col-8 pedidos">
-          <form action="{{ url_for('pedidos.filtrar_pedidos') }}" method="POST">
-            <h3>Busqueda por filtros</h3>
-            <label for="estado">Por estado:</label>
-            <select name="estado" class="form-select">
-              <option value>Selecciona un estado</option>
-              {% for estado in estados %}
-              <option value="{{ estado.id }}">{{ estado.nombre }}</option>
-              {% endfor %}
-            </select>
-            <label for="fecha">Por fecha:</label>
-            <input type="date" name="fecha" class="form-control">
-
-            <button type="submit" class="btn btn-success mt-3">Buscar</button>
-          </form>
-          <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-            data-bs-target="#exampleModal">
-            Productos agregados
-          </button>
-          <table class="table table-striped">
+        <div class="modal-body">
+          <table class="table">
             <thead>
               <tr>
-                <th>Num pedido</th>
-                <th>Fecha</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                <th scope="col">#</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Subtotal</th>
               </tr>
             </thead>
             <tbody>
@@ -108,45 +220,40 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="modal fade" id="modalDetalles" tabindex="-1"
-      aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"
-              aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Nombre</th>
-                  <th scope="col">Precio</th>
-                  <th scope="col">Cantidad</th>
-                  <th scope="col">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Audifonos</td>
-                  <td>260000</td>
-                  <td>2</td>
-                  <td>520000</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary"
-              data-bs-dismiss="modal">Close</button>
-          </div>
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Productos Agregados</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table" id="carrito_modal">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Subtotal</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Aquí se llenará dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="btnFinalizarCompra">Agregar pedido</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
         </div>
       </div>
     </div>
+  </div>
 
     <div class="modal fade" id="exampleModal" tabindex="-1"
       aria-labelledby="exampleModalLabel" aria-hidden="true">

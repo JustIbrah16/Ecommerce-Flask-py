@@ -75,6 +75,25 @@ def filtrar_pedidos():
     estados = Estado.query.all()  
     return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
 
+@pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
+def detalle_pedido(id):
+    detalles = (Detalle_pedido.query
+                .join(Productos)  # Asegúrate de hacer el join con Productos
+                .filter(Detalle_pedido.fk_pedido == id)
+                .add_columns(Productos.nombre, Productos.precio, Detalle_pedido.cantidad, Detalle_pedido.subtotal)  # Agregar campos necesarios
+                .all())
+
+    resultados = [{
+        'nombre': detalle.nombre,  # Nombre del producto
+        'precio': detalle.precio,   # Precio del producto
+        'cantidad': detalle.cantidad, 
+        'subtotal': detalle.subtotal
+    } for detalle in detalles]
+
+    return jsonify(resultados)
+
+
+
 @pedidos.route('/finalizar_compra', methods=['POST'])
 def finalizar_compra():
     data = request.get_json()
@@ -98,7 +117,6 @@ def finalizar_compra():
 
     flash('Pedido realizado con éxito', 'success')  
     return jsonify({'redirect': url_for('main.index')}), 201
-
 
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
 def actualizar_estado(pedido_id):
