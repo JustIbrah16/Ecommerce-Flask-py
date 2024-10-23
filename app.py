@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap5
 from routes.categorias import categorias
 from routes.productos import productos
 from routes.pedidos import pedidos
+from routes.usuarios import usuarios
 from routes.main import main
 from utils.db import db
 
@@ -21,3 +22,4 @@ app.register_blueprint(main)
 app.register_blueprint(categorias)
 app.register_blueprint(productos)
 app.register_blueprint(pedidos)
+app.register_blueprint(usuarios)
