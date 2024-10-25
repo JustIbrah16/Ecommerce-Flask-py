@@ -1,5 +1,6 @@
 from models.categorias import Categorias
 from utils.db import db
+from models.productos import Productos
 
 class CategoryQueries:
     @staticmethod
@@ -11,8 +12,8 @@ class CategoryQueries:
         return Categorias.query.get(categoria_id)
     
     @staticmethod
-    def agregar_categoria(nombre):
-        nueva_categoria = Categorias(nombre)
+    def agregar_categoria(nombre, estado):
+        nueva_categoria = Categorias(nombre, estado)
         db.session.add(nueva_categoria)
         db.session.commit()
 
@@ -28,6 +29,9 @@ class CategoryQueries:
         categoria = Categorias.query.get(id)
         if categoria:
             categoria.fk_estado = 1
+            productos = Productos.query.filter_by(fk_categoria = id).all()
+            for producto in productos:
+                producto.fk_estado = 1
             db.session.commit()  
     
     @staticmethod
@@ -35,6 +39,9 @@ class CategoryQueries:
         categoria = Categorias.query.get(id)
         if categoria:
             categoria.fk_estado = 2
+            productos = Productos.query.filter_by(fk_categoria = id).all()
+            for producto in productos:
+                producto.fk_estado = 2
             db.session.commit()
 
     

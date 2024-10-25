@@ -13,8 +13,9 @@ def add():
     if request.method == 'POST':
 
         nombre = request.form['nombre']
+        estado = 2
 
-        CategoryQueries.agregar_categoria(nombre)
+        CategoryQueries.agregar_categoria(nombre, estado)
         return redirect(url_for('categorias.index'))
 
     return render_template('categorias.html')

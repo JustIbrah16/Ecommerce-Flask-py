@@ -29,7 +29,7 @@ def login():
             return redirect(url_for('usuarios.login'))
         
         if User_queries.login(username, password):
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.index', show_modal = 'bienvenida'))
         else:
             return render_template('login.hmtl', error = 'Credenciales incorrectas')
     return render_template('login.html')
@@ -37,4 +37,4 @@ def login():
 @usuarios.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('usuarios.login'))
+    return redirect(url_for('usuarios.login', show_modal = 'despedida'))

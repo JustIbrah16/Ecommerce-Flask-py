@@ -63,8 +63,11 @@ def delete_productos(id):
 
 @productos.route("/activar_producto/<id>", methods=['POST'])
 def activar_producto(id):
-    ProductQueries.activar_producto(id)
-    return jsonify({'success' : True})
+    success = ProductQueries.activar_producto(id)
+    if success:
+        return jsonify({'success' : True})
+    else:
+        return jsonify({'success': False, 'message': 'No se puede activar el producto. Active la categoria primero'})
 
 
 
