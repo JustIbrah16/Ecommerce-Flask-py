@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
+
 productos = Blueprint('productos', __name__)
 
 def obtener_categoria():
@@ -58,5 +59,13 @@ def update_productos(id):
 @productos.route("/delete_productos/<id>", methods=['POST'])
 def delete_productos(id):
     ProductQueries.eliminar_producto(id)
-    flash('Producto eliminado correctamente', 'success')
-    return redirect(url_for('productos.index'))
+    return jsonify({'success': True})
+
+@productos.route("/activar_producto/<id>", methods=['POST'])
+def activar_producto(id):
+    ProductQueries.activar_producto(id)
+    return jsonify({'success' : True})
+
+
+
+        

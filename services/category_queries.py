@@ -24,9 +24,18 @@ class CategoryQueries:
             db.session.commit()
     
     @staticmethod
-    def eliminar_categoria(categoria_id):
-        categoria = Categorias.query.get(categoria_id)
+    def eliminar_categoria(id):
+        categoria = Categorias.query.get(id)
         if categoria:
-            db.session.delete(categoria) 
+            categoria.fk_estado = 1
             db.session.commit()  
+    
+    @staticmethod
+    def activar_categoria(id):
+        categoria = Categorias.query.get(id)
+        if categoria:
+            categoria.fk_estado = 2
+            db.session.commit()
+
+    
 

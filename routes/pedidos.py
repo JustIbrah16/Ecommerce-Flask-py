@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from services.order_queries import OrderQueries  # Importar la clase que maneja las consultas
-from services.estados_queries import Estados_queries
+from services.order_queries import OrderQueries
+from services.state_queries import Estados_queries
+from services.product_queries import ProductQueries
 
 pedidos = Blueprint('pedidos', __name__)
 
@@ -40,9 +41,10 @@ def filtrar_pedidos():
     fecha = request.form.get('fecha')
     
     pedidos_filtrados = OrderQueries.filtrar_pedidos(estado_id, fecha)
-    estados = Estados_queries.obtener_estados()  # Si necesitas listar los estados
+    estados = Estados_queries.obtener_estados()  
+    productos = ProductQueries.obtener_productos_disponibles()
 
-    return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
+    return render_template('index.html', pedidos=pedidos_filtrados, estados=estados, productos = productos)
 
 @pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
 def detalle_pedido(id):
@@ -73,5 +75,5 @@ def actualizar_estado(pedido_id):
         flash('Pedido no encontrado', 'error')
         return redirect(url_for('main.index'))
 
-    flash('Estado del pedido actualizado', 'success')
+    
     return redirect(url_for('main.index'))

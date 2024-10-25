@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash,jsonify
 from services.category_queries import CategoryQueries
 
 categorias = Blueprint('categorias', __name__)
@@ -29,8 +29,12 @@ def update(id):
     
     return render_template('update.html', categoria = categoria)
 
-@categorias.route("/delete/<id>")
+@categorias.route("/delete/<id>", methods=['POST'])
 def delete(id):
     CategoryQueries.eliminar_categoria(id)
+    return jsonify({'success': True})
 
-    return redirect(url_for('categorias.index'))
+@categorias.route("/activar/<id>", methods=['POST'])
+def activar(id):
+    CategoryQueries.activar_categoria(id)
+    return jsonify({'success': True})
