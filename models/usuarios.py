@@ -2,8 +2,9 @@ from utils.db import db
 from sqlalchemy import column, Integer, String, Numeric, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from .roles import Roles
+from flask_login import UserMixin
 
-class Usuarios(db.Model):
+class Usuarios(db.Model, UserMixin):
     __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key = True, nullable = False)
     username = db.Column(db.String, nullable = False)

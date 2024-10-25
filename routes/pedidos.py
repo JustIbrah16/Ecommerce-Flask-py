@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from services.order_queries import OrderQueries  # Importar la clase que maneja las consultas
+from services.estados_queries import Estados_queries
 
 pedidos = Blueprint('pedidos', __name__)
 
@@ -39,7 +40,7 @@ def filtrar_pedidos():
     fecha = request.form.get('fecha')
     
     pedidos_filtrados = OrderQueries.filtrar_pedidos(estado_id, fecha)
-    estados = OrderQueries.obtener_estados()  # Si necesitas listar los estados
+    estados = Estados_queries.obtener_estados()  # Si necesitas listar los estados
 
     return render_template('index.html', pedidos=pedidos_filtrados, estados=estados)
 
