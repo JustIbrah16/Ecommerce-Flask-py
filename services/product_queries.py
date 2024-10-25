@@ -4,7 +4,7 @@ from utils.db import db
 class ProductQueries:
     @staticmethod
     def obtener_productos():
-        return Productos.query.filter_by(fk_estado=2).all()
+        return Productos.query.all()
 
     @staticmethod
     def buscar_prod_por_id(id_prod):
@@ -32,3 +32,14 @@ class ProductQueries:
         if producto:
             producto.fk_estado = 1  
             db.session.commit()
+
+    @staticmethod
+    def activar_producto(id):
+        producto = Productos.query.get(id)
+        if producto:
+            producto.fk_estado = 2  
+            db.session.commit()
+    
+    @staticmethod
+    def obtener_productos_disponibles():
+        return Productos.query.filter(Productos.estado.has(id=2)).all()
