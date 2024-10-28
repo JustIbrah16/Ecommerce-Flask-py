@@ -67,7 +67,7 @@ def activar_producto(id):
     if success:
         return jsonify({'success' : True})
     else:
-        return jsonify({'success': False, 'message': 'No se puede activar el producto. Active la categoria primero'})
+        return jsonify({'success': False, 'message': 'No se puede activar el producto. Active o cambie la categoria primero'})
 
 
 

@@ -38,7 +38,7 @@ class ProductQueries:
     def activar_producto(id):
         producto = Productos.query.get(id)
         if producto:
-            categoria = Categorias.query.get(producto.fk_categioria)
+            categoria = Categorias.query.get(producto.fk_categoria)
             if categoria and categoria.fk_estado == 2:
                 producto.fk_estado = 2  
                 db.session.commit()
