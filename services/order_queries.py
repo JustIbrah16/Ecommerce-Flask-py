@@ -47,7 +47,7 @@ class OrderQueries:
     @staticmethod
     def finalizar_pedido(productos):
         try:
-            # Calcular el total del pedido
+            
             total = sum(item['precio'] * item['cantidad'] for item in productos)
             nuevo_pedido = Pedidos(fk_estado=3, total=total, fecha=datetime.datetime.utcnow())
 
@@ -55,7 +55,7 @@ class OrderQueries:
             db.session.commit()
             print("Pedido guardado:", nuevo_pedido.id)
 
-            # Guardar detalles del pedido
+            
             for item in productos:
                 detalle = Detalle_pedido(
                     fk_pedido=nuevo_pedido.id,
