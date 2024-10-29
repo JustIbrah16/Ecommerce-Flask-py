@@ -50,25 +50,34 @@ class OrderQueries:
     def finalizar_pedido(productos):
         try:
             Historial.historial_categorias()
-            total = sum(item['subtotal'] for item in productos)
+            # Calcular el total del pedido
+            total = sum(item['precio'] * item['cantidad'] for item in productos)
             nuevo_pedido = Pedidos(fk_estado=3, total=total, fecha=datetime.datetime.utcnow())
-            
+
             db.session.add(nuevo_pedido)
             db.session.commit()
+            print("Pedido guardado:", nuevo_pedido.id)
 
+            # Guardar detalles del pedido
             for item in productos:
                 detalle = Detalle_pedido(
                     fk_pedido=nuevo_pedido.id,
                     fk_producto=item['id'],
                     cantidad=item['cantidad'],
-                    subtotal=item['subtotal']
+                    subtotal=item['precio'] * item['cantidad']
                 )
                 db.session.add(detalle)
+
             db.session.commit()
+            print("Detalles guardados para pedido:", nuevo_pedido.id)
 
             return nuevo_pedido
         except Exception as e:
-            print(f'Ocurrio un error{e}')
+            db.session.rollback()
+            print("Error al guardar el pedido:", e)
+            return None
+
+
 
     @staticmethod
     def actualizar_estado_pedido(pedido_id):

@@ -1,4 +1,5 @@
 from models.productos import Productos
+from models.categorias import Categorias
 from utils.db import db
 
 class ProductQueries:
@@ -37,8 +38,13 @@ class ProductQueries:
     def activar_producto(id):
         producto = Productos.query.get(id)
         if producto:
-            producto.fk_estado = 2  
-            db.session.commit()
+            categoria = Categorias.query.get(producto.fk_categoria)
+            if categoria and categoria.fk_estado == 2:
+                producto.fk_estado = 2  
+                db.session.commit()
+                return True
+            else:
+                return False
     
     @staticmethod
     def obtener_productos_disponibles():

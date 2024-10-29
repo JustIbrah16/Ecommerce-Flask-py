@@ -1,6 +1,7 @@
 from models.categorias import Categorias
 from sqlalchemy import text
 from utils.db import db
+from models.productos import Productos
 from utils.historial import Historial
 from flask_login import current_user
 from models.tabla_temporal import Tabla_temporal
@@ -59,6 +60,9 @@ class CategoryQueries:
             categoria = Categorias.query.get(id)
             if categoria:
                 categoria.fk_estado = 1
+                productos = Productos.query.filter_by(fk_categoria = id).all()
+                for producto in productos:
+                    producto.fk_estado = 1
                 db.session.commit()  
                 print('No se puedo desactivar la categoria')
         except Exception as e:
@@ -72,6 +76,9 @@ class CategoryQueries:
             categoria = Categorias.query.get(id)
             if categoria:
                 categoria.fk_estado = 2
+                productos = Productos.query.filter_by(fk_categoria = id).all()
+                for producto in productos:
+                    producto.fk_estado = 2
                 db.session.commit()
                 print('No se pudo activar la categoria')
         except Exception as e:
