@@ -11,6 +11,7 @@ class Categorias(db.Model):
 
     estado = relationship('Estado')
 
-    def __init__(self, nombre):
+    def __init__(self, nombre, fk_estado):
         self.nombre = nombre
+        self.fk_estado = fk_estado
         
