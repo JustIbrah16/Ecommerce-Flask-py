@@ -14,19 +14,6 @@ class OrderQueries:
     def buscar_producto_por_id(id_prod):
         return Productos.query.get(id_prod)
 
-    @staticmethod
-    def agregar_pedido_y_detalle(producto, cantidad):
-        subtotal = cantidad * float(producto.precio)
-        nuevo_pedido = Pedidos(fk_estado=3, total=subtotal, fecha=datetime.datetime.utcnow())
-        
-        db.session.add(nuevo_pedido)
-        db.session.commit()
-
-        detalle = Detalle_pedido(fk_pedido=nuevo_pedido.id, fk_producto=producto.id, fk_categoria=producto.fk_categoria, cantidad=cantidad, subtotal=subtotal)
-        db.session.add(detalle)
-        db.session.commit()
-
-        return nuevo_pedido
 
     @staticmethod
     def actualizar_total_pedido(pedido_id, subtotal):
@@ -59,23 +46,35 @@ class OrderQueries:
 
     @staticmethod
     def finalizar_pedido(productos):
-        total = sum(item['subtotal'] for item in productos)
-        nuevo_pedido = Pedidos(fk_estado=3, total=total, fecha=datetime.datetime.utcnow())
-        
-        db.session.add(nuevo_pedido)
-        db.session.commit()
+        try:
+            # Calcular el total del pedido
+            total = sum(item['precio'] * item['cantidad'] for item in productos)
+            nuevo_pedido = Pedidos(fk_estado=3, total=total, fecha=datetime.datetime.utcnow())
 
-        for item in productos:
-            detalle = Detalle_pedido(
-                fk_pedido=nuevo_pedido.id,
-                fk_producto=item['id'],
-                cantidad=item['cantidad'],
-                subtotal=item['subtotal']
-            )
-            db.session.add(detalle)
-        db.session.commit()
+            db.session.add(nuevo_pedido)
+            db.session.commit()
+            print("Pedido guardado:", nuevo_pedido.id)
 
-        return nuevo_pedido
+            # Guardar detalles del pedido
+            for item in productos:
+                detalle = Detalle_pedido(
+                    fk_pedido=nuevo_pedido.id,
+                    fk_producto=item['id'],
+                    cantidad=item['cantidad'],
+                    subtotal=item['precio'] * item['cantidad']
+                )
+                db.session.add(detalle)
+
+            db.session.commit()
+            print("Detalles guardados para pedido:", nuevo_pedido.id)
+
+            return nuevo_pedido
+        except Exception as e:
+            db.session.rollback()
+            print("Error al guardar el pedido:", e)
+            return None
+
+
 
     @staticmethod
     def actualizar_estado_pedido(pedido_id):

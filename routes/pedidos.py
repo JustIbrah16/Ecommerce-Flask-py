@@ -62,10 +62,22 @@ def detalle_pedido(id):
 @pedidos.route('/finalizar_compra', methods=['POST'])
 def finalizar_compra():
     data = request.get_json()
-    nuevo_pedido = OrderQueries.finalizar_pedido(data['productos'])
 
-    flash('Pedido realizado con éxito', 'success')
-    return jsonify({'redirect': url_for('main.index')}), 201
+    if not data or 'productos' not in data:
+        return jsonify({'error': 'Datos de productos no válidos.'}), 400
+    
+    try:
+        nuevo_pedido = OrderQueries.finalizar_pedido(data['productos'])
+
+        if nuevo_pedido:
+            flash('Pedido realizado con éxito', 'success')
+            return jsonify({'redirect': url_for('main.index')}), 201
+        else:
+            return jsonify({'error': 'Error al guardar el pedido en la base de datos.'}), 500
+    except Exception as e:
+        print("Error al procesar la compra:", e)  # Esto ayudará a ver el error en la consola del servidor
+        return jsonify({'error': 'Error en el servidor: ' + str(e)}), 500
+
 
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
 def actualizar_estado(pedido_id):
