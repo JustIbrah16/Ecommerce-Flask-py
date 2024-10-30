@@ -32,6 +32,6 @@ def update_permisos():
 @permisos.route('/tabla_permisos')
 def tabla_permisos():  
     usuarios = Usuarios.query.all()
-    permisos_data = {permiso.usuario_id: permiso for permiso in Permisos.query.all()}
     
-    return render_template('tabla_permisos.html', usuarios=usuarios, permisos_data=permisos_data)
+    
+    return render_template('tabla_permisos.html')

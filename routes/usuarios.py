@@ -9,7 +9,7 @@ def registrar_usuarios():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        fk_rol = 1
+        fk_rol = 3
         if not username or not password:
             return redirect(url_for('usuarios.registrar_usuarios'))
         
@@ -31,7 +31,7 @@ def login():
         if User_queries.login(username, password):
             return redirect(url_for('main.index', show_modal = 'bienvenida'))
         else:
-            return render_template('login.hmtl', error = 'Credenciales incorrectas')
+            return render_template('login.html', error = 'Credenciales incorrectas')
     return render_template('login.html')
 
 @usuarios.route('/logout')
