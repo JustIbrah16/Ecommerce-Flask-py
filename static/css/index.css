@@ -21,6 +21,8 @@ body{
 .pedidos{
     border: 2px solid gray;
     box-sizing: border-box;
+    height: 500px;
+    overflow-y: auto;
 }
 
 

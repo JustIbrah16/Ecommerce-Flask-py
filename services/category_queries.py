@@ -1,12 +1,12 @@
 from models.categorias import Categorias
-from sqlalchemy import text
-from utils.db import db
 from models.productos import Productos
+from utils.db import db
 from utils.historial import Historial
-from flask_login import current_user
-from models.tabla_temporal import Tabla_temporal
 
+ESTADO_INACTIVO = 1
+ESTADO_ACTIVO = 2
 class CategoryQueries:
+    
     @staticmethod
     def obtener_categorias():
         return Categorias.query.all()
@@ -19,12 +19,9 @@ class CategoryQueries:
     def agregar_categoria(nombre, estado):
         try:
             Historial.historial_categorias()
-
             nueva_categoria = Categorias(nombre=nombre, fk_estado=estado)
             db.session.add(nueva_categoria)
             db.session.commit()
-
-            print(f'El id de la categoria es: {nueva_categoria.id}')
         except Exception as e:
             db.session.rollback()
             print(f'Ocurrió un error: {e}')
@@ -36,18 +33,15 @@ class CategoryQueries:
             return False
 
         try:
-            Historial.historial_categorias()
-            
+            Historial.historial_categorias()           
             categoria = Categorias.query.get(categoria_id)
             if categoria:
                 categoria.nombre = nombre
                 db.session.commit()
-                print(f'El ID es: {current_user.id}')
                 return True
             else:
                 print('Categoría no encontrada.')
                 return False
-
         except Exception as e:
             db.session.rollback()
             print(f'Ocurrió un error: {e}')
@@ -59,10 +53,10 @@ class CategoryQueries:
             Historial.historial_categorias()
             categoria = Categorias.query.get(id)
             if categoria:
-                categoria.fk_estado = 1
+                categoria.fk_estado = ESTADO_INACTIVO
                 productos = Productos.query.filter_by(fk_categoria = id).all()
                 for producto in productos:
-                    producto.fk_estado = 1
+                    producto.fk_estado = ESTADO_INACTIVO
                 db.session.commit()  
                 print('No se puedo desactivar la categoria')
         except Exception as e:
@@ -75,10 +69,10 @@ class CategoryQueries:
             Historial.historial_categorias()
             categoria = Categorias.query.get(id)
             if categoria:
-                categoria.fk_estado = 2
+                categoria.fk_estado = ESTADO_ACTIVO
                 productos = Productos.query.filter_by(fk_categoria = id).all()
                 for producto in productos:
-                    producto.fk_estado = 2
+                    producto.fk_estado = ESTADO_ACTIVO
                 db.session.commit()
                 print('No se pudo activar la categoria')
         except Exception as e:

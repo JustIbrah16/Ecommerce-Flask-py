@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
+from flask_login import login_required
 
 productos = Blueprint('productos', __name__)
 
@@ -8,6 +9,7 @@ def obtener_categoria():
     return Categorias.query.all()
 
 @productos.route("/buscar_prod_id", methods=['POST'])
+@login_required
 def buscar_prod_id():
     data = request.get_json()
     id_prod = data.get('id_prod')
@@ -18,12 +20,14 @@ def buscar_prod_id():
         return jsonify({'error': 'Producto no encontrado'}), 404
 
 @productos.route("/add_productos")
+@login_required
 def index():
     productos = ProductQueries.obtener_productos()
     categorias = obtener_categoria()
     return render_template('productos.html', productos=productos, categorias=categorias)
 
 @productos.route("/add_productos", methods=['POST', 'GET'])
+@login_required
 def add_productos():
     if request.method == 'POST':    
         nombre = request.form['nombre']
@@ -42,6 +46,7 @@ def add_productos():
     return render_template('productos.html')
 
 @productos.route("/update_productos/<id>", methods=['POST', 'GET'])
+@login_required
 def update_productos(id):
     producto = ProductQueries.buscar_prod_por_id(id)
     categorias = obtener_categoria()
@@ -57,11 +62,13 @@ def update_productos(id):
     return render_template('update_productos.html', producto=producto, categorias=categorias)
 
 @productos.route("/delete_productos/<id>", methods=['POST'])
+@login_required
 def delete_productos(id):
     ProductQueries.eliminar_producto(id)
     return jsonify({'success': True})
 
 @productos.route("/activar_producto/<id>", methods=['POST'])
+@login_required
 def activar_producto(id):
     success = ProductQueries.activar_producto(id)
     if success:

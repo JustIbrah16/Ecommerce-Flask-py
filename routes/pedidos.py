@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from services.order_queries import OrderQueries
 from services.state_queries import Estados_queries
 from services.product_queries import ProductQueries
+from flask_login import login_required
 
 pedidos = Blueprint('pedidos', __name__)
 
@@ -90,24 +91,17 @@ def actualizar_estado(pedido_id):
     
     return redirect(url_for('main.index'))
 
-@pedidos.route('/pedidos/<pedido_id>/detalles', methods=['GET'])
+@pedidos.route('/pedidos/<pedido_id>/historial', methods=['GET'])
 def obtener_detalles_pedido(pedido_id):
-    detalles = OrderQueries.obtener_detalles_pedido(pedido_id)  
     cambios_detalle = OrderQueries.detalle_cambios(pedido_id)
 
-    if detalles is None or cambios_detalle is None:
-        return jsonify({'error': 'No se pudieron obtener los detalles'}), 404
-
-    response = {
-        'detalles': detalles,
-        'cambios': [
-            {
-                'fecha_cambio': cambio.fecha_cambio,
-                'fk_estado': cambio.fk_estado,
-                'username': cambio.username
-            }
-            for cambio in cambios_detalle
-        ]
-    }
+    response = [{
+        'id': cambio.id,
+        'fecha_cambio': cambio.fecha_cambio,
+        'fk_estado': cambio.fk_estado,
+        'username': cambio.username,
+        'nombre': cambio.nombre
+    } for cambio in cambios_detalle]
 
     return jsonify(response)
+
