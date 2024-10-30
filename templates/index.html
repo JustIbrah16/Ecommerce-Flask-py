@@ -177,41 +177,59 @@
           };
 
           function cargarDetalles(pedidoId) {
-            fetch(`/pedidos/${pedidoId}/detalles`)
-              .then(response => response.json())
-              .then(data => {
-                const tbody = document.querySelector('#modalDetalles tbody');
-                tbody.innerHTML = ''; 
+    // Cargar detalles del pedido
+    fetch(`/pedidos/${pedidoId}/detalles`)
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.querySelector('#modalDetalles tbody');
+        tbody.innerHTML = ''; 
 
-                let total = 0; 
+        let total = 0; 
 
-                data.forEach((detalle, index) => {
-                  const row = document.createElement('tr');
-                  row.innerHTML = `
-                    <th scope="row">${index + 1}</th>
-                    <td>${detalle.nombre}</td>
-                    <td>${detalle.precio ? detalle.precio : 'No disponible'}</td>
-                    <td>${detalle.cantidad}</td>
-                    <td>${detalle.subtotal}</td>
-                  `;
-                  tbody.appendChild(row);
+        data.forEach((detalle, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <th scope="row">${index + 1}</th>
+            <td>${detalle.nombre}</td>
+            <td>${detalle.precio ? detalle.precio : 'No disponible'}</td>
+            <td>${detalle.cantidad}</td>
+            <td>${detalle.subtotal}</td>
+          `;
+          tbody.appendChild(row);
 
-                  
-                  total += parseFloat(detalle.subtotal);
-                });
+          total += parseFloat(detalle.subtotal);
+        });
 
-                console.log('Total calculado:', total);
+        const totalRow = document.createElement('tr');
+        totalRow.innerHTML = `
+          <td colspan="4" class="text-end"><strong>Total</strong></td>
+          <td><strong>${total.toFixed(2)}</strong></td>
+        `;
+        tbody.appendChild(totalRow);
 
-                
-                const totalRow = document.createElement('tr');
-                totalRow.innerHTML = `
-                  <td colspan="4" class="text-end"><strong>Total</strong></td>
-                  <td><strong>${total.toFixed(2)}</strong></td>
-                `;
-                tbody.appendChild(totalRow);
-              })
-              .catch(error => console.error('Error al cargar detalles:', error));
-          }
+        // Cargar cambios en el historial
+        return fetch(`/pedidos/${pedidoId}/historial`);
+      })
+      .then(response => response.json())
+      .then(cambios => {
+        const detallesPedido = document.getElementById('detallesPedido');
+        detallesPedido.innerHTML = ''; // Limpiar contenido anterior
+
+        cambios.forEach(cambio => {
+            const detalle = document.createElement('div');
+            detalle.classList.add('detalle-cambio');
+
+            detalle.innerHTML = `
+                <p>El pedido ${cambio.id} fue actualizado a ${cambio.nombre} el ${cambio.fecha_cambio} por ${cambio.username}</p>
+                <hr>
+            `;
+            
+            detallesPedido.appendChild(detalle);
+        });
+      })
+      .catch(error => console.error('Error al cargar detalles:', error));
+}
+
 
 
 
@@ -247,7 +265,12 @@
                 <!-- Aquí se llenará dinámicamente -->
               </tbody>
             </table>
+          
+            <div id="detallesPedido">
+              <!-- Aquí se mostrarán los cambios del historial -->
+            </div>
           </div>
+          
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary"
               data-bs-dismiss="modal">Cerrar</button>

@@ -8,12 +8,15 @@ from routes.main import main
 from utils.db import db
 from models.usuarios import Usuarios
 from flask_login import LoginManager
+from flask import redirect, url_for
 
 
 app = Flask(__name__)
 
 bootstrap = Bootstrap5(app)
 login_manager = LoginManager(app)
+
+login_manager.login_view = 'login'
 
 app.secret_key = 'secret key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3307/flask_db'
@@ -24,6 +27,10 @@ db.init_app(app)
 @login_manager.user_loader
 def load_user(id):
     return Usuarios.query.get(int(id))
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('usuarios.login'))
 
 app.register_blueprint(main)
 app.register_blueprint(categorias)
