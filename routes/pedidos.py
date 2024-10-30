@@ -28,7 +28,7 @@ def agregar_producto_a_pedido(producto_id):
         return redirect(url_for('productos.index'))
 
     cantidad = int(request.form['cantidad']) if 'cantidad' in request.form else 1
-    nuevo_pedido = OrderQueries.agregar_pedido_y_detalle(producto, cantidad)
+    nuevo_pedido = OrderQueries.obtener_detalles_pedido(producto, cantidad)
 
     OrderQueries.actualizar_total_pedido(nuevo_pedido.id, nuevo_pedido.total)
     OrderQueries.marcar_producto_inactivo(producto)
@@ -76,7 +76,7 @@ def finalizar_compra():
         else:
             return jsonify({'error': 'Error al guardar el pedido en la base de datos.'}), 500
     except Exception as e:
-        print("Error al procesar la compra:", e)  # Esto ayudará a ver el error en la consola del servidor
+        print("Error al procesar la compra:", e)  
         return jsonify({'error': 'Error en el servidor: ' + str(e)}), 500
 
 
