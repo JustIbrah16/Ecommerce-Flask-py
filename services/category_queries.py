@@ -2,6 +2,10 @@ from models.categorias import Categorias
 from models.productos import Productos
 from utils.db import db
 from utils.historial import Historial
+from models.historial_categorias import Historial_categorias
+from models.estado import Estado
+from models.usuarios import Usuarios
+from sqlalchemy.orm import aliased
 
 ESTADO_INACTIVO = 1
 ESTADO_ACTIVO = 2
@@ -77,6 +81,39 @@ class CategoryQueries:
                 print('No se pudo activar la categoria')
         except Exception as e:
             db.session.rollback()
+    #AGREGAR CREACION 
+    @staticmethod
+    def obtener_historial_categoria(categoria_id):
+        try:
+            categoria_id = int(categoria_id)  
+
+            estado_antiguo_alias = aliased(Estado)
+            estado_nuevo_alias = aliased(Estado)
+
+            resultado = (
+                db.session.query(
+                    Historial_categorias.id,  
+                    Historial_categorias.fecha,
+                    Usuarios.username,
+                    Historial_categorias.cambio,
+                    estado_antiguo_alias.nombre.label('estado_antiguo_nombre'),
+                    estado_nuevo_alias.nombre.label('estado_nuevo_nombre'),
+                    Historial_categorias.nombre_anterior,
+                    Historial_categorias.nombre_nuevo,
+                    Historial_categorias.fk_categoria  
+                )
+                .join(estado_antiguo_alias, Historial_categorias.estado_antiguo == estado_antiguo_alias.id)
+                .join(estado_nuevo_alias, Historial_categorias.estado_nuevo == estado_nuevo_alias.id)
+                .join(Usuarios, Usuarios.id == Historial_categorias.fk_user)
+                .filter(Historial_categorias.fk_categoria == categoria_id)  
+                .all()
+            )
+            
+            return resultado or []
+        except Exception as e:
+            print(f"Error al obtener el historial de la categoría [id_categoria]: {e}")
+            return []
+
 
     
 

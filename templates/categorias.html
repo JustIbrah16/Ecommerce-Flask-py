@@ -24,6 +24,11 @@
                     <div>
                         <a href="{{ url_for('categorias.update', id=categoria.id) }}" class="btn btn-warning btn-sm me-2">Actualizar</a>
 
+                        <button class="btn btn-info btn-sm me-2" 
+                            data-id="{{ categoria.id }}" 
+                            data-nombre="{{ categoria.nombre }}" 
+                            onclick="mostrarHistorial(this)">Detalles</button>
+
                         {% if categoria.fk_estado == 2 %}
                         <button class="btn btn-danger btn-sm"
                             data-url="{{ url_for('categorias.delete', id=categoria.id) }}"
@@ -38,7 +43,6 @@
                     </div>
                 </li>
             {% endfor %}
-
         </ul>
         
         <script>
@@ -104,6 +108,69 @@
                 });
             }
 
+            // Función para mostrar el historial
+            function mostrarHistorial(element) {
+                const categoriaId = element.getAttribute('data-id');
+                
+                fetch(`/categorias/${categoriaId}/historial`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#tablaHistorial tbody');
+                        tbody.innerHTML = ''; // Limpiar tabla anterior
+                        
+                        data.forEach(cambio => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${new Date(cambio.fecha_cambio).toLocaleString()}</td>
+                                <td>${cambio.cambio}</td>
+                                <td>${cambio.estado_antiguo}</td>
+                                <td>${cambio.estado_nuevo}</td>
+                                <td>${cambio.nombre_anterior}</td>
+                                <td>${cambio.nombre_nuevo}</td>
+                                <td>${cambio.usuario}</td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                        
+                        // Mostrar el modal
+                        const modal = new bootstrap.Modal(document.getElementById('historialModal'));
+                        modal.show();
+                    })
+                    .catch(error => console.error('Error al obtener el historial:', error));
+            }
         </script>
+    </div>
+</div>
+
+<!-- Modal para mostrar historial -->
+<div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historialModalLabel">Historial de Cambios de Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped" id="tablaHistorial">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cambio</th>
+                            <th>Estado Antiguo</th>
+                            <th>Estado Nuevo</th>
+                            <th>Nombre Anterior</th>
+                            <th>Nombre Nuevo</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Se llenará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>

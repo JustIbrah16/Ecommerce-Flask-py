@@ -77,5 +77,25 @@ def activar_producto(id):
         return jsonify({'success': False, 'message': 'No se puede activar el producto. Active o cambie la categoria primero'})
 
 
+@productos.route('/productos/<producto_id>/historial', methods=['GET'] )
+@login_required
+def obtener_historial_productos(producto_id):
+    cambios_producto = ProductQueries.obtener_historial_producto(producto_id)
+
+    response = [{
+        'id': cambio.id,
+        'fecha_cambio': cambio.fecha,
+        'usuario': cambio.username,
+        'cambio': cambio.cambio,
+        'estado_antiguo': cambio.estado_antiguo_nombre,
+        'estado_nuevo': cambio.estado_nuevo_nombre,
+        'nombre_anterior': cambio.nombre_anterior,
+        'nombre_nuevo': cambio.nombre_nuevo
+    } for cambio in cambios_producto]
+
+    return jsonify(response)
+
+
+
 
         

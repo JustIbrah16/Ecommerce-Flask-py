@@ -2,6 +2,12 @@ from models.productos import Productos
 from models.categorias import Categorias
 from utils.db import db
 from utils.historial import Historial
+from models.historial_productos import Historial_producto
+from models.estado import Estado
+from models.usuarios import Usuarios
+from sqlalchemy.orm import aliased
+
+
 
 ESTADO_INACTIVO = 1
 ESTADO_ACTIVO = 2
@@ -68,3 +74,32 @@ class ProductQueries:
     @staticmethod
     def obtener_productos_disponibles():
         return Productos.query.filter(Productos.estado.has(id=ESTADO_INACTIVO)).all()
+    
+    @staticmethod
+    def obtener_historial_producto(producto_id):
+        try:
+            estado_antiguo_alias = aliased(Estado)
+            estado_nuevo_alias = aliased(Estado)
+#agregar CREACION y PRECIO ANTERIOR/PRECIO NUEVO.
+            resultado = (
+                db.session.query(
+                    Productos.id,
+                    Historial_producto.fecha,
+                    Usuarios.username,
+                    Historial_producto.cambio,
+                    estado_antiguo_alias.nombre.label('estado_antiguo_nombre'),
+                    estado_nuevo_alias.nombre.label('estado_nuevo_nombre'),
+                    Historial_producto.nombre_anterior,
+                    Historial_producto.nombre_nuevo
+                )
+                .join(estado_antiguo_alias, Historial_producto.estado_antiguo == estado_antiguo_alias.id)
+                .join(estado_nuevo_alias, Historial_producto.estado_nuevo == estado_nuevo_alias.id)
+                .join(Usuarios, Usuarios.id == Historial_producto.fk_user)
+                .join(Productos, Productos.id == Historial_producto.fk_producto)
+                .filter(Historial_producto.fk_producto == producto_id)
+                .all()
+            )
+            return resultado or []
+        except Exception as e:
+            print(f"Error al obtener el historial del producto [id_producto]: {e}")
+            return []

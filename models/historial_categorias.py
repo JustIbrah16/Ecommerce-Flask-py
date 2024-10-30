@@ -4,11 +4,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-class Hsitorial_producto(db.Model):
-    __tablename__ = 'historial_productos'
+class Historial_categorias(db.Model):
+    __tablename__ = 'historial_categorias'
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    fk_producto = db.Column(db.Integer, nullable=False)
+    fk_categoria = db.Column(db.Integer, nullable=False)
     fk_user = db.Column(db.Integer, nullable=True)
     cambio = db.Column(db.String(100), nullable=False)
     fecha = db.Column(db.TIMESTAMP, nullable=False)
