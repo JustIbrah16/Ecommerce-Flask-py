@@ -7,7 +7,6 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 {% include 'header.html' %}
@@ -49,7 +48,11 @@
                         <p class="card-text"><strong>Categoría:</strong> {{ producto.categorias.nombre }}</p>
                     </div>
                     <div class="card-footer text-center">
-                        <a href="{{ url_for('productos.update_productos', id=producto.id) }}" class="btn btn-warning btn-sm me-2">Actualizar</a>
+                        
+                        <button class="btn btn-info btn-sm me-2" onclick="mostrarHistorial({{ producto.id }})">Detalles</button>
+
+                        <a href="{{ url_for('productos.update_productos', id=producto.id) }}"
+                           class="btn btn-warning btn-sm me-2">Actualizar</a>
 
                         {% if producto.fk_estado == 2 %}
                         <button class="btn btn-danger btn-sm me-2"
@@ -69,10 +72,71 @@
         </div>
     </div>
 
-
-        
+    <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historialModalLabel">Historial de Cambios del Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Cambio</th>
+                                <th>Estado Anterior</th>
+                                <th>Estado Nuevo</th>
+                                <th>Nombre Anterior</th>
+                                <th>Nombre Nuevo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialTablaBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        function mostrarHistorial(productoId) {
+            fetch(`/productos/${productoId}/historial`)
+                .then(response => response.json())
+                .then(data => {
+                    const historialTablaBody = document.getElementById('historialTablaBody');
+                    historialTablaBody.innerHTML = '';
+
+                    data.forEach(cambio => {
+                        const row = `<tr>
+                            <td>${cambio.fecha_cambio}</td>
+                            <td>${cambio.usuario}</td>
+                            <td>${cambio.cambio}</td>
+                            <td>${cambio.estado_antiguo}</td>
+                            <td>${cambio.estado_nuevo}</td>
+                            <td>${cambio.nombre_anterior}</td>
+                            <td>${cambio.nombre_nuevo}</td>
+                        </tr>`;
+                        historialTablaBody.insertAdjacentHTML('beforeend', row);
+                    });
+
+                    const historialModal = new bootstrap.Modal(document.getElementById('historialModal'));
+                    historialModal.show();
+                })
+                .catch(error => {
+                    console.error("Error al obtener el historial:", error);
+                    Swal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al cargar el historial",
+                        icon: "error"
+                    });
+                });
+        }
+
         function eliminarProducto(element) {
             const url = element.getAttribute('data-url');
             const id = element.getAttribute('data-id');
@@ -101,7 +165,6 @@
                                 text: "Tu producto ha sido eliminado",
                                 icon: "success"
                             }).then(() => {
-
                                 element.textContent = 'Activar';
                                 element.classList.remove('btn-danger');
                                 element.classList.add('btn-success');
@@ -119,7 +182,7 @@
                 }
             });
         }
-    
+
         function activarProducto(element) {
             const url = element.getAttribute('data-url');
             const id = element.getAttribute('data-id');
@@ -161,5 +224,4 @@
             });
         }
     </script>
-    
 </div>

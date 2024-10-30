@@ -439,7 +439,19 @@
         const data = await respuesta.json();
 
         if (respuesta.ok && data.redirect) {
-            window.location.href = data.redirect;
+            
+            Swal.fire({
+                position: "top-center",
+                icon: "success",
+                title: "Tu pedido ha sido guardado exitosamente",
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+           
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 1500);
         } else if (data.error) {
             alert(data.error);
         } else {

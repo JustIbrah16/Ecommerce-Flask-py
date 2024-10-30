@@ -46,3 +46,21 @@ def delete(id):
 def activar(id):
     CategoryQueries.activar_categoria(id)
     return jsonify({'success': True})
+
+@categorias.route('/categorias/<categoria_id>/historial', methods=['GET'])
+@login_required
+def obtener_historial_categorias(categoria_id):
+    cambios_categoria = CategoryQueries.obtener_historial_categoria(categoria_id)
+
+    response = [{
+        'id': cambio.fk_categoria, 
+        'fecha_cambio': cambio.fecha,
+        'usuario': cambio.username,
+        'cambio': cambio.cambio,
+        'estado_antiguo': cambio.estado_antiguo_nombre,
+        'estado_nuevo': cambio.estado_nuevo_nombre,
+        'nombre_anterior': cambio.nombre_anterior,
+        'nombre_nuevo': cambio.nombre_nuevo
+    } for cambio in cambios_categoria]
+
+    return jsonify(response)
