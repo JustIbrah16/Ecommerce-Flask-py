@@ -8,7 +8,7 @@ from routes.main import main
 from utils.db import db
 from models.usuarios import Usuarios
 from flask_login import LoginManager
-
+from routes.permisos import permisos
 
 app = Flask(__name__)
 
@@ -30,3 +30,5 @@ app.register_blueprint(categorias)
 app.register_blueprint(productos)
 app.register_blueprint(pedidos)
 app.register_blueprint(usuarios)
+app.register_blueprint(permisos)
+

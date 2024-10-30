@@ -89,3 +89,25 @@ def actualizar_estado(pedido_id):
 
     
     return redirect(url_for('main.index'))
+
+@pedidos.route('/pedidos/<pedido_id>/detalles', methods=['GET'])
+def obtener_detalles_pedido(pedido_id):
+    detalles = OrderQueries.obtener_detalles_pedido(pedido_id)  
+    cambios_detalle = OrderQueries.detalle_cambios(pedido_id)
+
+    if detalles is None or cambios_detalle is None:
+        return jsonify({'error': 'No se pudieron obtener los detalles'}), 404
+
+    response = {
+        'detalles': detalles,
+        'cambios': [
+            {
+                'fecha_cambio': cambio.fecha_cambio,
+                'fk_estado': cambio.fk_estado,
+                'username': cambio.username
+            }
+            for cambio in cambios_detalle
+        ]
+    }
+
+    return jsonify(response)
