@@ -107,11 +107,11 @@ class OrderQueries:
                     Usuarios.username,
                     Estado.nombre
                 )
-                .select_from(Pedidos)  # Establece explícitamente la tabla desde la que seleccionas
+                .select_from(Pedidos) 
                 .join(Historial_pedidos, Historial_pedidos.fk_pedido == Pedidos.id)
                 .join(Estado, Historial_pedidos.fk_estado == Estado.id)
                 .join(Usuarios, Usuarios.id == Historial_pedidos.fk_user)
-                .filter(Pedidos.id == pedido_id)  # Mantén el filtro aquí
+                .filter(Pedidos.id == pedido_id)  
                 .all()
             )
             

@@ -207,13 +207,12 @@
         `;
         tbody.appendChild(totalRow);
 
-        // Cargar cambios en el historial
         return fetch(`/pedidos/${pedidoId}/historial`);
       })
       .then(response => response.json())
       .then(cambios => {
         const detallesPedido = document.getElementById('detallesPedido');
-        detallesPedido.innerHTML = ''; // Limpiar contenido anterior
+        detallesPedido.innerHTML = ''; 
 
         cambios.forEach(cambio => {
             const detalle = document.createElement('div');
@@ -262,12 +261,12 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Aquí se llenará dinámicamente -->
+               
               </tbody>
             </table>
           
             <div id="detallesPedido">
-              <!-- Aquí se mostrarán los cambios del historial -->
+             
             </div>
           </div>
           

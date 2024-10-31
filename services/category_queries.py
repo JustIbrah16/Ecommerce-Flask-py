@@ -81,7 +81,7 @@ class CategoryQueries:
                 print('No se pudo activar la categoria')
         except Exception as e:
             db.session.rollback()
-    #AGREGAR CREACION 
+   
     @staticmethod
     def obtener_historial_categoria(categoria_id):
         try:
@@ -102,10 +102,11 @@ class CategoryQueries:
                     Historial_categorias.nombre_nuevo,
                     Historial_categorias.fk_categoria  
                 )
-                .join(estado_antiguo_alias, Historial_categorias.estado_antiguo == estado_antiguo_alias.id)
-                .join(estado_nuevo_alias, Historial_categorias.estado_nuevo == estado_nuevo_alias.id)
+                .join(estado_antiguo_alias, Historial_categorias.estado_antiguo == estado_antiguo_alias.id, isouter=True)
+                .join(estado_nuevo_alias, Historial_categorias.estado_nuevo == estado_nuevo_alias.id, isouter=True)
                 .join(Usuarios, Usuarios.id == Historial_categorias.fk_user)
                 .filter(Historial_categorias.fk_categoria == categoria_id)  
+                .order_by(Historial_categorias.fecha)
                 .all()
             )
             

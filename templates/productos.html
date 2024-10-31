@@ -73,28 +73,34 @@
     </div>
 
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="historialModalLabel">Historial de Cambios del Producto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Usuario</th>
-                                <th>Cambio</th>
-                                <th>Estado Anterior</th>
-                                <th>Estado Nuevo</th>
-                                <th>Nombre Anterior</th>
-                                <th>Nombre Nuevo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historialTablaBody">
-                        </tbody>
-                    </table>
+                <div class="modal-body p-4">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Usuario</th>
+                                    <th>Cambio</th>
+                                    <th>Estado Anterior</th>
+                                    <th>Estado Nuevo</th>
+                                    <th>Nombre Anterior</th>
+                                    <th>Nombre Nuevo</th>
+                                    <th>Precio Anterior</th>
+                                    <th>Precio Actual</th>
+                                    <th>categoria Anterior</th>
+                                    <th>Categroia Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialTablaBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -102,7 +108,7 @@
             </div>
         </div>
     </div>
-
+    
     <script>
         function mostrarHistorial(productoId) {
             fetch(`/productos/${productoId}/historial`)
@@ -110,20 +116,24 @@
                 .then(data => {
                     const historialTablaBody = document.getElementById('historialTablaBody');
                     historialTablaBody.innerHTML = '';
-
+    
                     data.forEach(cambio => {
                         const row = `<tr>
                             <td>${cambio.fecha_cambio}</td>
                             <td>${cambio.usuario}</td>
                             <td>${cambio.cambio}</td>
-                            <td>${cambio.estado_antiguo}</td>
+                            <td>${cambio.estado_antiguo || 'creado recientemente'}</td>
                             <td>${cambio.estado_nuevo}</td>
-                            <td>${cambio.nombre_anterior}</td>
+                            <td>${cambio.nombre_anterior || 'no se ha encontrado'}</td>
                             <td>${cambio.nombre_nuevo}</td>
+                            <td>$${parseFloat(cambio.precio_antiguo || 0).toFixed(2)}</td>
+                            <td>$${parseFloat(cambio.precio_actual || 0).toFixed(2)}</td>
+                            <td>${cambio.categoria_antigua || 'No asignada'}</td>  
+                            <td>${cambio.categoria_actual}</td>   
                         </tr>`;
                         historialTablaBody.insertAdjacentHTML('beforeend', row);
                     });
-
+    
                     const historialModal = new bootstrap.Modal(document.getElementById('historialModal'));
                     historialModal.show();
                 })
@@ -136,7 +146,8 @@
                     });
                 });
         }
-
+    
+    
         function eliminarProducto(element) {
             const url = element.getAttribute('data-url');
             const id = element.getAttribute('data-id');
@@ -224,4 +235,21 @@
             });
         }
     </script>
+    <style>
+        
+        #historialModal .modal-content {
+            border-radius: 10px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        #historialModal .modal-header {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        #historialModal .table th, #historialModal .table td {
+            white-space: nowrap;
+        }
+        #historialModal .table-responsive {
+            overflow-x: hidden;
+        }
+    </style>
 </div>
