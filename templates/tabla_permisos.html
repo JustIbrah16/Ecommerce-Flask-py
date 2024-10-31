@@ -11,37 +11,27 @@
         </div>
 
         <div class="card-body">
-            <form action="{{ url_for('permisos.update_permisos') }}" method="POST">
+            <form action="" method="POST">
                 <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th scope="col">Usuario</th>
-                            <th scope="col">Agregar</th>
-                            <th scope="col">Eliminar</th>
-                            <th scope="col">Activar</th>
-                            <th scope="col">Actualizar</th>
+                            <th scope="col">Nombres</th>
+                            <th scope="col">Apellidos</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Telefono</th>
+                            <th scope="col">Rol</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for usuario in usuarios %}
-                            <tr>
-                                <td>{{ usuario.username }}</td>
-                                <td class="text-center">
-                                    <input type="checkbox" name="permisos_{{ usuario.id }}_agregar"
-                                           {% if permisos_data.get(usuario.id) and permisos_data[usuario.id].agregar %} checked {% endif %}>
-                                </td>
-                                <td class="text-center">
-                                    <input type="checkbox" name="permisos_{{ usuario.id }}_eliminar"
-                                           {% if permisos_data.get(usuario.id) and permisos_data[usuario.id].eliminar %} checked {% endif %}>
-                                </td>
-                                <td class="text-center">
-                                    <input type="checkbox" name="permisos_{{ usuario.id }}_activar"
-                                           {% if permisos_data.get(usuario.id) and permisos_data[usuario.id].activar %} checked {% endif %}>
-                                </td>
-                                <td class="text-center">
-                                    <input type="checkbox" name="permisos_{{ usuario.id }}_actualizar"
-                                           {% if permisos_data.get(usuario.id) and permisos_data[usuario.id].actualizar %} checked {% endif %}>
-                                </td>
+                            <tr> 
+                                <td>{{ usuario.nombres }}</td> 
+                                <td>{{ usuario.apellidos }}</td>
+                                <td>{{ usuario.username }}</td>  
+                                <td>{{ usuario.telefono }}</td> 
+                                <td>{{ usuario.nombre }}</td>    
+                                <td class="text-center"> <button class="btn btn-primary">Permisos</button> </td>              
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -50,6 +40,37 @@
                     <button type="submit" class="btn btn-success">Guardar Cambios</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Roles</h3>
+            <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
+                <i class="bi bi-info-circle"></i> Ayuda
+            </button>
+        </div>
+
+        <div class="card-body">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nombres</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rol in roles %}
+                            <tr> 
+                                <td>{{ rol.nombre }}</td>    
+                                <td class="text-center">
+                                    <a href="{{ url_for('permisos.update_permisos', id=rol.id) }}" class="btn btn-warning btn-sm me-2">Permisos</a>
+                                </td>
+                                              
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
         </div>
     </div>
 

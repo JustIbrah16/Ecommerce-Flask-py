@@ -8,6 +8,5 @@ class Rol_permisos(db.Model):
     rol_id = db.Column(db.Integer, ForeignKey('roles.id'), primary_key=True, nullable=False)
     permiso_id = db.Column(db.Integer, ForeignKey('permisos.id'), primary_key=True, nullable=False)
 
-    # Relaciones
-    rol = relationship('Roles', backref='rol_permisos')  # Se puede acceder a permisos desde el rol
-    permiso = relationship('Permisos', backref='rol_permisos')  # Se puede acceder a roles desde el permiso
+    rol = relationship('Roles', back_populates='rol_permisos') 
+    permiso = relationship('Permisos', backref='rol_permisos')  

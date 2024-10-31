@@ -7,13 +7,16 @@ usuarios = Blueprint('usuarios', __name__)
 @usuarios.route('/register', methods = ['POST', 'GET'])
 def registrar_usuarios():
     if request.method == 'POST':
+        nombres = request.form['nombre']
+        apellidos = request.form['apellido']
         username = request.form['username']
+        telefono = request.form['telefono']
         password = request.form['password']
         fk_rol = 3
         if not username or not password:
             return redirect(url_for('usuarios.registrar_usuarios'))
         
-        User_queries.registrar_usuarios(username, password, fk_rol)
+        User_queries.registrar_usuarios(nombres, apellidos, username, telefono, password, fk_rol)
         return redirect(url_for('usuarios.login'))
     
     return render_template('register.html')
