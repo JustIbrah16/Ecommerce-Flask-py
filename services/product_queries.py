@@ -6,6 +6,7 @@ from models.historial_productos import Historial_producto
 from models.estado import Estado
 from models.usuarios import Usuarios
 from sqlalchemy.orm import aliased
+from sqlalchemy import case, label
 
 
 
@@ -75,31 +76,45 @@ class ProductQueries:
     def obtener_productos_disponibles():
         return Productos.query.filter(Productos.estado.has(id=ESTADO_INACTIVO)).all()
     
+  
+
     @staticmethod
     def obtener_historial_producto(producto_id):
         try:
             estado_antiguo_alias = aliased(Estado)
             estado_nuevo_alias = aliased(Estado)
-#agregar CREACION y PRECIO ANTERIOR/PRECIO NUEVO.
+            categoria_antigua_alias = aliased(Categorias)
+            categoria_actual_alias = aliased(Categorias)
+
             resultado = (
                 db.session.query(
-                    Productos.id,
+                    Historial_producto.id,
                     Historial_producto.fecha,
                     Usuarios.username,
                     Historial_producto.cambio,
                     estado_antiguo_alias.nombre.label('estado_antiguo_nombre'),
                     estado_nuevo_alias.nombre.label('estado_nuevo_nombre'),
                     Historial_producto.nombre_anterior,
-                    Historial_producto.nombre_nuevo
+                    Historial_producto.nombre_nuevo,
+                    Historial_producto.precio_antiguo,
+                    Historial_producto.precio_actual,
+                    categoria_antigua_alias.nombre.label('categoria_antigua_nombre'),
+                    categoria_actual_alias.nombre.label('categoria_actual_nombre'),
+                    Historial_producto.fk_producto
                 )
-                .join(estado_antiguo_alias, Historial_producto.estado_antiguo == estado_antiguo_alias.id)
-                .join(estado_nuevo_alias, Historial_producto.estado_nuevo == estado_nuevo_alias.id)
-                .join(Usuarios, Usuarios.id == Historial_producto.fk_user)
-                .join(Productos, Productos.id == Historial_producto.fk_producto)
+                .join(estado_antiguo_alias, Historial_producto.estado_antiguo == estado_antiguo_alias.id, isouter=True)
+                .join(estado_nuevo_alias, Historial_producto.estado_nuevo == estado_nuevo_alias.id, isouter=True)
+                .join(categoria_antigua_alias, Historial_producto.categoria_antigua == categoria_antigua_alias.id, isouter=True)
+                .join(categoria_actual_alias, Historial_producto.categoria_actual == categoria_actual_alias.id, isouter=True)
+                .join(Usuarios, Usuarios.id == Historial_producto.fk_user, isouter=True)
                 .filter(Historial_producto.fk_producto == producto_id)
+                .order_by(Historial_producto.fecha)
                 .all()
             )
+
             return resultado or []
         except Exception as e:
             print(f"Error al obtener el historial del producto [id_producto]: {e}")
             return []
+
+

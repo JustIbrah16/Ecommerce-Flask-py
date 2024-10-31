@@ -16,3 +16,7 @@ class Historial_producto(db.Model):
     estado_nuevo = db.Column(db.Integer, nullable=False)
     nombre_anterior = db.Column(db.String, nullable=False)
     nombre_nuevo = db.Column(db.String, nullable=False)
+    precio_antiguo = db.Column(db.Numeric(10, 2))
+    precio_actual = db.Column(db.Numeric(10, 2), nullable=False)
+    categoria_antigua = db.Column(db.Integer)
+    categoria_actual = db.Column(db.Integer, nullable=False)
