@@ -14,7 +14,7 @@ class Usuarios(db.Model, UserMixin):
     password = db.Column(db.String, nullable = False)
     fk_rol = db.Column(db.Integer, ForeignKey('roles.id'), nullable = False)
 
-    roles = relationship('Roles')
+    rol = relationship('Roles', backref='usuarios')
 
     def __init__(self, nombres, apellidos, username, telefono, password, fk_rol):
         self.nombres = nombres

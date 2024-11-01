@@ -34,7 +34,9 @@ def asignar_permiso(rol_id, permiso_id):
     db.session.add(nuevo_rol_permiso)
     db.session.commit()
 
-    return redirect(url_for('permisos.gestionar_permisos', rol_id=rol.id))
+    # Redirección usando el parámetro correcto
+    return redirect(url_for('permisos.update_permisos', id=rol.id))
+
 
 @permisos.route('/roles/<int:rol_id>/permisos/revocar/<int:permiso_id>', methods=['POST'])
 def revocar_permiso(rol_id, permiso_id):
@@ -42,5 +44,5 @@ def revocar_permiso(rol_id, permiso_id):
     db.session.delete(rol_permiso)
     db.session.commit()
 
-    return redirect(url_for('permisos.gestionar_permisos', rol_id=rol_id))
+    return redirect(url_for('permisos.update_permisos', id=rol_id))
 

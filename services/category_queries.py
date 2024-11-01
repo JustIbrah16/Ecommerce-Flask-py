@@ -26,9 +26,12 @@ class CategoryQueries:
             nueva_categoria = Categorias(nombre=nombre, fk_estado=estado)
             db.session.add(nueva_categoria)
             db.session.commit()
+            return nueva_categoria  # Asegúrate de retornar la nueva categoría
         except Exception as e:
             db.session.rollback()
             print(f'Ocurrió un error: {e}')
+            return None  # Retorna None en caso de error
+
 
     @staticmethod
     def actualizar_categoria(categoria_id, nombre):

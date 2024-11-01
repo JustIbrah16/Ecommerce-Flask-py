@@ -3,6 +3,7 @@ from services.order_queries import OrderQueries
 from services.state_queries import Estados_queries
 from services.product_queries import ProductQueries
 from flask_login import login_required
+from utils.permisos import requiere_permiso, requiere_permiso_ajax
 
 pedidos = Blueprint('pedidos', __name__)
 
@@ -37,6 +38,7 @@ def agregar_producto_a_pedido(producto_id):
     return redirect(url_for('productos.index'))
 
 @pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
+@requiere_permiso_ajax('filtrar_pedido')
 def filtrar_pedidos():
     estado_id = request.form.get('estado')
     fecha = request.form.get('fecha')
@@ -48,6 +50,7 @@ def filtrar_pedidos():
     return render_template('index.html', pedidos=pedidos_filtrados, estados=estados, productos = productos)
 
 @pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
+@requiere_permiso('detalle_pedido')
 def detalle_pedido(id):
     detalles = OrderQueries.obtener_detalles_pedido(id)
 
@@ -61,6 +64,7 @@ def detalle_pedido(id):
     return jsonify(resultados)
 
 @pedidos.route('/finalizar_compra', methods=['POST'])
+@requiere_permiso('guardar_pedido')
 def finalizar_compra():
     data = request.get_json()
 
@@ -81,17 +85,22 @@ def finalizar_compra():
 
 
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
+@requiere_permiso_ajax('actualizar_pedido')
 def actualizar_estado(pedido_id):
     pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id)
 
     if not pedido_actualizado:
-        flash('Pedido no encontrado', 'error')
-        return redirect(url_for('main.index'))
+        return jsonify({'success': 'Pedido no encontrado'}), 404
 
-    
-    return redirect(url_for('main.index'))
+    return jsonify({
+        'success': 'Estado actualizado correctamente!',
+        'nuevo_estado': pedido_actualizado.fk_estado  # Ajusta según tu modelo
+    })
+
+
 
 @pedidos.route('/pedidos/<pedido_id>/historial', methods=['GET'])
+@requiere_permiso('historial_pedido')
 def obtener_detalles_pedido(pedido_id):
     cambios_detalle = OrderQueries.detalle_cambios(pedido_id)
 

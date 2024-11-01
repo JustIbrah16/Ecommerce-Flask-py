@@ -81,36 +81,36 @@
                 <td>{{ pedido.total }}</td>
                 <td>{{ pedido.estado.nombre }}</td>
                 <td>
-                  <form id="form-{{ pedido.id }}"
-                    action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}"
-                    method="POST">
+                  <form id="form-{{ pedido.id }}">
+                    <span class="estado">{{ pedido.estado.nombre }}</span> <!-- Muestra el estado actual -->
                     {% if pedido.estado.id == 3 %}
                     <button type="button" class="btn btn-primary"
-                      onclick="updateState({{ pedido.id }})">
-                      Actualizar a Preparación
+                        onclick="updateState({{ pedido.id }})">
+                        Actualizar a Preparación
                     </button>
                     {% elif pedido.estado.id == 4 %}
                     <button type="button" class="btn btn-secondary"
-                      onclick="updateState({{ pedido.id }})">
-                      Actualizar a Reparto
+                        onclick="updateState({{ pedido.id }})">
+                        Actualizar a Reparto
                     </button>
                     {% elif pedido.estado.id == 5 %}
                     <button type="button" class="btn btn-success"
-                      onclick="updateState({{ pedido.id }})">
-                      Actualizar a Entregado
+                        onclick="updateState({{ pedido.id }})">
+                        Actualizar a Entregado
                     </button>
                     {% elif pedido.estado.id == 6 %}
                     <button type="button" class="btn btn-outline-secondary"
-                      disabled>
-                      Entregado
+                        disabled>
+                        Entregado
                     </button>
                     {% else %}
                     <button type="button" class="btn btn-outline-secondary"
-                      disabled>
-                      Inhabilitado
+                        disabled>
+                        Inhabilitado
                     </button>
                     {% endif %}
-                  </form>
+                </form>
+                
                 </td>
                 <td>
                   <button type="button" class="btn btn-warning"
@@ -126,17 +126,53 @@
 
           <script>
             function updateState(pedidoId) {
-              Swal.fire({
-                title: '¡Actualizado!',
-                text: 'El estado del pedido ha sido actualizado.',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-              });
-              setTimeout(function() {
-                document.getElementById('form-' + pedidoId).submit();
-              }, 2000); 
-            }
+    const url = `/pedido/${pedidoId}/actualizar`; // Cambia esto si tu ruta es diferente
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // Parsear la respuesta a JSON
+        } else if (response.status === 403) {
+            Swal.fire({
+                title: 'Permiso Denegado!',
+                text: 'No tienes permisos para actualizar el estado del pedido.',
+                icon: 'error'
+            });
+            throw new Error('Permiso denegado');
+        } else {
+            throw new Error('Error en la solicitud');
+        }
+    })
+    .then(data => {
+        Swal.fire({
+            title: 'Éxito!',
+            text: data.success,
+            icon: 'success'
+        });
+
+        // Aquí actualizamos el estado visualmente
+        const estadoElemento = document.querySelector(`#form-${pedidoId} .estado`);
+        if (estadoElemento) {
+            estadoElemento.textContent = data.nuevo_estado; // Asumiendo que `nuevo_estado` se retorna en la respuesta
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: error.message,
+            icon: 'error'
+        });
+    });
+}
+
+
+
           </script>
 
           <script>
@@ -429,37 +465,48 @@
     console.log("Datos enviados:", productos_carrito); 
 
     try {
-        const respuesta = await fetch(window.location.origin + '/finalizar_compra', {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productos: productos_carrito })
+    const respuesta = await fetch(window.location.origin + '/finalizar_compra', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productos: productos_carrito })
+    });
+
+    const data = await respuesta.json();
+
+    if (respuesta.ok && data.redirect) {
+        Swal.fire({
+            position: "top-center",
+            icon: "success",
+            title: "Tu pedido ha sido guardado exitosamente",
+            showConfirmButton: false,
+            timer: 1500
         });
 
-        const data = await respuesta.json();
-
-        if (respuesta.ok && data.redirect) {
-            
-            Swal.fire({
-                position: "top-center",
-                icon: "success",
-                title: "Tu pedido ha sido guardado exitosamente",
-                showConfirmButton: false,
-                timer: 1500
-            });
-
-           
-            setTimeout(() => {
-                window.location.href = data.redirect;
-            }, 1500);
-        } else if (data.error) {
-            alert(data.error);
-        } else {
-            alert("Pedido realizado correctamente.");
-        }
-    } catch (error) {
-        console.error("Error al enviar el pedido:", error);
-        alert("Hubo un problema al realizar el pedido. Inténtalo de nuevo.");
+        setTimeout(() => {
+            window.location.href = data.redirect;
+        }, 1500);
+    } else if (data.error) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Advertencia',
+            text: data.error,
+        });
+    } else {
+        Swal.fire({
+            icon: 'info',
+            title: 'Información',
+            text: "Pedido realizado correctamente.",
+        });
     }
+} catch (error) {
+    console.error("Error al enviar el pedido:", error);
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No tienes los permisos necesarios para realizar un pedido.',
+    });
+}
+
 }
 
 

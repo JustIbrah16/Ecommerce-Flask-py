@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="card shadow p-4 mb-5">
         <h3 class="card-title mb-4">Agregar Categoría</h3>
-        <form action="{{ url_for('categorias.add') }}" method="POST">
+        <form id="formAgregarCategoria">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre de la Categoría</label>
                 <input type="text" name="nombre" class="form-control" placeholder="Categoría" required>
@@ -77,34 +77,104 @@
         </div>
         
         <script>
-            function mostrarHistorial(element) {
-        const categoriaId = element.getAttribute('data-id');
-        
-        fetch(`/categorias/${categoriaId}/historial`)
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.querySelector('#tablaHistorial tbody');
-                tbody.innerHTML = ''; 
-                
-                data.forEach(cambio => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(cambio.fecha_cambio).toLocaleString()}</td>
-                        <td>${cambio.cambio}</td>
-                        <td>${cambio.estado_antiguo || 'Creado recientemente'}</td>
-                        <td>${cambio.estado_nuevo}</td>
-                        <td>${cambio.nombre_anterior || 'No se ha encontrado'}</td>
-                        <td>${cambio.nombre_nuevo}</td>
-                        <td>${cambio.usuario}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
+                document.querySelector('#formAgregarCategoria').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevenir el envío normal del formulario
 
-                const modal = new bootstrap.Modal(document.getElementById('historialModal'));
-                modal.show();
-            })
-            .catch(error => console.error('Error al obtener el historial:', error));
-    }
+    const formData = new FormData(this);
+
+    fetch("{{ url_for('categorias.add') }}", {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Éxito!',
+                text: data.success,
+                icon: 'success'
+            });
+
+            // Generar las URLs para actualizar y eliminar
+            const urlUpdate = "{{ url_for('categorias.update', id='') }}" + data.categoria.id;
+            const urlDelete = "{{ url_for('categorias.delete', id='') }}" + data.categoria.id;
+
+            // Crear un nuevo elemento para la lista
+            const nuevaCategoria = document.createElement('li');
+            nuevaCategoria.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+            nuevaCategoria.innerHTML = `
+                <span>${data.categoria.nombre}</span>
+                <div>
+                    <a href="${urlUpdate}" class="btn btn-warning btn-sm me-2">Actualizar</a>
+                    <button class="btn btn-info btn-sm me-2" 
+                        data-id="${data.categoria.id}" 
+                        onclick="mostrarHistorial(this)">Detalles</button>
+                    <button class="btn btn-danger btn-sm" 
+                        data-url="${urlDelete}" 
+                        onclick="eliminarCategoria(this)">Eliminar</button>
+                </div>
+            `;
+
+            // Añadir la nueva categoría a la lista
+            document.querySelector('.list-group').appendChild(nuevaCategoria);
+
+            // Limpiar el formulario
+            this.reset();
+        } else if (data.error) {
+            Swal.fire({
+                title: 'Error!',
+                text: data.error,
+                icon: 'error'
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: 'No se pudo agregar la categoría.',
+                icon: 'error'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Error en la solicitud.',
+            icon: 'error'
+        });
+    });
+});
+
+
+
+
+            function mostrarHistorial(element) {
+                const categoriaId = element.getAttribute('data-id');
+                
+                fetch(`/categorias/${categoriaId}/historial`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#tablaHistorial tbody');
+                        tbody.innerHTML = ''; 
+                        
+                        data.forEach(cambio => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${new Date(cambio.fecha_cambio).toLocaleString()}</td>
+                                <td>${cambio.cambio}</td>
+                                <td>${cambio.estado_antiguo || 'Creado recientemente'}</td>
+                                <td>${cambio.estado_nuevo}</td>
+                                <td>${cambio.nombre_anterior || 'No se ha encontrado'}</td>
+                                <td>${cambio.nombre_nuevo}</td>
+                                <td>${cambio.usuario}</td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+
+                        const modal = new bootstrap.Modal(document.getElementById('historialModal'));
+                        modal.show();
+                    })
+                    .catch(error => console.error('Error al obtener el historial:', error));
+            }
 
             function eliminarCategoria(element) {
                 const url = element.getAttribute('data-url');

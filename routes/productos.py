@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
 from flask_login import login_required
+from utils.permisos import requiere_permiso
 
 productos = Blueprint('productos', __name__)
 
@@ -21,6 +22,7 @@ def buscar_prod_id():
 
 @productos.route("/add_productos")
 @login_required
+@requiere_permiso('mostrar_productos')
 def index():
     productos = ProductQueries.obtener_productos()
     categorias = obtener_categoria()
@@ -28,6 +30,7 @@ def index():
 
 @productos.route("/add_productos", methods=['POST', 'GET'])
 @login_required
+@requiere_permiso('agregar_productos')
 def add_productos():
     if request.method == 'POST':    
         nombre = request.form['nombre']
@@ -47,6 +50,7 @@ def add_productos():
 
 @productos.route("/update_productos/<id>", methods=['POST', 'GET'])
 @login_required
+@requiere_permiso('actualizar_productos')
 def update_productos(id):
     producto = ProductQueries.buscar_prod_por_id(id)
     categorias = obtener_categoria()
@@ -63,12 +67,14 @@ def update_productos(id):
 
 @productos.route("/delete_productos/<id>", methods=['POST'])
 @login_required
+@requiere_permiso('desactivar_productos')
 def delete_productos(id):
     ProductQueries.eliminar_producto(id)
     return jsonify({'success': True})
 
 @productos.route("/activar_producto/<id>", methods=['POST'])
 @login_required
+@requiere_permiso('activar_productos')
 def activar_producto(id):
     success = ProductQueries.activar_producto(id)
     if success:
@@ -78,6 +84,7 @@ def activar_producto(id):
 
 
 @productos.route('/productos/<producto_id>/historial', methods=['GET'])
+@requiere_permiso('historial_productos')
 def obtener_historial_productos(producto_id):
     cambios_producto = ProductQueries.obtener_historial_producto(producto_id)
 

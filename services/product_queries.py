@@ -74,7 +74,7 @@ class ProductQueries:
     
     @staticmethod
     def obtener_productos_disponibles():
-        return Productos.query.filter(Productos.estado.has(id=ESTADO_INACTIVO)).all()
+        return Productos.query.filter(Productos.estado.has(id=ESTADO_ACTIVO)).all()
     
   
 
