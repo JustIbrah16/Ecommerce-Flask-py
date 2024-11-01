@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
 from flask_login import login_required
-from utils.permisos import requiere_permiso
-
+from utils.permisos import requiere_permiso, requiere_permiso_ajax
 productos = Blueprint('productos', __name__)
 
 def obtener_categoria():
