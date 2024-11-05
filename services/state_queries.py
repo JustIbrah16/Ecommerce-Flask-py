@@ -4,4 +4,5 @@ from utils.db import db
 class Estados_queries:
     staticmethod
     def obtener_estados():
-        return Estado.query.all()
+        estados =  Estado.query.order_by(Estado.id.desc()).limit(4).all()
+        return estados[::-1]
