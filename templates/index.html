@@ -156,12 +156,12 @@
             icon: 'success'
         });
 
-        // Actualiza el texto del estado en la vista
+        
         const estadoElemento = document.querySelector(`#estado-${pedidoId}`);
         if (estadoElemento) {
             estadoElemento.textContent = data.nuevo_estado;
 
-            // Cambia el color de la etiqueta del estado según el texto
+            
             let colorClase;
             switch (data.nuevo_estado) {
                 case 'Espera':
@@ -235,7 +235,7 @@
           };
 
           function cargarDetalles(pedidoId) {
-    // Cargar detalles del pedido
+   
     fetch(`/pedidos/${pedidoId}/detalles`)
       .then(response => response.json())
       .then(data => {

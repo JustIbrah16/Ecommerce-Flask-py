@@ -21,7 +21,7 @@ def registrar_usuarios():
     
     return render_template('register.html')
 
-@usuarios.route('/login', methods = ['POST', 'GET'])
+@usuarios.route('/login', methods=['POST', 'GET'])
 def login():
     
     if request.method == 'POST':
@@ -29,12 +29,15 @@ def login():
         password = request.form['password']
 
         if not username or not password:
+            flash('Por favor, completa ambos campos.', 'warning')
             return redirect(url_for('usuarios.login'))
         
         if User_queries.login(username, password):
-            return redirect(url_for('main.index', show_modal = 'bienvenida'))
+            return redirect(url_for('main.index', show_modal='bienvenida'))
         else:
-            return render_template('login.html', error = 'Credenciales incorrectas')
+            flash('Usuario o contraseña incorrecta. Inténtalo de nuevo.', 'danger')
+            return redirect(url_for('usuarios.login'))
+    
     return render_template('login.html')
 
 @usuarios.route('/logout')

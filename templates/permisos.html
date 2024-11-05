@@ -12,56 +12,56 @@
 {% include 'header.html' %}
 
 <div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Permisos para: {{ rol.nombre }}</h3>
-            <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Permisos para {{ rol.nombre }}</h3>
+            <button class="btn btn-outline-light btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#helpModal">
                 <i class="bi bi-info-circle"></i> Ayuda
             </button>
         </div>
         <div class="card-body">
-            <h5 class="mb-3">Permisos Asignados:</h5>
+            <h5 class="text-primary mb-3 fw-semibold">Permisos Asignados:</h5>
             <table class="table table-bordered table-hover align-middle">
-                <thead class="table-light">
+                <thead class="table-primary text-center">
                     <tr>
                         <th scope="col">Nombre del Permiso</th>
-                        <th scope="col" class="text-center">Acciones</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for permiso in permisos %}
                         <tr>
-                            <td>{{ permiso.nombre }}</td>
+                            <td class="text-truncate">{{ permiso.nombre }}</td>
                             <td class="text-center">
                                 <form action="{{ url_for('permisos.revocar_permiso', rol_id=rol.id, permiso_id=permiso.id) }}" method="POST">
-                                    <button class="btn btn-danger btn-sm">Revocar</button>
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill">Revocar</button>
                                 </form>
                             </td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="2" class="text-center">No hay permisos asignados.</td>
+                            <td colspan="2" class="text-center text-muted">No hay permisos asignados.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
-            <h5 class="mb-3">Permisos Disponibles:</h5>
+            <h5 class="text-primary mt-4 mb-3 fw-semibold">Permisos Disponibles:</h5>
             <table class="table table-bordered table-hover align-middle">
-                <thead class="table-light">
+                <thead class="table-primary text-center">
                     <tr>
                         <th scope="col">Nombre del Permiso</th>
-                        <th scope="col" class="text-center">Acciones</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for permiso in todos_permisos %}
                         {% if permiso not in permisos %}
                             <tr>
-                                <td>{{ permiso.nombre }}</td>
+                                <td class="text-truncate">{{ permiso.nombre }}</td>
                                 <td class="text-center">
                                     <form action="{{ url_for('permisos.asignar_permiso', rol_id=rol.id, permiso_id=permiso.id) }}" method="POST">
-                                        <button class="btn btn-success btn-sm">Asignar</button>
+                                        <button class="btn btn-outline-success btn-sm rounded-pill">Asignar</button>
                                     </form>
                                 </td>
                             </tr>
@@ -72,3 +72,53 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="helpModalLabel">Guía de Gestión de Permisos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <p>En esta sección puedes asignar o revocar permisos específicos para el rol seleccionado. Aquí encontrarás:</p>
+                <ul>
+                    <li><strong>Permisos Asignados:</strong> Los permisos ya asignados a este rol. Usa el botón <em>Revocar</em> para eliminar permisos específicos.</li>
+                    <li><strong>Permisos Disponibles:</strong> Permisos que aún no han sido asignados al rol. Usa el botón <em>Asignar</em> para añadir un nuevo permiso.</li>
+                </ul>
+                <p>Selecciona la acción deseada (asignar o revocar) y los cambios se aplicarán de inmediato.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header h3 {
+        font-weight: bold;
+    }
+    .table-primary {
+        background-color: #cfe2ff;
+    }
+    .btn-outline-success {
+        color: #198754;
+        border-color: #198754;
+    }
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+    .btn-outline-light:hover {
+        color: #fff;
+        background-color: #007bff;
+    }
+    .modal-content {
+        border-radius: 10px;
+    }
+    .modal-header {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+</style>

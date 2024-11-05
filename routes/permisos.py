@@ -34,7 +34,7 @@ def asignar_permiso(rol_id, permiso_id):
     db.session.add(nuevo_rol_permiso)
     db.session.commit()
 
-    # Redirección usando el parámetro correcto
+    
     return redirect(url_for('permisos.update_permisos', id=rol.id))
 
 
