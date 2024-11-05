@@ -47,7 +47,6 @@
             <div class="col-8 pedidos  border rounded-3 shadow-sm p-4 bg-light">
                 
                 <div class="p-4 border rounded shadow-sm" style="background-color: #f8f9fa; border: 2px solid #007bff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                    {% if current_user.is_authenticated and current_user|tiene_permiso('filtrar_pedido') %}
                     <form action="{{ url_for('pedidos.filtrar_pedidos') }}" method="POST" class="mb-4">
                         <h5 class="text-primary mb-4 text-center" style="font-size: 1.5rem; font-weight: 500;">Buscar Pedidos</h5>
                         <div class="row">
@@ -78,7 +77,6 @@
                         </button>
                         {% endif %}
                     </form>
-                    {% endif %}
 
                     <div class="table-responsive">
                         <table class="table table-sm table-hover table-striped align-middle" style="background-color: #ffffff; width: 100%; max-width: 100%; margin: auto;">
