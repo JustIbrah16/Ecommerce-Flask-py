@@ -30,7 +30,7 @@
             {% for categoria in categorias %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span class="text-truncate">{{ categoria.nombre }}</span>
-                    <div class="btn-group">
+                    <div class="btn-group" style="gap: 0.5rem;">
                         <a href="{{ url_for('categorias.update', id=categoria.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
                         <button class="btn btn-outline-info btn-sm rounded-pill" data-id="{{ categoria.id }}" data-nombre="{{ categoria.nombre }}" onclick="mostrarHistorial(this)">Detalles</button>
                         {% if categoria.fk_estado == 2 %}
@@ -44,7 +44,7 @@
         </ul>
     </div>
 
-    <!-- Modal Historial de Categorías -->
+
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
