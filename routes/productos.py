@@ -83,7 +83,8 @@ def activar_producto(id):
 
 
 @productos.route('/productos/<producto_id>/historial', methods=['GET'])
-
+@login_required
+@requiere_permiso('historial_productos')
 def obtener_historial_productos(producto_id):
     cambios_producto = ProductQueries.obtener_historial_producto(producto_id)
 
@@ -103,9 +104,3 @@ def obtener_historial_productos(producto_id):
     } for cambio in cambios_producto]
 
     return jsonify(response)
-
-
-
-
-
-        

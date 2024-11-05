@@ -71,9 +71,11 @@
                             </div>
                         </div>
                         <br>
+                        {% if current_user.is_authenticated and current_user|tiene_permiso('guardar_pedido') %}
                         <button type="button" class="btn btn-primary rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             <i class="bi bi-plus-circle me-2"></i> Productos Agregados
                         </button>
+                        {% endif %}
                     </form>
 
                     <div class="table-responsive">
@@ -100,6 +102,7 @@
 
                                     </td>
                                     <td class="text-center">
+                                        {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_pedido') %}
                                         <form id="form-{{ pedido.id }}" action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}" method="POST">
                                             {% if pedido.estado.id == 3 %}
                                             <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2" onclick="updateState({{ pedido.id }})">Preparación</button>
@@ -113,11 +116,14 @@
                                             <button type="button" class="btn btn-outline-dark btn-sm rounded-pill shadow-sm px-2" disabled>Inhabilitado</button>
                                             {% endif %}
                                         </form>
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
+                                        {% if current_user.is_authenticated and current_user|tiene_permiso('historial_pedido') %}
                                         <button type="button" class="btn btn-warning btn-sm rounded-pill shadow-sm px-2 py-1" data-bs-toggle="modal" data-bs-target="#modalDetalles" onclick="cargarDetalles({{ pedido.id }})">
                                             Detalles
                                         </button>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}

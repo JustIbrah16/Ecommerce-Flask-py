@@ -24,6 +24,7 @@ class ProductQueries:
     @staticmethod
     def agregar_producto(nombre, precio, categoria_id, estado):
         try:
+            Historial.historial_categorias()
             nuevo_producto = Productos(fk_categoria=categoria_id, nombre=nombre, precio=precio, fk_estado=estado)
             db.session.add(nuevo_producto)
             db.session.commit()

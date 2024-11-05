@@ -5,6 +5,7 @@ from models.roles import Roles
 from models.roles_permisos import Rol_permisos
 from utils.db import db
 from services.user_queries import User_queries
+from utils.permisos import requiere_permiso
 
 permisos = Blueprint('permisos', __name__)
 
@@ -12,6 +13,7 @@ permisos = Blueprint('permisos', __name__)
 def mostrar_tabla_permisos():  
     pass
 
+@requiere_permiso('mostrar_permisos')
 @permisos.route('/update_permisos/<id>/permisos', methods=['GET'])
 def update_permisos(id):
     rol = Roles.query.get_or_404(id)
