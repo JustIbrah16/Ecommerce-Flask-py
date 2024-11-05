@@ -21,7 +21,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 app.secret_key = 'secret key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3307/flask_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3306/flask_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)

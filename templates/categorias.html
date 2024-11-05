@@ -12,6 +12,7 @@
 {% include 'header.html' %}
 
 <div class="container mt-4">
+    {% if current_user.is_authenticated and current_user|tiene_permiso('agregar_categorias') %}
     <div class="card shadow-sm mb-4 p-3">
         <h4 class="text-center text-primary mb-3">Agregar Categoría</h4>
         <form action="{{ url_for('categorias.add') }}" method="POST" class="row g-2">
@@ -23,7 +24,7 @@
             </div>
         </form>
     </div>
-
+    {% endif %}
     <div class="card shadow-sm p-3">
         <h4 class="text-center text-primary mb-3">Categorías Disponibles</h4>
         <ul class="list-group">
@@ -31,12 +32,24 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span class="text-truncate">{{ categoria.nombre }}</span>
                     <div class="btn-group" style="gap: 0.5rem;">
+                        {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_categorias') %}
                         <a href="{{ url_for('categorias.update', id=categoria.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                        {% endif %}
+
+                        {% if current_user.is_authenticated and current_user|tiene_permiso('historial_categorias') %}
                         <button class="btn btn-outline-info btn-sm rounded-pill" data-id="{{ categoria.id }}" data-nombre="{{ categoria.nombre }}" onclick="mostrarHistorial(this)">Detalles</button>
+                        {% endif %}
+
+                        
                         {% if categoria.fk_estado == 2 %}
+                            {% if current_user.is_authenticated and current_user|tiene_permiso('desactivar_categorias') %}
                             <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('categorias.delete', id=categoria.id) }}" onclick="eliminarCategoria(this)">Eliminar</button>
+                            {% endif %}
                         {% else %}
+
+                            {% if current_user.is_authenticated and current_user|tiene_permiso('activar_categorias') %}                          
                             <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('categorias.activar', id=categoria.id) }}" onclick="activarCategoria(this)">Activar</button>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </li>
