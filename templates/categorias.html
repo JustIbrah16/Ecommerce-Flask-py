@@ -30,7 +30,7 @@
             {% for categoria in categorias %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span class="text-truncate">{{ categoria.nombre }}</span>
-                    <div class="btn-group">
+                    <div class="btn-group" style="gap: 0.5rem;">
                         <a href="{{ url_for('categorias.update', id=categoria.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
                         <button class="btn btn-outline-info btn-sm rounded-pill" data-id="{{ categoria.id }}" data-nombre="{{ categoria.nombre }}" onclick="mostrarHistorial(this)">Detalles</button>
                         {% if categoria.fk_estado == 2 %}
@@ -44,7 +44,7 @@
         </ul>
     </div>
 
-    <!-- Modal Historial de Categorías -->
+
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
@@ -187,8 +187,54 @@
                 });
             }
 
+            document.querySelector('form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const nombre = document.querySelector('[name="nombre"]').value;
+                
+                fetch('{{ url_for("categorias.add") }}', {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        'nombre': nombre,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Éxito',
+                            text: data.success,
+                            icon: 'success',
+                            confirmButtonText: 'Aceptar'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.error,
+                            icon: 'error',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al agregar categoría:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Hubo un problema con la solicitud. Inténtalo de nuevo más tarde.',
+                        icon: 'error',
+                        confirmButtonText: 'Aceptar'
+                    });
+                });
+            });
+
            
             
         </script>
+        
     </div>
 </div>

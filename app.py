@@ -9,6 +9,7 @@ from utils.db import db
 from models.usuarios import Usuarios
 from flask_login import LoginManager
 from routes.permisos import permisos
+from utils.permisos import tiene_permiso_filter
 from flask import redirect, url_for
 
 
@@ -24,6 +25,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3307/flask_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+
+app.jinja_env.filters['tiene_permiso'] = tiene_permiso_filter
 
 @login_manager.user_loader
 def load_user(id):

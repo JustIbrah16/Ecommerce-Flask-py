@@ -19,11 +19,11 @@ def index():
 def add():
     if request.method == 'POST':
         nombre = request.form['nombre']
-        estado = 2  # Ajusta según tus necesidades
+        estado = 2  
 
         nueva_categoria = CategoryQueries.agregar_categoria(nombre, estado)
 
-        if nueva_categoria:  # Verifica que no sea None
+        if nueva_categoria:  
             return jsonify({
                 'success': 'Categoría agregada con éxito!',
                 'categoria': {

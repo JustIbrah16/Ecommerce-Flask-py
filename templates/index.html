@@ -96,7 +96,8 @@
                                     <td class="text-center small">{{ pedido.fecha.strftime('%Y-%m-%d') }}</td>
                                     <td class="text-center small">${{ pedido.total }}</td>
                                     <td class="text-center">
-                                        <span class="badge rounded-pill text-bg-{{ 'success' if pedido.estado.nombre == 'Entregado' else 'secondary' }} small">{{ pedido.estado.nombre }}</span>
+                                        <span id="estado-{{ pedido.id }}" class="badge rounded-pill text-bg-{{ 'success' if pedido.estado.nombre == 'Entregado' else 'secondary' }} small">{{ pedido.estado.nombre }}</span>
+
                                     </td>
                                     <td class="text-center">
                                         <form id="form-{{ pedido.id }}" action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}" method="POST">
@@ -126,7 +127,7 @@
 
           <script>
             function updateState(pedidoId) {
-    const url = `/pedido/${pedidoId}/actualizar`; // Cambia esto si tu ruta es diferente
+    const url = `/pedido/${pedidoId}/actualizar`;
 
     fetch(url, {
         method: 'POST',
@@ -136,7 +137,7 @@
     })
     .then(response => {
         if (response.ok) {
-            return response.json(); // Parsear la respuesta a JSON
+            return response.json();
         } else if (response.status === 403) {
             Swal.fire({
                 title: 'Permiso Denegado!',
@@ -155,10 +156,30 @@
             icon: 'success'
         });
 
-        // Aquí actualizamos el estado visualmente
-        const estadoElemento = document.querySelector(`#form-${pedidoId} .estado`);
+        
+        const estadoElemento = document.querySelector(`#estado-${pedidoId}`);
         if (estadoElemento) {
-            estadoElemento.textContent = data.nuevo_estado; // Asumiendo que `nuevo_estado` se retorna en la respuesta
+            estadoElemento.textContent = data.nuevo_estado;
+
+            
+            let colorClase;
+            switch (data.nuevo_estado) {
+                case 'Espera':
+                    colorClase = 'secondary';
+                    break;
+                case 'Preparación':
+                    colorClase = 'info';
+                    break;
+                case 'Reparto':
+                    colorClase = 'warning';
+                    break;
+                case 'Entregado':
+                    colorClase = 'success';
+                    break;
+                default:
+                    colorClase = 'dark';
+            }
+            estadoElemento.className = `badge rounded-pill text-bg-${colorClase} small`;
         }
     })
     .catch(error => {
@@ -170,6 +191,7 @@
         });
     });
 }
+
 
 
 
@@ -213,7 +235,7 @@
           };
 
           function cargarDetalles(pedidoId) {
-    // Cargar detalles del pedido
+   
     fetch(`/pedidos/${pedidoId}/detalles`)
       .then(response => response.json())
       .then(data => {

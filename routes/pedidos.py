@@ -94,7 +94,7 @@ def actualizar_estado(pedido_id):
 
     return jsonify({
         'success': 'Estado actualizado correctamente!',
-        'nuevo_estado': pedido_actualizado.fk_estado  # Ajusta según tu modelo
+        'nuevo_estado': pedido_actualizado.estado.nombre 
     })
 
 

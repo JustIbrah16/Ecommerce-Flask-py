@@ -30,7 +30,7 @@ class ProductQueries:
             return nuevo_producto
         except Exception as e:
             db.session.rollback()
-            raise e  # Asegúrate de propagar el error para que pueda ser manejado
+            raise e  
 
 
     @staticmethod

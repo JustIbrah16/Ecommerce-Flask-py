@@ -14,7 +14,25 @@
 <div class="container mt-4">
     <div class="card shadow-sm mb-4 p-3">
         <h4 class="text-center text-primary mb-3">Agregar Producto</h4>
-        z
+        <form action="{{ url_for('productos.add_productos') }}" method="POST" class="row g-2">
+            <div class="col-md-5">
+                <input type="text" name="nombre" class="form-control form-control-sm rounded-pill" placeholder="Nombre del producto" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="precio" class="form-control form-control-sm rounded-pill" placeholder="Precio" required>
+            </div>
+            <div class="col-md-3">
+                <select name="categoria" class="form-select form-select-sm rounded-pill" required>
+                    <option value>Seleccionar categoría</option>
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill">Agregar</button>
+            </div>
+        </form>
     </div>
 
     <div class="container mt-4">

@@ -5,15 +5,25 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="{{ url_for('main.index') }}">Inicio</a>
           </li>
+
+          {% if current_user.is_authenticated and current_user|tiene_permiso('mostrar_productos') %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('productos.add_productos') }}">Agregar Productos</a>
           </li>
+          {% endif %}
+
+          {% if current_user.is_authenticated and current_user|tiene_permiso('mostrar_categorias') %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('categorias.add') }}">Agregar Categorias</a>
           </li>
+          {% endif %}
+
+          {% if current_user.is_authenticated and current_user|tiene_permiso('mostrar_permisos') %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('permisos.tabla_permisos') }}">Tabla de Permisos</a>
           </li>   
+          {% endif %}
+
         </ul>
       </div>
       <div class="d-flex justify-content-end align-items-center mb-3">

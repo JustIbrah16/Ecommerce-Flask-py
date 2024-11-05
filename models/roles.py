@@ -11,4 +11,4 @@ class Roles(db.Model):
     permisos = relationship('Rol_permisos', back_populates='rol', lazy='dynamic')
 
     def obtener_permisos(self):
-        return [rol_permiso.permiso for rol_permiso in self.permisos]  # Asegúrate de que esto sea correcto
+        return [rol_permiso.permiso for rol_permiso in self.permisos]  

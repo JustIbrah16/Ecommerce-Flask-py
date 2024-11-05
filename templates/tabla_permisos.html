@@ -1,77 +1,61 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Gestion de permisos para usuarios</h3>
-        </div>
-
-        <div class="card-body">
-            <form action="" method="POST">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-primary">Gestión de Permisos para Usuarios</h4>
+        <button type="button" class="btn btn-outline-info btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#helpModal">
+            Ayuda
+        </button>
+    </div>
+    <div class="card shadow-sm mb-4 p-3">
+        <h5 class="text-center text-primary mb-3">Usuarios</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover table-striped align-middle text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col">Nombres</th>
+                        <th scope="col">Apellidos</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Teléfono</th>
+                        <th scope="col">Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
                         <tr>
-                            <th scope="col">Nombres</th>
-                            <th scope="col">Apellidos</th>
-                            <th scope="col">Username</th>
-                            <th scope="col">Telefono</th>
-                            <th scope="col">Rol</th>
+                            <td>{{ usuario.nombres }}</td>
+                            <td>{{ usuario.apellidos }}</td>
+                            <td>{{ usuario.username }}</td>
+                            <td>{{ usuario.telefono }}</td>
+                            <td>{{ usuario.nombre }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for usuario in usuarios %}
-                            <tr> 
-                                <td>{{ usuario.nombres }}</td> 
-                                <td>{{ usuario.apellidos }}</td>
-                                <td>{{ usuario.username }}</td>  
-                                <td>{{ usuario.telefono }}</td> 
-                                <td>{{ usuario.nombre }}</td>          
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </form>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Roles</h3>
-            <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#helpModal">
-                <i class="bi bi-info-circle"></i> Ayuda
-            </button>
-        </div>
-
-        <div class="card-body">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">Nombres</th>
-                            <th scope="col">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for rol in roles %}
-                            <tr> 
-                                <td>{{ rol.nombre }}</td>    
-                                <td class="text-center">
-                                    <a href="{{ url_for('permisos.update_permisos', id=rol.id) }}" class="btn btn-warning btn-sm me-2">Permisos</a>
-                                </td>
-                                              
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-        </div>
+ 
+    <div class="card shadow-sm p-3">
+        <h5 class="text-center text-primary mb-3">Roles</h5>
+        <ul class="list-group">
+            {% for rol in roles %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-truncate">{{ rol.nombre }}</span>
+                    <a href="{{ url_for('permisos.update_permisos', id=rol.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Permisos</a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 
+ 
     <div class="mt-4">
-        <h5 class="text-secondary">Resumen de permisos asignados</h5>
+        <h5 class="text-secondary text-center">Resumen de Permisos Asignados</h5>
         <div class="row">
             <div class="col-md-3 mb-3">
-                <div class="card text-center">
-                    <div class="card-header bg-dark text-white">
+                <div class="card text-center shadow-sm">
+                    <div class="card-header bg-dark text-white rounded-top">
                         Total Usuarios
                     </div>
                     <div class="card-body">
@@ -80,9 +64,9 @@
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center">
-                    <div class="card-header bg-danger text-white">
-                        Permisos para eliminar
+                <div class="card text-center shadow-sm">
+                    <div class="card-header bg-danger text-white rounded-top">
+                        Permisos para Eliminar
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">{{ permisos_data | selectattr("eliminar", "equalto", True) | list | length }}</h5>
@@ -90,9 +74,9 @@
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center">
-                    <div class="card-header bg-success text-white">
-                        Permisos de activación
+                <div class="card text-center shadow-sm">
+                    <div class="card-header bg-success text-white rounded-top">
+                        Permisos de Activación
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">{{ permisos_data | selectattr("activar", "equalto", True) | list | length }}</h5>
@@ -100,9 +84,9 @@
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center">
-                    <div class="card-header bg-warning text-white">
-                        Permisos para agregar
+                <div class="card text-center shadow-sm">
+                    <div class="card-header bg-warning text-white rounded-top">
+                        Permisos para Agregar
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">{{ permisos_data | selectattr("agregar", "equalto", True) | list | length }}</h5>
@@ -110,9 +94,9 @@
                 </div>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="card text-center">
-                    <div class="card-header bg-info text-white">
-                        Permisos para actualizar
+                <div class="card text-center shadow-sm">
+                    <div class="card-header bg-info text-white rounded-top">
+                        Permisos para Actualizar
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">{{ permisos_data | selectattr("actualizar", "equalto", True) | list | length }}</h5>
@@ -122,28 +106,40 @@
         </div>
     </div>
 </div>
-
 <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title" id="helpModalLabel">Guía de Permisos</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>En esta sección puedes asignar o revocar permisos para cada usuario en la plataforma:</p>
+            <div class="modal-body p-3">
+                <p>En este apartado puedes administrar los permisos para los usuarios de la plataforma. Aquí tienes una descripción general de cada sección:</p>
                 <ul>
-                    <li><strong>Agregar:</strong> Permite añadir categorías, productos, pedidos.</li>
-                    <li><strong>Eliminar:</strong> Permite borrar categorías, productos, pedidos.</li>
-                    <li><strong>Activar:</strong> Permite activar o desactivar categorías, productos, pedidos.</li>
-                    <li><strong>Actualizar:</strong> Permite editar elementos existentes.</li>
+                    <li><strong>Usuarios:</strong> Lista todos los usuarios con su información básica y el rol que tienen asignado en el sistema.</li>
+                    <li><strong>Roles:</strong> Muestra los roles existentes y permite acceder a la configuración de permisos para cada rol. Puedes definir qué acciones puede realizar cada rol.</li>
+                    <li><strong>Resumen de Permisos:</strong> Presenta un resumen de los permisos asignados en la plataforma, permitiéndote ver cuántos usuarios tienen permisos específicos como agregar, eliminar, activar o actualizar información.</li>
                 </ul>
-                <p>Marca o desmarca las casillas según los permisos que deseas otorgar a cada usuario y haz clic en "Guardar Cambios".</p>
+                <p>Para modificar permisos, selecciona el rol deseado en la lista y usa la opción "Permisos" para asignar o revocar accesos específicos. Los cambios realizados se guardarán automáticamente y afectarán las operaciones disponibles para los usuarios asignados a ese rol.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .card-header {
+        font-weight: bold;
+        font-size: 1rem;
+    }
+    .modal-content {
+        border-radius: 10px;
+    }
+    .modal-header {
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+</style>
 {% endblock %}

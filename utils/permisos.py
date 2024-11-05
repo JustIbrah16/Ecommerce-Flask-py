@@ -16,6 +16,13 @@ def cargar_roles():
 
     return roles_permisos
 
+def tiene_permiso_filter(usuario, permiso):
+    if usuario.rol is None:
+        return False
+    rol = usuario.rol.nombre
+    roles_permisos = cargar_roles()
+    return permiso in roles_permisos.get(rol, [])
+
 
 def tiene_permiso(usuario, permiso):
     if usuario.rol is None:  # Asegúrate de que el rol no sea None
