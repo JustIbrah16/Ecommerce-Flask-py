@@ -12,6 +12,7 @@
 {% include 'header.html' %}
 
 <div class="container mt-4">
+    {% if current_user.is_authenticated and current_user|tiene_permiso('agregar_productos') %}
     <div class="card shadow-sm mb-4 p-3">
         <h4 class="text-center text-primary mb-3">Agregar Producto</h4>
         <form action="{{ url_for('productos.add_productos') }}" method="POST" class="row g-2">
@@ -34,6 +35,7 @@
             </div>
         </form>
     </div>
+    {% endif %}
 
     <div class="container mt-4">
        
@@ -52,12 +54,23 @@
                         <p class="text-muted small"><strong>Categoría:</strong> {{ producto.categorias.nombre }}</p>
                     </div>
                     <div class="card-footer d-flex justify-content-around py-2">
+
+                        {% if current_user.is_authenticated and current_user|tiene_permiso('historial_productos') %}
                         <button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial({{ producto.id }})">Detalles</button>
+                        {% endif %}
+
+                        {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_productos') %}
                         <a href="{{ url_for('productos.update_productos', id=producto.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                        {% endif %}
+
                         {% if producto.fk_estado == 2 %}
+                            {% if current_user.is_authenticated and current_user|tiene_permiso('desactivar_productos') %}
                             <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('productos.delete_productos', id=producto.id) }}" data-id="{{ producto.id }}" onclick="eliminarProducto(this)">Eliminar</button>
+                            {% endif %}
                         {% else %}
+                            {% if current_user.is_authenticated and current_user|tiene_permiso('activar_productos') %}
                             <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('productos.activar_producto', id=producto.id) }}" data-id="{{ producto.id }}" onclick="activarProducto(this)">Activar</button>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
