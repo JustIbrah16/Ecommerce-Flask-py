@@ -6,6 +6,9 @@ from utils.permisos import requiere_permiso, requiere_permiso_ajax
 
 productos = Blueprint('productos', __name__)
 
+ESTADO_INACTIVO = 1
+ESTADO_ACTIVO = 2
+
 def obtener_categoria():
     return Categorias.query.all()
 
@@ -25,7 +28,7 @@ def buscar_prod_id():
 @requiere_permiso('mostrar_productos')
 def index():
     productos = ProductQueries.obtener_productos()
-    categorias = obtener_categoria()
+    categorias = ProductQueries.obtener_categorias_activas()
     return render_template('productos.html', productos=productos, categorias=categorias)
 
 @productos.route("/add_productos", methods=['POST', 'GET'])
@@ -37,23 +40,23 @@ def add_productos():
         precio = request.form['precio']
         categoria_id = request.form['categoria']
         estado = 2
-
-        categoria = Categorias.query.get(categoria_id)
-        if not categoria:
-            flash('Categoria no valida', 'error')
-            return redirect(url_for('main.index'))
-
-        ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
-        return redirect(url_for('productos.index'))
-    
-    return render_template('productos.html')
+        
+        try:
+            ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
+            flash("producto agreagdo exitosamente.", "success")
+            return redirect(url_for('productos.index'))
+        except ValueError as ve:
+            flash(str(ve), 'error')
+            return redirect(url_for('productos.index'))
+    categorias = ProductQueries.obtener_categorias_activas()
+    return render_template('productos.html', categorias=categorias)
 
 @productos.route("/update_productos/<id>", methods=['POST', 'GET'])
 @login_required
 @requiere_permiso('actualizar_productos')
 def update_productos(id):
     producto = ProductQueries.buscar_prod_por_id(id)
-    categorias = obtener_categoria()
+    categorias = ProductQueries.obtener_categorias_activas()
 
     if request.method == 'POST':
         nombre = request.form['nombre']
@@ -69,18 +72,36 @@ def update_productos(id):
 @login_required
 @requiere_permiso('desactivar_productos')
 def delete_productos(id):
-    ProductQueries.eliminar_producto(id)
-    return jsonify({'success': True})
+    producto = ProductQueries.obtener_producto(id)
+    if producto:
+        categoria = Categorias.query.get(producto.fk_categoria)
+
+        if categoria and categoria.fk_estado == ESTADO_ACTIVO:
+            ProductQueries.eliminar_producto(id)
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'message': "No se puede eliminar el producto si la categoria no está activa"})
+    else:
+        return jsonify({'success': False, 'message': 'Producto no encontrado'})
+    
 
 @productos.route("/activar_producto/<id>", methods=['POST'])
 @login_required
 @requiere_permiso('activar_productos')
 def activar_producto(id):
-    success = ProductQueries.activar_producto(id)
-    if success:
-        return jsonify({'success' : True})
+    producto = ProductQueries.obtener_producto(id)
+    if producto:
+        categoria = Categorias.query.get(producto.fk_categoria)
+        if categoria and categoria.fk_estado == ESTADO_ACTIVO:
+            success = ProductQueries.activar_producto(id)
+            if success:
+                return jsonify({'success' : True})
+            else:
+                return jsonify({'success': False, 'message': 'No se puede activar el producto.'})
+        else:
+            return jsonify({'success': False, 'message': 'No se puede activar el producto si la categoría no está activa.'})
     else:
-        return jsonify({'success': False, 'message': 'No se puede activar el producto. Active o cambie la categoria primero'})
+        return jsonify({'success': False, 'message': 'Producto no encontrado.'})
 
 
 @productos.route('/productos/<producto_id>/historial', methods=['GET'])
@@ -105,3 +126,4 @@ def obtener_historial_productos(producto_id):
     } for cambio in cambios_producto]
 
     return jsonify(response)
+

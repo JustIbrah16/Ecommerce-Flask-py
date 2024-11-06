@@ -38,12 +38,10 @@
     {% endif %}
 
     <div class="container mt-4">
-       
         <div class="row g-3">
             {% for producto in productos %}
             <div class="col-md-4 col-lg-3">
                 <div class="card shadow-sm h-100 border-0 position-relative">
-                    
                     <img src="https://cdn-icons-png.flaticon.com/512/3240/3240782.png" 
                          alt="Icono de confirmación" 
                          class="position-absolute top-0 end-0 p-1" 
@@ -78,6 +76,7 @@
             {% endfor %}
         </div>
     </div>
+
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
@@ -116,6 +115,7 @@
     </div>
     
     <script>
+        
         function mostrarHistorial(productoId) {
             fetch(`/productos/${productoId}/historial`)
                 .then(response => response.json())
@@ -151,116 +151,117 @@
                         icon: "error"
                     });
                 });
-            }
-                
+        }
+
         function eliminarProducto(element) {
-        const url = element.getAttribute('data-url');
-        const id = element.getAttribute('data-id');
-        
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "Se eliminará el producto",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Eliminar"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            title: "Eliminado",
-                            text: "Tu producto ha sido eliminado",
-                            icon: "success"
-                        }).then(() => {
-                            element.textContent = 'Activar';
-                            element.classList.remove('btn-outline-danger');
-                            element.classList.add('btn-outline-success');
-                            element.setAttribute('data-url', `{{ url_for('productos.activar_producto', id='') }}` + id);
-                            element.setAttribute('onclick', 'activarProducto(this)');
-                        });
-                    } else {
-                        Swal.fire({
-                            title: "Error",
-                            text: "No se pudo eliminar el producto",
-                            icon: "error"
-                        });
-                    }
+    const url = element.getAttribute('data-url');
+    const id = element.getAttribute('data-id');
+    
+    Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Se eliminará el producto",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Eliminar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Eliminado",
+                        text: "Tu producto ha sido eliminado",
+                        icon: "success"
+                    }).then(() => {
+                        element.textContent = 'Activar';
+                        element.classList.remove('btn-outline-danger');
+                        element.classList.add('btn-outline-success');
+                        element.setAttribute('data-url', `{{ url_for('productos.activar_producto', id='') }}` + id);
+                        element.setAttribute('onclick', 'activarProducto(this)');
+                    });
+                } else {
+                    // Verifica si la categoría está desactivada o eliminada
+                    Swal.fire({
+                        title: "Error",
+                        text: data.message,  // Muestra el mensaje de error retornado desde el servidor
+                        icon: "error"
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al eliminar el producto",
+                    icon: "error"
                 });
-            }
-        });
-    }
+            });
+        }
+    });
+}
 
 function activarProducto(element) {
     const url = element.getAttribute('data-url');
     const id = element.getAttribute('data-id');
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: "Activado!",
-                text: "Producto activado correctamente!",
-                icon: "success"
-            }).then(() => {
-                element.textContent = 'Eliminar';
-                element.classList.remove('btn-outline-success');
-                element.classList.add('btn-outline-danger');
-                element.setAttribute('data-url', `{{ url_for('productos.delete_productos', id='') }}` + id);
-                element.setAttribute('onclick', 'eliminarProducto(this)');
+    
+    Swal.fire({
+        title: "¿Estás seguro?",
+        text: "Activarás el producto",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Activar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: "Activado",
+                        text: "El producto ha sido activado",
+                        icon: "success"
+                    }).then(() => {
+                        element.textContent = 'Eliminar';
+                        element.classList.remove('btn-outline-success');
+                        element.classList.add('btn-outline-danger');
+                        element.setAttribute('data-url', `{{ url_for('productos.delete_productos', id='') }}` + id);
+                        element.setAttribute('onclick', 'eliminarProducto(this)');
+                    });
+                } else {
+                    // Verifica si la categoría está desactivada o eliminada
+                    Swal.fire({
+                        title: "Error",
+                        text: data.message,  // Muestra el mensaje de error retornado desde el servidor
+                        icon: "error"
+                    });
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al activar el producto",
+                    icon: "error"
+                });
             });
-        } else {
-            Swal.fire({
-                title: "No se puede activar el producto",
-                text: "Active o cambie la categoría del producto primero.",
-                icon: "warning"
-            });
         }
-    })
-    .catch(error => {
-        console.error("Error en la solicitud:", error);
-        Swal.fire({
-            title: "Error",
-            text: "Hubo un problema en el servidor",
-            icon: "error"
-        });
     });
 }
     </script>
 
-    
-    <style>
-        .card .card-title {
-            font-size: 1rem;
-            font-weight: bold;
-        }
-        .card .card-text {
-            font-size: 0.875rem;
-        }
-        .modal-xl {
-            max-width: 90%;
-        }
-        .modal-content {
-            border-radius: 10px;
-        }
-        .modal-header {
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-        }
-        #historialModal .table {
-            margin-bottom: 0;
-        }
-    </style>
+</div>
