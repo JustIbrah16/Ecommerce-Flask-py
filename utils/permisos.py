@@ -11,7 +11,7 @@ def cargar_roles():
     roles = Roles.query.all()
 
     for rol in roles:
-        permisos = [permiso.permiso.nombre for permiso in rol.permisos]  # Accediendo correctamente
+        permisos = [permiso.permiso.nombre for permiso in rol.permisos]
         roles_permisos[rol.nombre] = permisos
 
     return roles_permisos
@@ -25,10 +25,10 @@ def tiene_permiso_filter(usuario, permiso):
 
 
 def tiene_permiso(usuario, permiso):
-    if usuario.rol is None:  # Asegúrate de que el rol no sea None
+    if usuario.rol is None:
         return False
     rol = usuario.rol.nombre
-    roles_permisos = cargar_roles()  # Asegúrate de que esto esté correctamente
+    roles_permisos = cargar_roles()
     return permiso in roles_permisos.get(rol, [])
 
 
@@ -38,7 +38,7 @@ def requiere_permiso(permiso):
         def envoltura(*args, **kwargs):
             usuario = current_user
             if not usuario.is_authenticated:
-                abort(403)  # Prohibido si no está autenticado
+                abort(403)
             if not tiene_permiso(usuario, permiso):
                 return render_template('403.html') # Prohibido si no tiene permiso
             return func(*args, **kwargs)

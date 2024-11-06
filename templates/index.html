@@ -106,17 +106,9 @@
                                     <td class="text-center">
                                         {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_pedido') %}
                                         <form id="form-{{ pedido.id }}" action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}" method="POST">
-                                            {% if pedido.estado.id == 3 %}
-                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2" onclick="updateState({{ pedido.id }})">Preparación</button>
-                                            {% elif pedido.estado.id == 4 %}
-                                            <button type="button" class="btn btn-outline-warning btn-sm rounded-pill shadow-sm px-2" onclick="updateState({{ pedido.id }})">Reparto</button>
-                                            {% elif pedido.estado.id == 5 %}
-                                            <button type="button" class="btn btn-outline-success btn-sm rounded-pill shadow-sm px-2" onclick="updateState({{ pedido.id }})">Entregado</button>
-                                            {% elif pedido.estado.id == 6 %}
-                                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill shadow-sm px-2" disabled>Entregado</button>
-                                            {% else %}
-                                            <button type="button" class="btn btn-outline-dark btn-sm rounded-pill shadow-sm px-2" disabled>Inhabilitado</button>
-                                            {% endif %}
+                                            
+                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2" onclick="updateState({{ pedido.id }})">Actualizar</button>
+                                            
                                         </form>
                                         {% endif %}
                                     </td>

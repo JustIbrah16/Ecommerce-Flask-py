@@ -3,6 +3,7 @@ from services.product_queries import ProductQueries
 from models.categorias import Categorias
 from flask_login import login_required
 from utils.permisos import requiere_permiso, requiere_permiso_ajax
+
 productos = Blueprint('productos', __name__)
 
 def obtener_categoria():
@@ -43,7 +44,7 @@ def add_productos():
             return redirect(url_for('main.index'))
 
         ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
-        return redirect(url_for('main.index'))
+        return redirect(url_for('productos.index'))
     
     return render_template('productos.html')
 
