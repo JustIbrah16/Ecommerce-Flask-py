@@ -7,7 +7,7 @@ from models.estado import Estado
 from models.usuarios import Usuarios
 from sqlalchemy.orm import aliased
 from sqlalchemy import case, label
-
+from sqlalchemy.exc import SQLAlchemyError
 
 
 ESTADO_INACTIVO = 1
@@ -24,6 +24,10 @@ class ProductQueries:
     @staticmethod
     def agregar_producto(nombre, precio, categoria_id, estado):
         try:
+            categoria = Categorias.query.get(categoria_id)
+            if not categoria or categoria.fk_estado != ESTADO_ACTIVO:
+                raise ValueError("La categoria no existe o no está activa.")
+            
             Historial.historial_categorias()
             nuevo_producto = Productos(fk_categoria=categoria_id, nombre=nombre, precio=precio, fk_estado=estado)
             db.session.add(nuevo_producto)
@@ -119,5 +123,14 @@ class ProductQueries:
         except Exception as e:
             print(f"Error al obtener el historial del producto [id_producto]: {e}")
             return []
+    
+    @staticmethod
+    def obtener_categorias_activas():
+        return Categorias.query.filter_by(fk_estado=ESTADO_ACTIVO).all()
+    
+    @staticmethod
+    def obtener_producto(id):
+        return Productos.query.filter_by(id=id).first()
+    
 
 

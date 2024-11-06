@@ -26,7 +26,7 @@
         <div class="row h-auto">
             <div class="col-4 productos d-flex flex-column">
                 <h2 class="mb-3 text-primary">Productos Disponibles</h2>
-                <ul class="list-group flex-grow-1">
+                <ul class="list-group flex-grow-1 overflow-auto" style="max-height: 400px;">
                     {% for producto in productos %}
                     <li class="list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm p-3" style="border: 1px solid #ddd;">
                         <div class="ms-2 me-auto">

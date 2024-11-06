@@ -84,3 +84,5 @@ def obtener_historial_categorias(categoria_id):
     } for cambio in cambios_categoria]
 
     return jsonify(response)
+
+

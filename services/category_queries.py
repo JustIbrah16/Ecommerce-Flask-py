@@ -116,6 +116,8 @@ class CategoryQueries:
         except Exception as e:
             print(f"Error al obtener el historial de la categoría [id_categoria]: {e}")
             return []
+        
+    
 
 
     
