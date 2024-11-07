@@ -10,10 +10,12 @@ class Pedidos(db.Model):
     fk_estado = db.Column(db.Integer, ForeignKey('estado.id'), nullable = False)
     total = db.Column(db.Numeric(12, 2), nullable = False)
     fecha = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable = False)
+    version = db.Column(db.Integer)
 
     estado = relationship('Estado')
 
-    def __init__(self, fk_estado, total, fecha):
+    def __init__(self, fk_estado, total, fecha, version):
         self.fk_estado = fk_estado
         self.total = total
         self.fecha = fecha
+        self.version = version

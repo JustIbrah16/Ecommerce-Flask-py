@@ -55,7 +55,7 @@ class OrderQueries:
             Historial.historial_categorias()
            
             total = sum(item['precio'] * item['cantidad'] for item in productos)
-            nuevo_pedido = Pedidos(fk_estado=ESTADO_ESPERA, total=total, fecha=datetime.datetime.utcnow())
+            nuevo_pedido = Pedidos(fk_estado=ESTADO_ESPERA, total=total, fecha=datetime.datetime.utcnow(), version=1)
 
             db.session.add(nuevo_pedido)
             db.session.commit()
@@ -87,8 +87,13 @@ class OrderQueries:
         try:
             Historial.historial_categorias()
             pedido = Pedidos.query.get(pedido_id)
-            if pedido:
+            version = Pedidos.query.filter(Pedidos.version == pedido_id).first()
+            version_nueva = pedido.version + 1
+            print(f'La version de la base de datos es {version.version if version else "No encontrada"}')
+            print(f'La version nueva es {version_nueva}')
+            if pedido and version and version.version != version_nueva:
                 pedido.fk_estado += ESTADO_INACTIVO
+                pedido.version_nueva = version_nueva
                 db.session.commit()
                 return pedido
             return None
