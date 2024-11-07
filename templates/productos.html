@@ -188,10 +188,10 @@
                         element.setAttribute('onclick', 'activarProducto(this)');
                     });
                 } else {
-                    // Verifica si la categoría está desactivada o eliminada
+      
                     Swal.fire({
                         title: "Error",
-                        text: data.message,  // Muestra el mensaje de error retornado desde el servidor
+                        text: data.message,  
                         icon: "error"
                     });
                 }
@@ -243,10 +243,10 @@ function activarProducto(element) {
                         element.setAttribute('onclick', 'eliminarProducto(this)');
                     });
                 } else {
-                    // Verifica si la categoría está desactivada o eliminada
+                    
                     Swal.fire({
                         title: "Error",
-                        text: data.message,  // Muestra el mensaje de error retornado desde el servidor
+                        text: data.message,
                         icon: "error"
                     });
                 }
@@ -263,5 +263,7 @@ function activarProducto(element) {
     });
 }
     </script>
+    <script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
+
 
 </div>
