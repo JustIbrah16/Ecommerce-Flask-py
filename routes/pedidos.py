@@ -113,4 +113,3 @@ def obtener_detalles_pedido(pedido_id):
     } for cambio in cambios_detalle]
 
     return jsonify(response)
-

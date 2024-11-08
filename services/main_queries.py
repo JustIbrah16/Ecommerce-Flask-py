@@ -19,4 +19,3 @@ class MainQueries:
     staticmethod
     def obtener_estados():
         return Estado.query.all()
-    

@@ -23,9 +23,18 @@ def update_permisos(id):
 
 @permisos.route('/tabla_permisos')
 def tabla_permisos():  
-    usuarios = User_queries.listar_usuarios()  
+    page = request.args.get('page', 1, type=int)
+    usuarios_paginados = User_queries.listar_usuarios(page=page, per_page=1)
     roles = Roles.query.all()
-    return render_template('tabla_permisos.html', usuarios=usuarios, roles = roles)
+    total_pages = usuarios_paginados.pages
+    visible_pages = list(range(max(1, page - 2), min(total_pages, page + 2) + 1))
+
+    return render_template('tabla_permisos.html', 
+                           usuarios=usuarios_paginados.items, 
+                           roles=roles, 
+                           page=usuarios_paginados.page, 
+                           total_pages=total_pages, 
+                           visible_pages=visible_pages)
 
 @permisos.route('/roles/<int:rol_id>/permisos/asignar/<int:permiso_id>', methods=['POST'])
 def asignar_permiso(rol_id, permiso_id):

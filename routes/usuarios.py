@@ -53,8 +53,8 @@ def logout():
     logout_user()
     return redirect(url_for('usuarios.login', show_modal = 'despedida'))
 
-@usuarios.route('/permisos')
-def permisos():
-    usuarios = Usuarios.query.all()  
-    acciones = ["Agregar", "Eliminar", "Activar", "Actualizar"]  
-    return render_template('tabla_permisos.html', usuarios=usuarios, acciones=acciones)
+# @usuarios.route('/permisos')
+# def permisos():
+#     usuarios = Usuarios.query.all()  
+#     acciones = ["Agregar", "Eliminar", "Activar", "Actualizar"]  
+#     return render_template('tabla_permisos.html', usuarios=usuarios, acciones=acciones)

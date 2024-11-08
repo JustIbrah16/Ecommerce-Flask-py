@@ -12,8 +12,8 @@ ESTADO_ACTIVO = 2
 class CategoryQueries:
     
     @staticmethod
-    def obtener_categorias():
-        return Categorias.query.all()
+    def obtener_categorias(page=1, per_page=6):
+        return Categorias.query.paginate(page=page, per_page=per_page, error_out=False)
     
     @staticmethod
     def buscar_categorias_por_id(categoria_id):

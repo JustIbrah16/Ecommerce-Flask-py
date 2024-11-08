@@ -1,4 +1,4 @@
-from flask import Flask, session, redirect, url_for 
+from flask import Flask, session, redirect, url_for, request
 from flask_bootstrap import Bootstrap5
 from routes.categorias import categorias
 from routes.productos import productos
@@ -13,8 +13,8 @@ from utils.permisos import tiene_permiso_filter
 from datetime import timedelta
 
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 bootstrap = Bootstrap5(app)
 login_manager = LoginManager(app)
 

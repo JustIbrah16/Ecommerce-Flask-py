@@ -40,14 +40,12 @@
                         <button class="btn btn-outline-info btn-sm rounded-pill" data-id="{{ categoria.id }}" data-nombre="{{ categoria.nombre }}" onclick="mostrarHistorial(this)">Detalles</button>
                         {% endif %}
 
-                        
                         {% if categoria.fk_estado == 2 %}
                             {% if current_user.is_authenticated and current_user|tiene_permiso('desactivar_categorias') %}
                             <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('categorias.delete', id=categoria.id) }}" onclick="eliminarCategoria(this)">Eliminar</button>
                             {% endif %}
                         {% else %}
-
-                            {% if current_user.is_authenticated and current_user|tiene_permiso('activar_categorias') %}                          
+                            {% if current_user.is_authenticated and current_user|tiene_permiso('activar_categorias') %}
                             <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('categorias.activar', id=categoria.id) }}" onclick="activarCategoria(this)">Activar</button>
                             {% endif %}
                         {% endif %}
@@ -55,7 +53,42 @@
                 </li>
             {% endfor %}
         </ul>
+        <nav aria-label="Page navigation example" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('categorias.index', page=1) }}" aria-label="First">
+                        <span aria-hidden="true">&laquo; First</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('categorias.index', page=page-1) }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% for p in visible_pages %}
+                <li class="page-item {% if page == p %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('categorias.index', page=p) }}">{{ p }}</a>
+                </li>
+                {% endfor %}
+        
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('categorias.index', page=page+1) }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('categorias.index', page=total_pages) }}" aria-label="Last">
+                        <span aria-hidden="true">Last &raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
+    
 
 
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
