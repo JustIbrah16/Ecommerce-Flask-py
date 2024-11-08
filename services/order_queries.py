@@ -87,13 +87,8 @@ class OrderQueries:
         try:
             Historial.historial_categorias()
             pedido = Pedidos.query.get(pedido_id)
-            version = Pedidos.query.filter(Pedidos.version == pedido_id).first()
-            version_nueva = pedido.version + 1
-            print(f'La version de la base de datos es {version.version if version else "No encontrada"}')
-            print(f'La version nueva es {version_nueva}')
-            if pedido and version and version.version != version_nueva:
+            if pedido:
                 pedido.fk_estado += ESTADO_INACTIVO
-                pedido.version_nueva = version_nueva
                 db.session.commit()
                 return pedido
             return None

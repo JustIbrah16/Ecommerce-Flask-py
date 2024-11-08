@@ -86,6 +86,7 @@
                                     <th scope="col" class="text-center small">Pedido</th>
                                     <th scope="col" class="text-center small">Fecha</th>
                                     <th scope="col" class="text-center small">Total</th>
+                                    <th>Version</th>
                                     <th scope="col" class="text-center small">Estado</th>
                                     <th scope="col" class="text-center small">Actualizar pedido</th>
                                     <th scope="col" class="text-center small">Detalles</th>
@@ -97,6 +98,7 @@
                                     <td class="text-center small">{{ pedido.id }}</td>
                                     <td class="text-center small">{{ pedido.fecha.strftime('%Y-%m-%d') }}</td>
                                     <td class="text-center small">${{ pedido.total }}</td>
+                                    <td class="text-center small" id="version" name="version">{{ pedido.version }}</td>
                                     <td class="text-center">
                                         <span id="estado-{{ pedido.id }}" class="badge rounded-pill text-bg-{{ 'success' if pedido.estado.nombre == 'Entregado' else 'secondary' }} small">{{ pedido.estado.nombre }}</span>
 
