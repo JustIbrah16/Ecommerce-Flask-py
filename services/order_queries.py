@@ -55,7 +55,7 @@ class OrderQueries:
             Historial.historial_categorias()
            
             total = sum(item['precio'] * item['cantidad'] for item in productos)
-            nuevo_pedido = Pedidos(fk_estado=ESTADO_ESPERA, total=total, fecha=datetime.datetime.utcnow())
+            nuevo_pedido = Pedidos(fk_estado=ESTADO_ESPERA, total=total, fecha=datetime.datetime.utcnow(), version=1)
 
             db.session.add(nuevo_pedido)
             db.session.commit()

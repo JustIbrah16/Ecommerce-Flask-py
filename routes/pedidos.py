@@ -88,6 +88,7 @@ def finalizar_compra():
 @requiere_permiso_ajax('actualizar_pedido')
 def actualizar_estado(pedido_id):
     pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id)
+    nuevo_estado = request.form['version']
 
     if not pedido_actualizado:
         return jsonify({'success': 'Pedido no encontrado'}), 404
