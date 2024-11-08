@@ -15,8 +15,8 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 bootstrap = Bootstrap(app)
 login_manager = LoginManager(app)
 

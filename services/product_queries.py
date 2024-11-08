@@ -14,8 +14,8 @@ ESTADO_INACTIVO = 1
 ESTADO_ACTIVO = 2
 class ProductQueries:
     @staticmethod
-    def obtener_productos():
-        return Productos.query.all()
+    def obtener_productos(page = 1, per_page=8):
+        return Productos.query.paginate(page=page, per_page=per_page, error_out=False)
 
     @staticmethod
     def buscar_prod_por_id(id_prod):

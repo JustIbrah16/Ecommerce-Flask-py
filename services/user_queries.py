@@ -22,15 +22,14 @@ class User_queries:
         return False
     
     @staticmethod
-    def listar_usuarios():
+    def listar_usuarios(page=1, per_page=1):
         result = (
             db.session.query(
-            Usuarios.nombres,
-            Usuarios.apellidos,
-            Usuarios.username,
-            Usuarios.telefono,
-            Roles.nombre
+                Usuarios.nombres,
+                Usuarios.apellidos,
+                Usuarios.username,
+                Usuarios.telefono,
+                Roles.nombre
             )
-        ).join(Usuarios, Usuarios.fk_rol == Roles.id).all()
-
+        ).join(Usuarios, Usuarios.fk_rol == Roles.id).paginate(page=page, per_page=per_page, error_out=False)
         return result

@@ -113,6 +113,40 @@
             </div>
         </div>
     </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page > 1 %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('productos.index', page=1) }}" aria-label="First">
+                    <span aria-hidden="true">&laquo; First</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('productos.index', page=page-1) }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+            {% for p in visible_pages %}
+            <li class="page-item {% if page == p %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('productos.index', page=p) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+    
+            {% if page < total_pages %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('productos.index', page=page+1) }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('productos.index', page=total_pages) }}" aria-label="Last">
+                    <span aria-hidden="true">Last &raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
     
     <script>
         

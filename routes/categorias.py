@@ -9,8 +9,18 @@ categorias = Blueprint('categorias', __name__)
 @login_required
 @requiere_permiso('mostrar_categorias')
 def index():
-    categorias = CategoryQueries.obtener_categorias()
-    return render_template('categorias.html', categorias = categorias)
+    page = request.args.get('page', 1, type=int)
+    categorias_paginadas = CategoryQueries.obtener_categorias(page=page, per_page=6)
+    total_pages = categorias_paginadas.pages
+    visible_pages = list(range(max(1, page - 2), min(total_pages, page + 2) + 1))
+
+    return render_template(
+        'categorias.html', 
+        categorias=categorias_paginadas.items,
+        page=categorias_paginadas.page,
+        total_pages=total_pages,
+        visible_pages=visible_pages
+    )
 
 
 @categorias.route("/add", methods=['POST'])

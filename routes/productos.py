@@ -27,9 +27,20 @@ def buscar_prod_id():
 @login_required
 @requiere_permiso('mostrar_productos')
 def index():
-    productos = ProductQueries.obtener_productos()
+    page = request.args.get('page', 1, type=int)
+    productos_paginados = ProductQueries.obtener_productos(page=page, per_page=8)
     categorias = ProductQueries.obtener_categorias_activas()
-    return render_template('productos.html', productos=productos, categorias=categorias)
+    total_pages = productos_paginados.pages
+    visible_pages = list(range(max(1, page - 2), min(total_pages, page + 2) + 1))
+
+    return render_template(
+        'productos.html', 
+        productos=productos_paginados.items, 
+        categorias=categorias, 
+        page=productos_paginados.page, 
+        total_pages=total_pages,
+        visible_pages=visible_pages
+    )
 
 @productos.route("/add_productos", methods=['POST', 'GET'])
 @login_required
