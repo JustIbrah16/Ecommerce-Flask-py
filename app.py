@@ -1,5 +1,5 @@
 from flask import Flask, session, redirect, url_for 
-from flask_bootstrap import Bootstrap5
+from flask_bootstrap import Bootstrap
 from routes.categorias import categorias
 from routes.productos import productos
 from routes.pedidos import pedidos
@@ -11,17 +11,19 @@ from flask_login import LoginManager
 from routes.permisos import permisos
 from utils.permisos import tiene_permiso_filter
 from datetime import timedelta
+import pymysql
+pymysql.install_as_MySQLdb()
 
 
 app = Flask(__name__)
 
-bootstrap = Bootstrap5(app)
+bootstrap = Bootstrap(app)
 login_manager = LoginManager(app)
 
 login_manager.login_view = 'login'
 
 app.secret_key = 'secret key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3306/flask_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost:3306/flask_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
