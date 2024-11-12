@@ -97,9 +97,10 @@
 
 <script>
     function confirmarRevocar(event, button) {
-        event.preventDefault(); 
+        event.preventDefault();
         const form = button.closest('form');
-        
+        const url = form.action;
+
         Swal.fire({
             title: "¿Estás seguro?",
             text: "¡Se revocará este permiso del rol!",
@@ -110,21 +111,28 @@
             confirmButtonText: "Sí, revocar"
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    title: "¡Revocado!",
-                    text: "El permiso ha sido revocado.",
-                    icon: "success"
-                }).then(() => {
-                    form.submit(); 
+                fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        Swal.fire("¡Revocado!", data.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", data.message, "error");
+                    }
                 });
             }
         });
     }
 
     function confirmarAsignar(event, button) {
-        event.preventDefault(); 
+        event.preventDefault();
         const form = button.closest('form');
-        
+        const url = form.action;
+
         Swal.fire({
             title: "¿Estás seguro?",
             text: "¡Este permiso será asignado al rol!",
@@ -135,12 +143,18 @@
             confirmButtonText: "Sí, asignar"
         }).then((result) => {
             if (result.isConfirmed) {
-                Swal.fire({
-                    title: "¡Asignado!",
-                    text: "El permiso ha sido asignado al rol.",
-                    icon: "success"
-                }).then(() => {
-                    form.submit(); 
+                fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        Swal.fire("¡Asignado!", data.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", data.message, "error");
+                    }
                 });
             }
         });
