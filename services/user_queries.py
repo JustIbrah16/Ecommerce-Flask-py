@@ -30,7 +30,7 @@ class User_queries:
         return False
     
     @staticmethod
-    def listar_usuarios(page=1, per_page=10):
+    def listar_usuarios(page=1, per_page=8):
         result = (
             db.session.query(
                 Usuarios.nombres,

@@ -28,7 +28,7 @@ def index():
 
 @categorias.route("/add", methods=['POST'])
 @login_required
-@requiere_permiso_ajax('agregar_categorias')
+@requiere_permiso('agregar_categorias')
 def add():
     if request.method == 'POST':
         nombre = request.form['nombre']
