@@ -7,11 +7,19 @@ from utils.hash import hash_generator, check_password
 class User_queries:
     
     @staticmethod
-    def registrar_usuarios(nombres, apellidos, user, telefono, password, fk_rol):
-        hashed_password = hash_generator(password)
-        nuevo_usuario = Usuarios(nombres=nombres, apellidos=apellidos, username=user, telefono=telefono, password=hashed_password, fk_rol=fk_rol)
+    def registrar_usuarios(nombres, apellidos, username, telefono, password, fk_rol):
+        hashed_password = hash_generator(password) 
+        nuevo_usuario = Usuarios(
+            nombres=nombres,
+            apellidos=apellidos,
+            username=username,
+            telefono=telefono,
+            password=hashed_password,
+            fk_rol=fk_rol
+        )
         db.session.add(nuevo_usuario)
         db.session.commit()
+
 
     @staticmethod
     def login(username, password):
@@ -22,7 +30,7 @@ class User_queries:
         return False
     
     @staticmethod
-    def listar_usuarios(page=1, per_page=1):
+    def listar_usuarios(page=1, per_page=10):
         result = (
             db.session.query(
                 Usuarios.nombres,

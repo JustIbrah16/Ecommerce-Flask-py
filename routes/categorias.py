@@ -3,6 +3,9 @@ from services.category_queries import CategoryQueries
 from flask_login import login_required
 from utils.permisos import requiere_permiso, requiere_permiso_ajax
 
+ESTADO_INACTIVO = 1
+ESTADO_ACTIVO = 2
+
 categorias = Blueprint('categorias', __name__)
 
 @categorias.route("/add")
@@ -66,6 +69,10 @@ def update(id):
 @login_required
 @requiere_permiso('desactivar_categorias')
 def delete(id):
+    categoria = CategoryQueries.buscar_categorias_por_id(id)
+    if categoria and categoria.fk_estado == ESTADO_INACTIVO:
+        return jsonify({'error': 'La categoría ya está eliminada.'}), 400
+    
     CategoryQueries.eliminar_categoria(id)
     return jsonify({'success': True})
 
@@ -73,6 +80,10 @@ def delete(id):
 @login_required
 @requiere_permiso('activar_categorias')
 def activar(id):
+    categoria = CategoryQueries.buscar_categorias_por_id(id)
+    if categoria and categoria.fk_estado == ESTADO_ACTIVO:
+        return jsonify({'error': 'La categoría ya está activa.'}), 400
+    
     CategoryQueries.activar_categoria(id)
     return jsonify({'success': True})
 
@@ -94,5 +105,6 @@ def obtener_historial_categorias(categoria_id):
     } for cambio in cambios_categoria]
 
     return jsonify(response)
+
 
 
