@@ -80,25 +80,48 @@ class OrderQueries:
             print("Error al guardar el pedido:", e)
             return None
 
-
-
     @staticmethod
-    def actualizar_estado_pedido(pedido_id):
+    def get_pedido_by_id(pedido_id):
         try:
-            Historial.historial_categorias()
-            pedido = Pedidos.query.get(pedido_id)
-            version = Pedidos.query.filter(Pedidos.version == pedido_id).first()
-            version_nueva = pedido.version + 1
-            print(f'La version de la base de datos es {version.version if version else "No encontrada"}')
-            print(f'La version nueva es {version_nueva}')
-            if pedido and version and version.version != version_nueva:
-                pedido.fk_estado += ESTADO_INACTIVO
-                pedido.version_nueva = version_nueva
-                db.session.commit()
-                return pedido
-            return None
+            estado= Pedidos.query.filter(Pedidos.fk_estado == pedido_id).first()
+            return estado
         except Exception as e:
             print(f'Ocurrio un error {e}')
+
+    @staticmethod
+    def actualizar_estado_pedido(pedido_id, version_enviado):
+        try:
+            # Obtener el pedido por su ID
+            pedido = Pedidos.query.get(pedido_id)
+
+            if not pedido:
+                print(f"Pedido con ID {pedido_id} no encontrado.")
+                return None
+            
+            # Verificar la versión enviada por el cliente con la versión en la base de datos
+            print(f'Version de la base de datos: {pedido.version}')
+            print(f'Version enviada por el cliente: {version_enviado}')
+
+            # Si la versión en la base de datos no coincide con la versión enviada, ha habido un conflicto de concurrencia
+            if pedido.version != version_enviado:
+                print(f"Error de concurrencia: El pedido ha sido actualizado por otro usuario.")
+                return None
+
+            # Si las versiones coinciden, actualizamos el estado y la versión
+            pedido.fk_estado += ESTADO_INACTIVO  # O lo que necesites para cambiar el estado
+            pedido.version += 1  # Incrementar la versión en la base de datos
+
+            # Realizamos el commit para guardar los cambios
+            db.session.commit()
+            
+            # Devolver el pedido actualizado
+            return pedido
+        except Exception as e:
+            print(f'Ocurrió un error: {e}')
+            db.session.rollback()  # Rollback en caso de error
+            return None
+
+
 
     @staticmethod
     def detalle_cambios(pedido_id):

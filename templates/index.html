@@ -102,17 +102,19 @@
                                     <td class="text-center small">{{ pedido.id }}</td>
                                     <td class="text-center small">{{ pedido.fecha.strftime('%Y-%m-%d') }}</td>
                                     <td class="text-center small">${{ pedido.total }}</td>
-                                    <td class="text-center small" id="version" name="version">{{ pedido.version }}</td>
+                                    <!-- Asignamos un id único para la versión -->
+                                    <td class="text-center small" id="version-{{ pedido.id }}" name="version">{{ pedido.version }}</td>
                                     <td class="text-center">
                                         <span id="estado-{{ pedido.id }}" class="badge rounded-pill text-bg-{{ 'success' if pedido.estado.nombre == 'Entregado' else 'secondary' }} small">{{ pedido.estado.nombre }}</span>
-
                                     </td>
                                     <td class="text-center">
                                         {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_pedido') %}
                                         <form id="form-{{ pedido.id }}" action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}" method="POST">
-                                            
-                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2" onclick="updateState({{ pedido.id }})">Actualizar</button>
-                                            
+                                            <input type="hidden" name="version" value="{{ pedido.version }}"> 
+                                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2 botonActualizar" 
+                                                    id="update-btn-{{ pedido.id }}" data-pedido-id="{{ pedido.id }}"
+                                                    {% if pedido.estado.id == 6 %} disabled {% endif %}
+                                                    >Actualizar</button>
                                         </form>
                                         {% endif %}
                                     </td>
@@ -126,6 +128,9 @@
                                 </tr>
                                 {% endfor %}
                             </tbody>
+                            
+                            
+                            
                         </table>
                         
         
@@ -134,15 +139,33 @@
             function updateState(pedidoId) {
     const url = `/pedido/${pedidoId}/actualizar`;
 
+    // Obtener el valor de la versión desde el DOM (en el campo correspondiente al pedido)
+    const versionElemento = document.querySelector(`#version-${pedidoId}`);
+    const version = parseInt(versionElemento.textContent.trim(), 10);  // Obtener la versión actualizada
+
+    // Datos a enviar al servidor: incluimos la versión enviada por el cliente
+    const data = {
+        version: version  // La versión del pedido que se envía al backend
+    };
+
+    // Realizar la solicitud POST con la versión incluida
     fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(data)  // Enviar los datos como JSON
     })
     .then(response => {
         if (response.ok) {
             return response.json();
+        } else if (response.status === 409) {  // Si ocurre un conflicto (concurrencia optimista)
+            Swal.fire({
+                title: 'Conflicto de actualización!',
+                text: 'El pedido ha sido actualizado por otro usuario. Por favor, recarga la página.',
+                icon: 'error'
+            });
+            throw new Error('Este pedido fue actualizado desde otra parte de la aplicacion, por favor actualice la pagina e intentelo de nuevo');
         } else if (response.status === 403) {
             Swal.fire({
                 title: 'Permiso Denegado!',
@@ -155,18 +178,19 @@
         }
     })
     .then(data => {
+        // Si la respuesta es exitosa, mostrar el mensaje y actualizar la interfaz
         Swal.fire({
             title: 'Éxito!',
             text: data.success,
             icon: 'success'
         });
 
-        
+        // Actualizar el estado visualmente
         const estadoElemento = document.querySelector(`#estado-${pedidoId}`);
         if (estadoElemento) {
             estadoElemento.textContent = data.nuevo_estado;
 
-            
+            // Cambiar el color del badge basado en el nuevo estado
             let colorClase;
             switch (data.nuevo_estado) {
                 case 'Espera':
@@ -186,6 +210,21 @@
             }
             estadoElemento.className = `badge rounded-pill text-bg-${colorClase} small`;
         }
+
+        // Actualizar la versión en el frontend (en la tabla)
+        const versionElemento = document.querySelector(`#version-${pedidoId}`);
+        if (versionElemento) {
+            versionElemento.textContent = data.version;  // Actualizamos la versión mostrada
+        }
+
+        // Actualizar el botón de "Actualizar" para que pase la nueva versión
+        const updateBtn = document.querySelector(`#update-btn-${pedidoId}`);
+        if (updateBtn) {
+            updateBtn.setAttribute('onclick', `updateState(${pedidoId})`);  // Actualizamos el onclick con la versión correcta
+        }
+
+        
+
     })
     .catch(error => {
         console.error('Error:', error);
@@ -196,6 +235,17 @@
         });
     });
 }
+
+// Asociar el evento de clic a los botones de actualización
+document.querySelectorAll('.btn-outline-primary').forEach(button => {
+    button.addEventListener('click', function() {
+        const pedidoId = this.getAttribute('data-pedido-id');
+        updateState(pedidoId);
+    });
+});
+
+
+
 
 
 
@@ -368,9 +418,8 @@
                     </tfoot>
                 </table>
             </div>
-            <div class="modal-footer justify-content-between">
+            <div class="modal-footer justify-content-end">
                 <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" id="btnFinalizarCompra">Agregar pedido</button>
-                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>

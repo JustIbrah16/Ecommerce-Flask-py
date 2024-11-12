@@ -87,16 +87,24 @@ def finalizar_compra():
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
 @requiere_permiso_ajax('actualizar_pedido')
 def actualizar_estado(pedido_id):
-    pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id)
-    nuevo_estado = request.form['version']
+    # Obtener los datos JSON enviados en la solicitud
+    data = request.get_json()
+    version_enviado = data.get('version')
+
+    # Llamar a la función de actualización de estado con la versión enviada por el cliente
+    pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id, version_enviado)
 
     if not pedido_actualizado:
-        return jsonify({'success': 'Pedido no encontrado'}), 404
+        # Responder con un código 409 si hubo un conflicto de concurrencia
+        return jsonify({'success': 'El pedido ha sido actualizado por otro usuario. Intenta nuevamente.'}), 409  # 409 Conflict
 
+    # Si todo está bien, devolver la respuesta con el nuevo estado y versión
     return jsonify({
         'success': 'Estado actualizado correctamente!',
-        'nuevo_estado': pedido_actualizado.estado.nombre 
+        'nuevo_estado': pedido_actualizado.estado.nombre,
+        'version': pedido_actualizado.version  # Devolver la nueva versión
     })
+
 
 
 
