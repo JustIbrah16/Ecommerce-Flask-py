@@ -24,7 +24,7 @@ def update_permisos(id):
 @permisos.route('/tabla_permisos')
 def tabla_permisos():  
     page = request.args.get('page', 1, type=int)
-    usuarios_paginados = User_queries.listar_usuarios(page=page, per_page=1)
+    usuarios_paginados = User_queries.listar_usuarios(page=page, per_page=8)
     roles = Roles.query.all()
     total_pages = usuarios_paginados.pages
     visible_pages = list(range(max(1, page - 2), min(total_pages, page + 2) + 1))
