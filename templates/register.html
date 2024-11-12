@@ -25,50 +25,66 @@
 
                     <div class="form-outline mb-3">
                         <label class="form-label text-muted small" for="nombre">Nombres</label>
-                        <input type="text" id="nombre" name="nombre" class="form-control form-control-sm rounded-pill"
-                            placeholder="Nombres" required />
+                        <input type="text" id="nombre" name="nombre" class="form-control form-control-sm rounded-pill" placeholder="Nombres" required />
+                        <div id="nombre-info" class="text-muted small" style="display: none;">
+                            Solo letras (sin caracteres especiales ni números).
+                        </div>
+                        <div id="nombre-error" class="text-danger small" style="display: none;">
+                            El nombre solo debe contener letras.
+                        </div>
                     </div>
                     
                     <div class="form-outline mb-3">
                         <label class="form-label text-muted small" for="apellido">Apellidos</label>
-                        <input type="text" id="apellido" name="apellido" class="form-control form-control-sm rounded-pill"
-                            placeholder="Apellidos" required />
+                        <input type="text" id="apellido" name="apellido" class="form-control form-control-sm rounded-pill" placeholder="Apellidos" required />
+                        <div id="apellido-info" class="text-muted small" style="display: none;">
+                            Solo letras (sin caracteres especiales ni números).
+                        </div>
+                        <div id="apellido-error" class="text-danger small" style="display: none;">
+                            El apellido solo debe contener letras.
+                        </div>
                     </div>
                     
                     <div class="form-outline mb-3">
                         <label class="form-label text-muted small" for="username">Usuario</label>
-                        <input type="text" id="username" name="username" class="form-control form-control-sm rounded-pill"
-                            placeholder="Cree su nombre de usuario" required />
-                        
+                        <input type="text" id="username" name="username" class="form-control form-control-sm rounded-pill" placeholder="Cree su nombre de usuario" required />
+                        <div id="username-info" class="text-muted small" style="display: none;">
+                            Puede contener letras y números, sin caracteres especiales.
+                        </div>
+                        <div id="username-error" class="text-danger small" style="display: none;">
+                            El nombre de usuario debe contener primero letras y puede incluir números, sin caracteres especiales.
+                        </div>
                     </div>
 
                     <div class="form-outline mb-3">
                         <label class="form-label text-muted small" for="telefono">Teléfono</label>
-                        <input type="text" id="telefono" name="telefono" class="form-control form-control-sm rounded-pill"
-                            placeholder="Número de teléfono" required />
-                        
+                        <input type="text" id="telefono" name="telefono" class="form-control form-control-sm rounded-pill" placeholder="Número de teléfono" required />
+                        <div id="telefono-info" class="text-muted small" style="display: none;">
+                            Solo números y un '+' al inicio si es necesario.
+                        </div>
+                        <div id="telefono-error" class="text-danger small" style="display: none;">
+                            El número de teléfono solo debe contener dígitos, y puede iniciar con '+'.
+                        </div>
                     </div>
 
                     <div class="form-outline mb-3">
                         <label class="form-label text-muted small" for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" class="form-control form-control-sm rounded-pill"
-                            placeholder="Cree su contraseña" required />
-                            <div id="password-info" class="password-info" style="display: none;">
-                                <ul>
-                                    <li>La contraseña debe contener al menos 8 caracteres, entre ellos una letra mayúscula, una letra minúscula, un número y al menos un carácter especial (ejemplo: `!@#$%^&*`).</li>
-                                </ul>
-                            </div>
-                        
+                        <input type="password" id="password" name="password" class="form-control form-control-sm rounded-pill" placeholder="Cree su contraseña" required />
+                        <div id="password-info" class="password-info" style="display: none;">
+                            <ul>
+                                <li>La contraseña debe contener al menos 8 caracteres.</li>
+                                <li>Debe incluir al menos una letra mayúscula, una letra minúscula, un número y un carácter especial (ejemplo: !@#$%^&*).</li>
+                            </ul>
+                        </div>
                     </div>
-
+                    
                     <div class="form-outline mb-3">
                         <label class="form-label text-muted small" for="confirm_password">Confirmar Contraseña</label>
-                        <input type="password" id="confirm_password" name="confirm_password" 
-                               class="form-control form-control-sm rounded-pill" placeholder="Confirme su contraseña" required />
-                        
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control form-control-sm rounded-pill" placeholder="Confirme su contraseña" required />
                     </div>
+                    
                     <div id="password-error" class="text-danger small mb-3 text-center" style="display: none;">
-                        Las contraseñas no coinciden.
+                        Las contraseñas no coinciden o no cumplen con los requisitos.
                     </div>
 
                     {% if error %}
@@ -90,7 +106,6 @@
 </section>
 
 <style>
-    /* Estilo para el mensaje informativo */
     .password-info {
         margin-top: 10px;
         padding: 10px;
@@ -109,48 +124,111 @@
     .password-info li {
         margin-bottom: 5px;
     }
-</style>
 
-<script>
-    // Mostrar los requisitos cuando el usuario hace clic en el campo de la contraseña
-    document.getElementById('password').addEventListener('focus', function() {
-        document.getElementById('password-info').style.display = 'block';
-    });
-
-    // Ocultar los requisitos cuando el usuario sale del campo de la contraseña
-    document.getElementById('password').addEventListener('blur', function() {
-        document.getElementById('password-info').style.display = 'none';
-    });
-</script>
-
-<script>
-function validatePasswords() {
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirm_password").value;
-    const errorElement = document.getElementById("password-error");
-
-    if (password !== confirmPassword) {
-        errorElement.style.display = "block";
-        return false;
-    } else {
-        errorElement.style.display = "none";
-        return true;
-    }
-}
-</script>
-
-<style>
     .form-outline .form-label {
         font-size: 0.85rem;
     }
+
     .btn {
         font-size: 0.9rem;
     }
-    .card, .form {
-        border-radius: 15px;
-        background: #f9f9f9;
-    }
+
     .alert {
         margin-bottom: 10px;
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const patterns = {
+            nombre: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+            apellido: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/,
+            username: /^(?=.*[A-Za-z])[A-Za-z0-9]+$/,
+            telefono: /^\+?[0-9]+$/
+        };
+
+        function setupValidation(inputId, infoId, errorId, pattern) {
+            const inputElement = document.getElementById(inputId);
+            const infoElement = document.getElementById(infoId);
+            const errorElement = document.getElementById(errorId);
+
+            inputElement.addEventListener("focus", function() {
+                infoElement.style.display = "block";
+            });
+
+            inputElement.addEventListener("input", function() {
+                const value = inputElement.value;
+                if (pattern.test(value)) {
+                    errorElement.style.display = "none";
+                    inputElement.classList.remove("is-invalid");
+                    inputElement.classList.add("is-valid");
+                } else {
+                    errorElement.style.display = "block";
+                    inputElement.classList.remove("is-valid");
+                    inputElement.classList.add("is-invalid");
+                }
+            });
+
+            inputElement.addEventListener("blur", function() {
+                infoElement.style.display = "none";
+            });
+        }
+
+        setupValidation("nombre", "nombre-info", "nombre-error", patterns.nombre);
+        setupValidation("apellido", "apellido-info", "apellido-error", patterns.apellido);
+        setupValidation("username", "username-info", "username-error", patterns.username);
+        setupValidation("telefono", "telefono-info", "telefono-error", patterns.telefono);    
+});
+document.addEventListener("DOMContentLoaded", function() {
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm_password');
+        const passwordError = document.getElementById('password-error');
+        const passwordInfo = document.getElementById('password-info');
+
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
+        passwordField.addEventListener('focus', function() {
+            passwordInfo.style.display = 'block';
+        });
+
+        passwordField.addEventListener('blur', function() {
+            passwordInfo.style.display = 'none';
+        });
+
+        passwordField.addEventListener('input', function() {
+            if (passwordRegex.test(passwordField.value)) {
+                passwordField.classList.remove('is-invalid');
+                passwordField.classList.add('is-valid');
+                passwordError.style.display = 'none';
+            } else {
+                passwordField.classList.remove('is-valid');
+                passwordField.classList.add('is-invalid');
+                passwordError.style.display = 'block';
+            }
+            validatePasswords();
+        });
+
+
+        confirmPasswordField.addEventListener('input', validatePasswords);
+
+        function validatePasswords() {
+            if (passwordField.value === confirmPasswordField.value && passwordRegex.test(passwordField.value)) {
+                confirmPasswordField.classList.remove('is-invalid');
+                confirmPasswordField.classList.add('is-valid');
+                passwordError.style.display = 'none';
+            } else {
+                confirmPasswordField.classList.remove('is-valid');
+                confirmPasswordField.classList.add('is-invalid');
+                passwordError.style.display = 'block';
+            }
+        }
+
+
+        document.querySelector("form").addEventListener("submit", function(event) {
+            if (!passwordRegex.test(passwordField.value) || passwordField.value !== confirmPasswordField.value) {
+                passwordError.style.display = 'block';
+                event.preventDefault();
+            }
+        });
+    });
+</script>

@@ -399,7 +399,7 @@
                 productos_carrito.push({ id: rs.id, nombre: rs.nombre, precio, cantidad: 1 });
                 const button = document.querySelector(`button[onclick="search('${id}')"]`);
                 if (button) {
-                    button.innerText = "Agregado al pedido";
+                    button.innerText = "Producto Agregado";
                     button.disabled = true;
                 }
             }
