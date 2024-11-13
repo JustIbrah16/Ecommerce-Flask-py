@@ -1,6 +1,6 @@
 from models.usuarios import Usuarios
 from models.roles import Roles
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import login_user
 from utils.db import db
 from utils.hash import hash_generator, check_password
 

@@ -1,9 +1,8 @@
 from services.user_queries import User_queries
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from flask_login import login_user, logout_user, current_user
-from models.usuarios import Usuarios
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import  logout_user
 import re
-from utils.hash import hash_generator
+
 
 usuarios = Blueprint('usuarios', __name__)
 

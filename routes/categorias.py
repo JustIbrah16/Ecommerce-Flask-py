@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash,jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from services.category_queries import CategoryQueries
 from flask_login import login_required
-from utils.permisos import requiere_permiso, requiere_permiso_ajax
+from utils.permisos import requiere_permiso
 
 ESTADO_INACTIVO = 1
 ESTADO_ACTIVO = 2

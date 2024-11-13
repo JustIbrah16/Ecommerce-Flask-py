@@ -17,6 +17,9 @@
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
 
   </head>
 
@@ -483,6 +486,7 @@ function renderCarrito() {
     
     productos_carrito.forEach((producto, index) => {
         const subtotal = (producto.cantidad * producto.precio).toFixed(2);
+        
         tbody.innerHTML += `
             <tr id="row_product_${producto.id}">
                 <td>${producto.id}
@@ -491,8 +495,11 @@ function renderCarrito() {
                 <td>${producto.nombre}</td>
                 <td>${producto.precio.toFixed(2)}</td>
                 <td>
-                    <input type="number" value="${producto.cantidad}" min="1" 
-                           oninput="updateCantidad(${producto.id}, this.value)">
+                    <select id="cantidad-select-${producto.id}" onchange="updateCantidad(${producto.id}, this.value)">
+                        ${Array.from({ length: 30 }, (_, i) => 
+                            `<option value="${i + 1}" ${i + 1 === producto.cantidad ? 'selected' : ''}>${i + 1}</option>`
+                        ).join('')}
+                    </select>
                 </td>
                 <td>
                     <span id="subtotal_${producto.id}">${subtotal}</span>
@@ -502,6 +509,14 @@ function renderCarrito() {
                 </td>
             </tr>
         `;
+    });
+
+    productos_carrito.forEach((producto) => {
+        new Choices(`#cantidad-select-${producto.id}`, {
+            searchEnabled: false,
+            shouldSort: false,
+            allowHTML: true
+        });
     });
 }
 
