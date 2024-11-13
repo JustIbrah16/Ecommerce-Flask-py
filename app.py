@@ -26,7 +26,7 @@ app.secret_key = 'secret key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost:3306/flask_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 db.init_app(app)
 

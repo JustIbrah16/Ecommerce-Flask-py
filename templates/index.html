@@ -111,10 +111,14 @@
                                         {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_pedido') %}
                                         <form id="form-{{ pedido.id }}" action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}" method="POST">
                                             <input type="hidden" name="version" value="{{ pedido.version }}"> 
+                                            <!-- Botón de actualización -->
                                             <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2 botonActualizar" 
-                                                    id="update-btn-{{ pedido.id }}" data-pedido-id="{{ pedido.id }}"
-                                                    {% if pedido.estado.id == 6 %} disabled {% endif %}
-                                                    >Actualizar</button>
+                                            id="update-btn-{{ pedido.id }}" 
+                                            data-pedido-id="{{ pedido.id }}"
+                                            {% if pedido.estado.id == 6 %} disabled {% endif %}>
+                                            Actualizar
+                                            </button>
+
                                         </form>
                                         {% endif %}
                                     </td>
@@ -165,7 +169,7 @@
                 text: 'El pedido ha sido actualizado por otro usuario. Por favor, recarga la página.',
                 icon: 'error'
             });
-            throw new Error('Este pedido fue actualizado desde otra parte de la aplicacion, por favor actualice la pagina e intentelo de nuevo');
+            throw new Error('Este pedido fue actualizado desde otra parte de la aplicación, por favor actualice la página e inténtelo de nuevo');
         } else if (response.status === 403) {
             Swal.fire({
                 title: 'Permiso Denegado!',
@@ -178,6 +182,9 @@
         }
     })
     .then(data => {
+        // Aseguramos que estamos recibiendo la respuesta correctamente
+        console.log('Respuesta del servidor:', data); // Ver qué datos recibimos
+
         // Si la respuesta es exitosa, mostrar el mensaje y actualizar la interfaz
         Swal.fire({
             title: 'Éxito!',
@@ -217,13 +224,21 @@
             versionElemento.textContent = data.version;  // Actualizamos la versión mostrada
         }
 
-        // Actualizar el botón de "Actualizar" para que pase la nueva versión
+        // ** Aquí actualizamos el estado del botón "Actualizar" directamente **
         const updateBtn = document.querySelector(`#update-btn-${pedidoId}`);
         if (updateBtn) {
-            updateBtn.setAttribute('onclick', `updateState(${pedidoId})`);  // Actualizamos el onclick con la versión correcta
+            console.log('Botón encontrado:', updateBtn); // Verificamos si el botón fue encontrado
+            // Verificamos la versión y cambiamos la habilitación del botón en tiempo real
+            if (data.version === 4) {  // Deshabilitar el botón si la versión es 4
+                console.log('Versión es 4, deshabilitando el botón');
+                updateBtn.disabled = true;
+            } else {
+                console.log('Versión NO es 4, habilitando el botón');
+                updateBtn.disabled = false;  // Habilitar el botón si la versión NO es 4
+            }
+        } else {
+            console.log('Botón NO encontrado');
         }
-
-        
 
     })
     .catch(error => {
@@ -243,13 +258,6 @@ document.querySelectorAll('.btn-outline-primary').forEach(button => {
         updateState(pedidoId);
     });
 });
-
-
-
-
-
-
-
           </script>
 
           <script>
@@ -426,104 +434,108 @@ document.querySelectorAll('.btn-outline-primary').forEach(button => {
 </div>
 
 <script>
-    let productos_carrito = []; 
-    
-    
-    async function search(id) {
-        try {
-            const peticion = await fetch(window.location.origin + '/buscar_prod_id', {
-                method: "POST",
-                body: JSON.stringify({ id_prod: id }),
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-            });
-            
-            const rs = await peticion.json();
-            const precio = parseFloat(rs.precio);
-            
-            const existingProduct = productos_carrito.find(prod => prod.id === rs.id);
-            
-            if (existingProduct) {
-                existingProduct.cantidad += 1;
-            } else {
-                productos_carrito.push({ id: rs.id, nombre: rs.nombre, precio, cantidad: 1 });
-                const button = document.querySelector(`button[onclick="search('${id}')"]`);
-                if (button) {
-                    button.innerText = "Producto Agregado";
-                    button.disabled = true;
-                }
-            }
-            
-            renderCarrito();
-            actualizarTotal();
-        } catch (error) {
-            console.error("Error al buscar el producto:", error);
-        }
-    }
-    
-    
-    function renderCarrito() {
-        const tbody = document.querySelector("#carrito_modal tbody");
-        if (!tbody) return; 
-        
-        tbody.innerHTML = '';
-        
-        productos_carrito.forEach((producto, index) => {
-            const subtotal = (producto.cantidad * producto.precio).toFixed(2);
-            tbody.innerHTML += `
-                <tr id="row_product_${producto.id}">
-                    <td>${producto.id}
-                        <input type="hidden" name="productos[${index}][id]" value="${producto.id}">
-                    </td>
-                    <td>${producto.nombre}</td>
-                    <td>${producto.precio.toFixed(2)}</td>
-                    <td>
-                        <input type="number" value="${producto.cantidad}" min="1" 
-                               oninput="updateCantidad(${producto.id}, this.value)">
-                    </td>
-                    <td>
-                        <span id="subtotal_${producto.id}">${subtotal}</span>
-                    </td>
-                    <td>
-                        <button type="button" onclick="removeProduct(${producto.id})" class="btn btn-danger">Eliminar</button>
-                    </td>
-                </tr>
-            `;
+    let productos_carrito = JSON.parse(localStorage.getItem('productos_carrito')) || []; // Carga el carrito desde localStorage o un arreglo vacío
+
+// Función para actualizar el localStorage y sincronizar con otras pestañas
+function actualizarLocalStorage() {
+    localStorage.setItem('productos_carrito', JSON.stringify(productos_carrito));
+    // Notificar a otras pestañas sobre el cambio
+    window.dispatchEvent(new Event('carritoActualizado'));
+}
+
+async function search(id) {
+    try {
+        const peticion = await fetch(window.location.origin + '/buscar_prod_id', {
+            method: "POST",
+            body: JSON.stringify({ id_prod: id }),
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
         });
-    }
-    
-    
-    function updateCantidad(id, nuevaCantidad) {
-        const producto = productos_carrito.find(prod => prod.id === id);
-        if (producto) {
-            producto.cantidad = parseInt(nuevaCantidad) || 1;
-            document.getElementById(`subtotal_${producto.id}`).innerText = (producto.cantidad * producto.precio).toFixed(2);
+        
+        const rs = await peticion.json();
+        const precio = parseFloat(rs.precio);
+        
+        const existingProduct = productos_carrito.find(prod => prod.id === rs.id);
+        
+        if (existingProduct) {
+            existingProduct.cantidad += 1;
+        } else {
+            productos_carrito.push({ id: rs.id, nombre: rs.nombre, precio, cantidad: 1 });
+            const button = document.querySelector(`button[onclick="search('${id}')"]`);
+            if (button) {
+                button.innerText = "Producto Agregado";
+                button.disabled = true;
+            }
         }
-        actualizarTotal();
-    }
-    
-    
-    function removeProduct(id) {
-        productos_carrito = productos_carrito.filter(prod => prod.id !== id);
+        
+        actualizarLocalStorage(); // Sincroniza con localStorage
         renderCarrito();
         actualizarTotal();
-        
-        const button = document.querySelector(`button[onclick="search('${id}')"]`);
-        if (button) {
-            button.innerText = "Agregar al pedido";
-            button.disabled = false;
-        }
+    } catch (error) {
+        console.error("Error al buscar el producto:", error);
     }
+}
+
+function renderCarrito() {
+    const tbody = document.querySelector("#carrito_modal tbody");
+    if (!tbody) return; 
     
+    tbody.innerHTML = '';
     
-    function actualizarTotal() {
-        const total = productos_carrito.reduce((accum, producto) => {
-            return accum + producto.precio * producto.cantidad;
-        }, 0);
-        document.getElementById("total_pedido").innerText = total.toFixed(2);
+    productos_carrito.forEach((producto, index) => {
+        const subtotal = (producto.cantidad * producto.precio).toFixed(2);
+        tbody.innerHTML += `
+            <tr id="row_product_${producto.id}">
+                <td>${producto.id}
+                    <input type="hidden" name="productos[${index}][id]" value="${producto.id}">
+                </td>
+                <td>${producto.nombre}</td>
+                <td>${producto.precio.toFixed(2)}</td>
+                <td>
+                    <input type="number" value="${producto.cantidad}" min="1" 
+                           oninput="updateCantidad(${producto.id}, this.value)">
+                </td>
+                <td>
+                    <span id="subtotal_${producto.id}">${subtotal}</span>
+                </td>
+                <td>
+                    <button type="button" onclick="removeProduct(${producto.id})" class="btn btn-danger">Eliminar</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function updateCantidad(id, nuevaCantidad) {
+    const producto = productos_carrito.find(prod => prod.id === id);
+    if (producto) {
+        producto.cantidad = parseInt(nuevaCantidad) || 1;
+        document.getElementById(`subtotal_${producto.id}`).innerText = (producto.cantidad * producto.precio).toFixed(2);
     }
+    actualizarLocalStorage(); // Sincroniza con localStorage
+    actualizarTotal();
+}
+
+function removeProduct(id) {
+    productos_carrito = productos_carrito.filter(prod => prod.id !== id);
+    actualizarLocalStorage(); // Sincroniza con localStorage
+    renderCarrito();
+    actualizarTotal();
     
-    
-    async function enviarPedido() {
+    const button = document.querySelector(`button[onclick="search('${id}')"]`);
+    if (button) {
+        button.innerText = "Agregar al pedido";
+        button.disabled = false;
+    }
+}
+
+function actualizarTotal() {
+    const total = productos_carrito.reduce((accum, producto) => {
+        return accum + producto.precio * producto.cantidad;
+    }, 0);
+    document.getElementById("total_pedido").innerText = total.toFixed(2);
+}
+
+async function enviarPedido() {
     if (productos_carrito.length === 0) {
         alert("El carrito está vacío. Agrega productos antes de continuar.");
         return;
@@ -532,63 +544,66 @@ document.querySelectorAll('.btn-outline-primary').forEach(button => {
     console.log("Datos enviados:", productos_carrito); 
 
     try {
-    const respuesta = await fetch(window.location.origin + '/finalizar_compra', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productos: productos_carrito })
-    });
-
-    const data = await respuesta.json();
-
-    if (respuesta.ok && data.redirect) {
-        Swal.fire({
-            position: "top-center",
-            icon: "success",
-            title: "Tu pedido ha sido guardado exitosamente",
-            showConfirmButton: false,
-            timer: 1500
+        const respuesta = await fetch(window.location.origin + '/finalizar_compra', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productos: productos_carrito })
         });
 
-        setTimeout(() => {
-            window.location.href = data.redirect;
-        }, 1500);
-    } else if (data.error) {
+        const data = await respuesta.json();
+
+        if (respuesta.ok && data.redirect) {
+            Swal.fire({
+                position: "top-center",
+                icon: "success",
+                title: "Tu pedido ha sido guardado exitosamente",
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+            setTimeout(() => {
+                window.location.href = data.redirect;
+            }, 1500);
+        } else if (data.error) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Advertencia',
+                text: data.error,
+            });
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'Información',
+                text: "Pedido realizado correctamente.",
+            });
+        }
+    } catch (error) {
+        console.error("Error al enviar el pedido:", error);
         Swal.fire({
-            icon: 'warning',
-            title: 'Advertencia',
-            text: data.error,
-        });
-    } else {
-        Swal.fire({
-            icon: 'info',
-            title: 'Información',
-            text: "Pedido realizado correctamente.",
+            icon: 'error',
+            title: 'Error',
+            text: 'No tienes los permisos necesarios para realizar un pedido.',
         });
     }
-} catch (error) {
-    console.error("Error al enviar el pedido:", error);
-    Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No tienes los permisos necesarios para realizar un pedido.',
-    });
 }
 
+const btnFinalizarCompra = document.getElementById('btnFinalizarCompra');
+if (btnFinalizarCompra) {
+    btnFinalizarCompra.addEventListener('click', enviarPedido);
 }
 
+// Evento para escuchar cambios de carrito en localStorage
+window.addEventListener('carritoActualizado', () => {
+    renderCarrito();
+    actualizarTotal();
+});
 
-    
-    
-    const btnFinalizarCompra = document.getElementById('btnFinalizarCompra');
-    if (btnFinalizarCompra) {
-        btnFinalizarCompra.addEventListener('click', enviarPedido);
-    }
-    
-    
-    document.getElementById('exampleModal').addEventListener('show.bs.modal', () => {
-        renderCarrito();
-        actualizarTotal();
-    });
+// Inicialización del carrito cuando se muestra el modal
+document.getElementById('exampleModal').addEventListener('show.bs.modal', () => {
+    renderCarrito();
+    actualizarTotal();
+});
+
   </script>
 <script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
 

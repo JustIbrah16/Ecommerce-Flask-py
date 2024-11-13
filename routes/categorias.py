@@ -37,18 +37,9 @@ def add():
         nueva_categoria = CategoryQueries.agregar_categoria(nombre, estado)
 
         if nueva_categoria:  
-            return jsonify({
-                'success': 'Categoría agregada con éxito!',
-                'categoria': {
-                    'id': nueva_categoria.id,
-                    'nombre': nueva_categoria.nombre,
-                    'estado': nueva_categoria.fk_estado
-                }
-            })
+            return redirect(url_for('categorias.index'))
         else:
             return jsonify({'error': 'No se pudo crear la categoría.'}), 400
-
-
 
 
 
