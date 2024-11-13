@@ -43,8 +43,6 @@ def add():
 
 
 
-
-
 @categorias.route("/update/<id>", methods=['POST', 'GET'])
 @login_required
 @requiere_permiso('actualizar_categorias')
