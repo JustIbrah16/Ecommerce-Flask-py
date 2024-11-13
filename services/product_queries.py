@@ -6,8 +6,8 @@ from models.historial_productos import Historial_producto
 from models.estado import Estado
 from models.usuarios import Usuarios
 from sqlalchemy.orm import aliased
-from sqlalchemy import case, label
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import label
+
 
 
 ESTADO_INACTIVO = 1

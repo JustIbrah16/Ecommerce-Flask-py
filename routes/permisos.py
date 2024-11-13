@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-from models.usuarios import Usuarios
+from flask import Blueprint, render_template, request, jsonify
 from models.permisos import Permisos
 from models.roles import Roles
 from models.roles_permisos import Rol_permisos

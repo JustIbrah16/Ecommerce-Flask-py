@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from services.order_queries import OrderQueries
 from services.state_queries import Estados_queries
 from services.product_queries import ProductQueries
-from flask_login import login_required
 from utils.permisos import requiere_permiso, requiere_permiso_ajax
 
 pedidos = Blueprint('pedidos', __name__)
@@ -25,7 +24,6 @@ def agregar_producto_a_pedido(producto_id):
     producto = OrderQueries.buscar_producto_por_id(producto_id)
 
     if not producto or producto.fk_estado != 2:
-        flash("Producto no válido o inactivo", 'error')
         return redirect(url_for('productos.index'))
 
     cantidad = int(request.form['cantidad']) if 'cantidad' in request.form else 1
@@ -34,7 +32,6 @@ def agregar_producto_a_pedido(producto_id):
     OrderQueries.actualizar_total_pedido(nuevo_pedido.id, nuevo_pedido.total)
     OrderQueries.marcar_producto_inactivo(producto)
 
-    flash(f'{cantidad} producto(s) agregado(s) al pedido', 'success')
     return redirect(url_for('productos.index'))
 
 @pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
@@ -75,7 +72,6 @@ def finalizar_compra():
         nuevo_pedido = OrderQueries.finalizar_pedido(data['productos'])
 
         if nuevo_pedido:
-            flash('Pedido realizado con éxito', 'success')
             return jsonify({'redirect': url_for('main.index')}), 201
         else:
             return jsonify({'error': 'Error al guardar el pedido en la base de datos.'}), 500
@@ -87,22 +83,21 @@ def finalizar_compra():
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
 @requiere_permiso_ajax('actualizar_pedido')
 def actualizar_estado(pedido_id):
-    # Obtener los datos JSON enviados en la solicitud
+  
     data = request.get_json()
     version_enviado = data.get('version')
 
-    # Llamar a la función de actualización de estado con la versión enviada por el cliente
+  
     pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id, version_enviado)
 
     if not pedido_actualizado:
-        # Responder con un código 409 si hubo un conflicto de concurrencia
-        return jsonify({'success': 'El pedido ha sido actualizado por otro usuario. Intenta nuevamente.'}), 409  # 409 Conflict
+        return jsonify({'success': 'El pedido ha sido actualizado por otro usuario. Intenta nuevamente.'}), 409 
 
-    # Si todo está bien, devolver la respuesta con el nuevo estado y versión
+    
     return jsonify({
         'success': 'Estado actualizado correctamente!',
         'nuevo_estado': pedido_actualizado.estado.nombre,
-        'version': pedido_actualizado.version  # Devolver la nueva versión
+        'version': pedido_actualizado.version  
     })
 
 

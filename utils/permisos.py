@@ -1,11 +1,9 @@
-from models.usuarios import Usuarios
 from models.roles import Roles
-from models.permisos import Permisos
 from functools import wraps
-from flask import abort, current_app, render_template
+from flask import abort, render_template
 from flask_login import current_user
 
-# Definición de la función para cargar roles y permisos
+
 def cargar_roles():
     roles_permisos = {}
     roles = Roles.query.all()
@@ -40,7 +38,7 @@ def requiere_permiso(permiso):
             if not usuario.is_authenticated:
                 abort(403)
             if not tiene_permiso(usuario, permiso):
-                return render_template('403.html') # Prohibido si no tiene permiso
+                return render_template('403.html')
             return func(*args, **kwargs)
         return envoltura
     return decorador

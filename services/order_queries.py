@@ -91,6 +91,7 @@ class OrderQueries:
     @staticmethod
     def actualizar_estado_pedido(pedido_id, version_enviado):
         try:
+            Historial.historial_categorias()
             # Obtener el pedido por su ID
             pedido = Pedidos.query.get(pedido_id)
 
