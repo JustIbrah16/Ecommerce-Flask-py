@@ -52,8 +52,11 @@
                         <div id="username-info" class="text-muted small" style="display: none;">
                             Puede contener letras y números, sin caracteres especiales.
                         </div>
-                        <div id="username-error" class="text-danger small" style="display: none;">
-                            El nombre de usuario debe contener primero letras y puede incluir números, sin caracteres especiales.
+                        <div id="username-error-pattern" class="text-danger small" style="display: none;">
+                            El nombre de usuario no cumple con los requisitos.
+                        </div>
+                        <div id="username-error-exists" class="text-danger small" style="display: none;">
+                            El nombre de usuario ya existe. Por favor, elige otro.
                         </div>
                     </div>
 
@@ -252,4 +255,57 @@
             }
         });
     });
+    document.addEventListener("DOMContentLoaded", function() {
+    const usernameInput = document.getElementById("username");
+    const usernameInfo = document.getElementById("username-info");
+    const usernameErrorPattern = document.getElementById("username-error-pattern");
+    const usernameErrorExists = document.getElementById("username-error-exists");
+    const usernamePattern = /^(?=.*[A-Za-z])[A-Za-z0-9]+$/;
+    
+    usernameInput.addEventListener("focus", function() {
+        usernameInfo.style.display = "block";
+    });
+
+    usernameInput.addEventListener("input", function() {
+        const username = usernameInput.value;
+
+        if (usernamePattern.test(username)) {
+            usernameErrorPattern.style.display = "none";
+            usernameInput.classList.remove("is-invalid");
+            usernameInput.classList.add("is-valid");
+            checkUsernameExists(username);
+        } else {
+            usernameErrorPattern.style.display = "block";
+            usernameInput.classList.remove("is-valid");
+            usernameInput.classList.add("is-invalid");
+
+            usernameErrorExists.style.display = "none";
+        }
+    });
+
+    usernameInput.addEventListener("blur", function() {
+        usernameInfo.style.display = "none";
+    });
+    function checkUsernameExists(username) {
+        fetch("/verificar_usuario", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.existe) {
+                usernameErrorExists.style.display = "block";
+                usernameInput.classList.remove("is-valid");
+                usernameInput.classList.add("is-invalid");
+            } else {
+                usernameErrorExists.style.display = "none";
+            }
+        })
+        .catch(error => console.error("Error al verificar usuario:", error));
+    }
+});
+
 </script>

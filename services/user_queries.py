@@ -41,3 +41,7 @@ class User_queries:
             )
         ).join(Usuarios, Usuarios.fk_rol == Roles.id).paginate(page=page, per_page=per_page, error_out=False)
         return result
+    
+    @staticmethod
+    def verificar_usuario_existente(username):
+        return db.session.query(Usuarios).filter_by(username=username).first() is not None

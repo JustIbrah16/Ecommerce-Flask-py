@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify,flash
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
 from flask_login import login_required
