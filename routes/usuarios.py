@@ -15,6 +15,7 @@ def registrar_usuarios():
     if request.method == 'POST':
         nombres = request.form['nombre']
         apellidos = request.form['apellido']
+        email = request.form['email']
         username = request.form['username']
         telefono = request.form['telefono']
         password = request.form['password']
@@ -51,7 +52,7 @@ def registrar_usuarios():
             return render_template('register.html')
         
         
-        User_queries.registrar_usuarios(nombres, apellidos, username, telefono, password, fk_rol)
+        User_queries.registrar_usuarios(nombres, apellidos, email, username, telefono, password, fk_rol)
         flash("Usuario registrado exitosamente.", "success")
         return redirect(url_for('usuarios.login'))
     
