@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify,flash
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
 from flask_login import login_required
@@ -56,8 +56,7 @@ def add_productos():
             ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
             return redirect(url_for('productos.index'))
         except ValueError as ve:
-            flash(str(ve), 'error')
-            return redirect(url_for('productos.index'))
+            return redirect(url_for('productos.index', error = str(ve)))
     categorias = ProductQueries.obtener_categorias_activas()
     return render_template('productos.html', categorias=categorias)
 

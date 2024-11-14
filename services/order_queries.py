@@ -92,34 +92,27 @@ class OrderQueries:
     def actualizar_estado_pedido(pedido_id, version_enviado):
         try:
             Historial.historial_categorias()
-            # Obtener el pedido por su ID
             pedido = Pedidos.query.get(pedido_id)
 
             if not pedido:
                 print(f"Pedido con ID {pedido_id} no encontrado.")
                 return None
-            
-            # Verificar la versión enviada por el cliente con la versión en la base de datos
             print(f'Version de la base de datos: {pedido.version}')
             print(f'Version enviada por el cliente: {version_enviado}')
 
-            # Si la versión en la base de datos no coincide con la versión enviada, ha habido un conflicto de concurrencia
             if pedido.version != version_enviado:
                 print(f"Error de concurrencia: El pedido ha sido actualizado por otro usuario.")
                 return None
 
-            # Si las versiones coinciden, actualizamos el estado y la versión
-            pedido.fk_estado += ESTADO_INACTIVO  # O lo que necesites para cambiar el estado
-            pedido.version += 1  # Incrementar la versión en la base de datos
+            pedido.fk_estado += ESTADO_INACTIVO  
+            pedido.version += 1  
 
-            # Realizamos el commit para guardar los cambios
             db.session.commit()
-            
-            # Devolver el pedido actualizado
+
             return pedido
         except Exception as e:
             print(f'Ocurrió un error: {e}')
-            db.session.rollback()  # Rollback en caso de error
+            db.session.rollback()
             return None
 
 

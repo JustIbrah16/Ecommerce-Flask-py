@@ -19,7 +19,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-
+    <script src="{{ url_for('static', filename='js/cierreinactividad.js') }}"></script>
+    
 
   </head>
 
@@ -145,28 +146,22 @@
           <script>
             function updateState(pedidoId) {
     const url = `/pedido/${pedidoId}/actualizar`;
-
-    // Obtener el valor de la versión desde el DOM (en el campo correspondiente al pedido)
     const versionElemento = document.querySelector(`#version-${pedidoId}`);
-    const version = parseInt(versionElemento.textContent.trim(), 10);  // Obtener la versión actualizada
-
-    // Datos a enviar al servidor: incluimos la versión enviada por el cliente
+    const version = parseInt(versionElemento.textContent.trim(), 10); 
     const data = {
-        version: version  // La versión del pedido que se envía al backend
+        version: version
     };
-
-    // Realizar la solicitud POST con la versión incluida
     fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)  // Enviar los datos como JSON
+        body: JSON.stringify(data) 
     })
     .then(response => {
         if (response.ok) {
             return response.json();
-        } else if (response.status === 409) {  // Si ocurre un conflicto (concurrencia optimista)
+        } else if (response.status === 409) {  
             Swal.fire({
                 title: 'Conflicto de actualización!',
                 text: 'El pedido ha sido actualizado por otro usuario. Por favor, recarga la página.',
@@ -185,22 +180,18 @@
         }
     })
     .then(data => {
-        // Aseguramos que estamos recibiendo la respuesta correctamente
-        console.log('Respuesta del servidor:', data); // Ver qué datos recibimos
+        console.log('Respuesta del servidor:', data);
 
-        // Si la respuesta es exitosa, mostrar el mensaje y actualizar la interfaz
         Swal.fire({
             title: 'Éxito!',
             text: data.success,
             icon: 'success'
         });
 
-        // Actualizar el estado visualmente
         const estadoElemento = document.querySelector(`#estado-${pedidoId}`);
         if (estadoElemento) {
             estadoElemento.textContent = data.nuevo_estado;
 
-            // Cambiar el color del badge basado en el nuevo estado
             let colorClase;
             switch (data.nuevo_estado) {
                 case 'Espera':
@@ -221,23 +212,20 @@
             estadoElemento.className = `badge rounded-pill text-bg-${colorClase} small`;
         }
 
-        // Actualizar la versión en el frontend (en la tabla)
         const versionElemento = document.querySelector(`#version-${pedidoId}`);
         if (versionElemento) {
-            versionElemento.textContent = data.version;  // Actualizamos la versión mostrada
+            versionElemento.textContent = data.version;
         }
 
-        // ** Aquí actualizamos el estado del botón "Actualizar" directamente **
         const updateBtn = document.querySelector(`#update-btn-${pedidoId}`);
         if (updateBtn) {
-            console.log('Botón encontrado:', updateBtn); // Verificamos si el botón fue encontrado
-            // Verificamos la versión y cambiamos la habilitación del botón en tiempo real
-            if (data.version === 4) {  // Deshabilitar el botón si la versión es 4
+            console.log('Botón encontrado:', updateBtn); 
+            if (data.version === 4) {  
                 console.log('Versión es 4, deshabilitando el botón');
                 updateBtn.disabled = true;
             } else {
                 console.log('Versión NO es 4, habilitando el botón');
-                updateBtn.disabled = false;  // Habilitar el botón si la versión NO es 4
+                updateBtn.disabled = false;  
             }
         } else {
             console.log('Botón NO encontrado');
@@ -254,7 +242,6 @@
     });
 }
 
-// Asociar el evento de clic a los botones de actualización
 document.querySelectorAll('.btn-outline-primary').forEach(button => {
     button.addEventListener('click', function() {
         const pedidoId = this.getAttribute('data-pedido-id');
@@ -352,12 +339,7 @@ document.querySelectorAll('.btn-outline-primary').forEach(button => {
       })
       .catch(error => console.error('Error al cargar detalles:', error));
 }
-
-
-
-
-
-        </script>
+    </script>
 
         </div>
       </div>
@@ -437,44 +419,86 @@ document.querySelectorAll('.btn-outline-primary').forEach(button => {
 </div>
 
 <script>
-    let productos_carrito = JSON.parse(localStorage.getItem('productos_carrito')) || []; // Carga el carrito desde localStorage o un arreglo vacío
+ let productos_carrito = JSON.parse(localStorage.getItem('productos_carrito')) || [];
 
-// Función para actualizar el localStorage y sincronizar con otras pestañas
 function actualizarLocalStorage() {
     localStorage.setItem('productos_carrito', JSON.stringify(productos_carrito));
-    // Notificar a otras pestañas sobre el cambio
     window.dispatchEvent(new Event('carritoActualizado'));
 }
 
+function actualizarBotones() {
+    const botones = document.querySelectorAll('button[onclick^="search("]');
+    botones.forEach(button => {
+        const onclickAttr = button.getAttribute('onclick');
+        const idMatch = onclickAttr.match(/search\(['"](\d+)['"]\)/);
+        if (idMatch) {
+            const id = parseInt(idMatch[1], 10);
+            const exists = productos_carrito.some(prod => prod.id === id);
+            if (exists) {
+                button.innerText = "Producto Agregado";
+                button.disabled = true;
+            } else {
+                button.innerText = "Agregar al pedido";
+                button.disabled = false;
+            }
+        }
+    });
+}
+
 async function search(id) {
+    productos_carrito = JSON.parse(localStorage.getItem('productos_carrito')) || [];
+
     try {
         const peticion = await fetch(window.location.origin + '/buscar_prod_id', {
             method: "POST",
             body: JSON.stringify({ id_prod: id }),
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
         });
-        
+
         const rs = await peticion.json();
+
+        if (rs.error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: rs.error,
+            });
+            return;
+        }
+
         const precio = parseFloat(rs.precio);
-        
+
         const existingProduct = productos_carrito.find(prod => prod.id === rs.id);
-        
+
         if (existingProduct) {
-            existingProduct.cantidad += 1;
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Producto ya en el carrito',
+                text: 'Este producto ya ha sido agregado al carrito.',
+            });
+            return;
         } else {
             productos_carrito.push({ id: rs.id, nombre: rs.nombre, precio, cantidad: 1 });
+
             const button = document.querySelector(`button[onclick="search('${id}')"]`);
             if (button) {
                 button.innerText = "Producto Agregado";
                 button.disabled = true;
             }
         }
-        
-        actualizarLocalStorage(); // Sincroniza con localStorage
+
+        actualizarLocalStorage();
         renderCarrito();
         actualizarTotal();
+        actualizarBotones(); 
     } catch (error) {
         console.error("Error al buscar el producto:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Hubo un error al agregar el producto al carrito.',
+        });
     }
 }
 
@@ -486,7 +510,6 @@ function renderCarrito() {
     
     productos_carrito.forEach((producto, index) => {
         const subtotal = (producto.cantidad * producto.precio).toFixed(2);
-        
         tbody.innerHTML += `
             <tr id="row_product_${producto.id}">
                 <td>${producto.id}
@@ -495,7 +518,7 @@ function renderCarrito() {
                 <td>${producto.nombre}</td>
                 <td>${producto.precio.toFixed(2)}</td>
                 <td>
-                    <select id="cantidad-select-${producto.id}" onchange="updateCantidad(${producto.id}, this.value)">
+                    <select id="cantidad-select-${producto.id}" onchange="updateCantidad(${producto.id}, this.value)" class="limited-select">
                         ${Array.from({ length: 30 }, (_, i) => 
                             `<option value="${i + 1}" ${i + 1 === producto.cantidad ? 'selected' : ''}>${i + 1}</option>`
                         ).join('')}
@@ -512,11 +535,15 @@ function renderCarrito() {
     });
 
     productos_carrito.forEach((producto) => {
-        new Choices(`#cantidad-select-${producto.id}`, {
-            searchEnabled: false,
-            shouldSort: false,
-            allowHTML: true
-        });
+        const select = document.getElementById(`cantidad-select-${producto.id}`);
+        if (select && !select.dataset.choicesInitialized) { 
+            new Choices(select, {
+                searchEnabled: false,
+                shouldSort: false,
+                itemSelectText: '', 
+            });
+            select.dataset.choicesInitialized = true;
+        }
     });
 }
 
@@ -526,16 +553,16 @@ function updateCantidad(id, nuevaCantidad) {
         producto.cantidad = parseInt(nuevaCantidad) || 1;
         document.getElementById(`subtotal_${producto.id}`).innerText = (producto.cantidad * producto.precio).toFixed(2);
     }
-    actualizarLocalStorage(); // Sincroniza con localStorage
+    actualizarLocalStorage();
     actualizarTotal();
 }
 
 function removeProduct(id) {
     productos_carrito = productos_carrito.filter(prod => prod.id !== id);
-    actualizarLocalStorage(); // Sincroniza con localStorage
+    actualizarLocalStorage(); 
     renderCarrito();
     actualizarTotal();
-    
+
     const button = document.querySelector(`button[onclick="search('${id}')"]`);
     if (button) {
         button.innerText = "Agregar al pedido";
@@ -552,7 +579,11 @@ function actualizarTotal() {
 
 async function enviarPedido() {
     if (productos_carrito.length === 0) {
-        alert("El carrito está vacío. Agrega productos antes de continuar.");
+        Swal.fire({
+            icon: 'warning',
+            title: 'Carrito vacío',
+            text: "El carrito está vacío. Agrega productos antes de continuar.",
+        });
         return;
     }
 
@@ -607,20 +638,31 @@ if (btnFinalizarCompra) {
     btnFinalizarCompra.addEventListener('click', enviarPedido);
 }
 
-// Evento para escuchar cambios de carrito en localStorage
+window.addEventListener('storage', (event) => {
+    if (event.key === 'productos_carrito') {
+        productos_carrito = JSON.parse(event.newValue) || [];
+        renderCarrito();
+        actualizarTotal();
+        actualizarBotones(); 
+    }
+});
+
 window.addEventListener('carritoActualizado', () => {
     renderCarrito();
     actualizarTotal();
+    actualizarBotones(); 
 });
 
-// Inicialización del carrito cuando se muestra el modal
 document.getElementById('exampleModal').addEventListener('show.bs.modal', () => {
     renderCarrito();
     actualizarTotal();
 });
 
-  </script>
-<script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
-
+document.addEventListener('DOMContentLoaded', () => {
+    renderCarrito();
+    actualizarTotal();
+    actualizarBotones();
+});
+</script>
   </body>
 </html>

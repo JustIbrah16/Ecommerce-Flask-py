@@ -25,27 +25,24 @@ body{
     overflow-y: auto;
 }
 
-/* Define el tamaño del select */
-.choices__inner {
+
+.choices__list--dropdown {
+    max-height: 150px; 
+    overflow-y: auto;
+}
+
+.choices__item--selectable {
+    padding: 8px;
+    font-size: 15px;
+    white-space: nowrap; 
+}
+
+.limited-select-container {
     min-width: 80px;
     max-width: 100px;
+}
+
+.limited-select-inner {
     padding: 4px 8px;
 }
 
-/* Controla la altura máxima del menú desplegable */
-.choices__list--dropdown .choices__list {
-    max-height: 150px; /* Solo se muestran 5 elementos aproximadamente */
-    overflow-y: auto; /* Permite desplazarse para ver más elementos */
-}
-
-/* Estilo para los elementos del menú desplegable */
-.choices__list--dropdown .choices__item--selectable {
-    padding: 8px;
-    font-size: 14px;
-}
-
-/* Ajuste para evitar el solapamiento de los números */
-.choices__list--dropdown .choices__item--selectable {
-    line-height: 1.5; /* Aumenta el espacio entre los números */
-    white-space: nowrap; /* Evita que el texto se envuelva */
-}

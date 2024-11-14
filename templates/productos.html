@@ -149,6 +149,22 @@
     </nav>
     
     <script>
+
+        function getURLParameter(name){
+            return new URLSearchParams(window.location.search).get(name);
+
+        }
+        const errorMessage = getURLParameter('error');
+        if (errorMessage) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+                confirmButtonText: 'Aceptar'
+            })
+
+            history.replaceState(null, nulln, window.location.pathname)
+        }
         
         function mostrarHistorial(productoId) {
             fetch(`/productos/${productoId}/historial`)

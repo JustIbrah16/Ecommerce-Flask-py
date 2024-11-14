@@ -32,14 +32,14 @@ def index():
 def add():
     if request.method == 'POST':
         nombre = request.form['nombre']
-        estado = 2  
+        estado = ESTADO_ACTIVO 
 
         nueva_categoria = CategoryQueries.agregar_categoria(nombre, estado)
 
         if nueva_categoria:  
             return redirect(url_for('categorias.index'))
         else:
-            return jsonify({'error': 'No se pudo crear la categoría.'}), 400
+            return jsonify({'error': 'Esta categoria ya está creada'}), 400
 
 
 
