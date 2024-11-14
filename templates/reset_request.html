@@ -1,4 +1,78 @@
-<form method="POST">
-    <input type="email" name="email" placeholder="Tu correo electrónico" required>
-    <button type="submit">Enviar enlace para restablecer</button>
-</form>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Estilizado</title>
+    <!-- Incluyendo Bootstrap desde CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            height: 100vh; /* Para que ocupe toda la altura de la pantalla */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            background-color: #f4f7fa;
+        }
+        .form-container {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-container input,
+        .form-container button {
+            border-radius: 25px;
+        }
+        .form-container button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h3 class="text-center text-primary fw-bold mb-4">Restablecer contraseña</h3>
+        
+        <!-- Bloque para mostrar mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label text-muted" for="email">Correo electrónico</label>
+                <input type="email" class="form-control" name="email" placeholder="Correo electrónico" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">Enviar</button>
+            </div>
+            <p class="small text-center mt-3">O también puedes <a href="" class="text-primary fw-bold">recibir un código a tu número telefónico</a></p>
+        </form>
+    </div>
+
+    <!-- Incluyendo Bootstrap JS desde CDN (opcional si es necesario) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

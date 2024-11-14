@@ -12,6 +12,7 @@ from models.usuarios import Usuarios
 from flask_login import LoginManager
 from routes.permisos import permisos
 from utils.permisos import tiene_permiso_filter
+from utils.hash import hash_generator, check_password
 from datetime import timedelta
 import pymysql
 pymysql.install_as_MySQLdb()
@@ -33,7 +34,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'esneiderlastre@gmail.com'
-app.config['MAIL_PASSWORD'] = 'gradoctavo10'
+app.config['MAIL_PASSWORD'] = 'pybe guzp fcgz sxpv'
 mail = Mail(app)
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
@@ -59,28 +60,49 @@ def make_session_permanent():
 def reset_password_request():
     if request.method == 'POST':
         email = request.form['email']
-        user = Usuarios.query.filter_by(email = email).first()
-        if user:
-            s = Serializer(app.config['SECRET_KEY'])
-            token = s.dumps({'email': email}, salt='reset-password')
-            reset_url = url_for('reset_password', token = token, _external = True)
-            message = Message('Restablecimiento de contraseña',
-                              sender='no-reply@tuapp.com',
-                              recipients=[email])
-            message.body = f'Haz clic en el siguiente enlace para restablecer tu contraseña: {reset_url}'
-            mail.send(message)
-            flash('Te hemos enviado un enlace para restablecer tu contraseña por correo electronico', 'info')
-            return redirect(url_for('login'))
+
+        # Verificar si el campo de correo electrónico está vacío
+        if email and email.strip():  # Si el correo no está vacío
+            user = Usuarios.query.filter_by(email=email).first()
+
+            if user:  # Si el usuario existe en la base de datos
+                s = Serializer(app.config['SECRET_KEY'])
+                token = s.dumps({'email': email}, salt='reset-password')
+                reset_url = url_for('reset_password', token=token, _external=True)
+
+                # Crear y enviar el mensaje de correo
+                message = Message('Restablecimiento de contraseña',
+                                  sender='no-reply@tuapp.com',
+                                  recipients=[email])
+                message.body = f'Haz clic en el siguiente enlace para restablecer tu contraseña: {reset_url}'
+                mail.send(message)
+
+                # Mensaje de éxito
+                flash('Te hemos enviado un enlace para restablecer tu contraseña por correo electrónico', 'info')
+
+                # Redirigir a la página de login
+                return redirect(url_for('usuarios.login'))
+
+            else:
+                # Si el correo no está en la base de datos
+                flash('No encontramos ese correo electrónico en nuestros registros', 'error')
+                return render_template('reset_request.html')  # Volver a la misma página
+
         else:
-            flash('No encontramos ese correo electronico en nuestros registros', 'error')
+            # Si el campo de correo electrónico está vacío
+            flash('Por favor ingresa un correo electrónico válido', 'error')
+            return render_template('reset_request.html')  # Volver a la misma página
+
+    # Si la solicitud es GET o si el POST no pasa las validaciones
     return render_template('reset_request.html')
+
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     s = Serializer(app.config['SECRET_KEY'])
     try:
-        email = s.loads(token)['email']
-    except BadSignature:
+        email = s.loads(token, salt='reset-password')['email']
+    except (BadSignature):
         flash('El enlace ha expirado o es invalido', 'error')
         return redirect(url_for('reset_password_request'))
     
@@ -91,9 +113,12 @@ def reset_password(token):
     
     if request.method == 'POST':
         new_password = request.form['password']
-        user.set_password(new_password)
+
+        hashed_password = hash_generator(new_password)
+        user.password = hashed_password
         db.session.commit()
         flash('Tu contraseña ha sido restablecida exitosamente', 'success')
+        return redirect(url_for('usuarios.login'))
 
     return render_template('reset_password.html', token = token)
 

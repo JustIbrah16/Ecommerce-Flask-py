@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base, relationship
 from .roles import Roles
 from flask_login import UserMixin
 from datetime import datetime, timedelta
+from utils.hash import hash_generator, check_password
 
 class Usuarios(db.Model, UserMixin):
     __tablename__ = 'usuarios'
