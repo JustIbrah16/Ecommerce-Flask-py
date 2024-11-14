@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
 from flask_login import login_required
@@ -42,7 +42,7 @@ def index():
         visible_pages=visible_pages
     )
 
-@productos.route("/add_productos", methods=['POST', 'GET'])
+@productos.route("/add_productos", methods=['POST'])
 @login_required
 @requiere_permiso('agregar_productos')
 def add_productos():
@@ -50,15 +50,20 @@ def add_productos():
         nombre = request.form['nombre']
         precio = request.form['precio']
         categoria_id = request.form['categoria']
-        estado = 2
+        estado = ESTADO_ACTIVO
         
         try:
-            ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
-            return redirect(url_for('productos.index'))
+            nuevo_producto = ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
+            if nuevo_producto:
+                return redirect(url_for('productos.index'))
+            else:
+                return jsonify({'error': f'El producto {nombre} ya existe'}), 400
         except ValueError as ve:
-            return redirect(url_for('productos.index', error = str(ve)))
-    categorias = ProductQueries.obtener_categorias_activas()
-    return render_template('productos.html', categorias=categorias)
+            return jsonify({'error': str(ve)}), 400
+
+
+
+
 
 @productos.route("/update_productos/<id>", methods=['POST', 'GET'])
 @login_required
