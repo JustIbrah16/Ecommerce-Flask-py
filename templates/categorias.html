@@ -8,6 +8,7 @@
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
 
 {% include 'header.html' %}
 
@@ -15,14 +16,14 @@
     {% if current_user.is_authenticated and current_user|tiene_permiso('agregar_categorias') %}
     <div class="card shadow-sm mb-4 p-3">
         <h4 class="text-center text-primary mb-3">Agregar Categoría</h4>
-        <form action="{{ url_for('categorias.add') }}" method="POST" class="row g-2">
+        <form action="{{ url_for('categorias.add') }}" method="POST" class="row g-2" id="form-agregar-categoria">
             <div class="col-md-9">
                 <input type="text" name="nombre" class="form-control form-control-sm rounded-pill" placeholder="Nombre de la Categoría" required>
             </div>
             <div class="col-md-3 d-flex justify-content-end">
                 <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100">Agregar</button>
             </div>
-        </form>
+        </form>        
     </div>
     {% endif %}
     <div class="card shadow-sm p-3">
@@ -143,6 +144,46 @@
 </style>
 
 <script>
+    document.querySelector("#form-agregar-categoria").onsubmit = async function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                window.location.href = "{{ url_for('categorias.index') }}";
+            } else {
+                const result = await response.json();
+                if (result.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.error,
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo un problema al agregar la categoría.',
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de red',
+                text: 'No se pudo conectar con el servidor. Por favor, intenta de nuevo.',
+            });
+        }
+    }
+
     function mostrarHistorial(element) {
         const categoriaId = element.getAttribute('data-id');
         fetch(`/categorias/${categoriaId}/historial`)
@@ -249,7 +290,6 @@ function activarCategoria(element) {
            
             
         </script>
-        <script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
 
     </div>
 </div>

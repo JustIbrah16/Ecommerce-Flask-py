@@ -22,6 +22,10 @@ class CategoryQueries:
     @staticmethod
     def agregar_categoria(nombre, estado):
         try:
+            categoria_existente = Categorias.query.filter_by(nombre=nombre).first()
+            if categoria_existente:
+                return None
+            
             Historial.historial_categorias()
             nueva_categoria = Categorias(nombre=nombre, fk_estado=estado)
             db.session.add(nueva_categoria)

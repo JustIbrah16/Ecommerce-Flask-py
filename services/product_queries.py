@@ -28,6 +28,10 @@ class ProductQueries:
             if not categoria or categoria.fk_estado != ESTADO_ACTIVO:
                 raise ValueError("La categoria no existe o no está activa.")
             
+            Producto_existente = Productos.query.filter_by(nombre=nombre).first()
+            if Producto_existente:
+                raise ValueError(f"El producto {nombre} ya existe")
+            
             Historial.historial_categorias()
             nuevo_producto = Productos(fk_categoria=categoria_id, nombre=nombre, precio=precio, fk_estado=estado)
             db.session.add(nuevo_producto)
