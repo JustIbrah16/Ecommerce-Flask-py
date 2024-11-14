@@ -26,20 +26,22 @@ class ProductQueries:
         try:
             categoria = Categorias.query.get(categoria_id)
             if not categoria or categoria.fk_estado != ESTADO_ACTIVO:
-                raise ValueError("La categoria no existe o no está activa.")
+                raise ValueError("La categoría no existe o no está activa.")
             
-            Producto_existente = Productos.query.filter_by(nombre=nombre).first()
-            if Producto_existente:
-                raise ValueError(f"El producto {nombre} ya existe")
+            producto_existente = Productos.query.filter_by(nombre=nombre).first()
+            if producto_existente:
+                return None  
             
-            Historial.historial_categorias()
             nuevo_producto = Productos(fk_categoria=categoria_id, nombre=nombre, precio=precio, fk_estado=estado)
             db.session.add(nuevo_producto)
             db.session.commit()
             return nuevo_producto
         except Exception as e:
             db.session.rollback()
-            raise e  
+            print(f'Ocurrió un error: {e}')
+            return None
+
+ 
 
 
     @staticmethod

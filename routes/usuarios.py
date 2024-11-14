@@ -1,8 +1,8 @@
 from services.user_queries import User_queries
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import  logout_user
 import re
-
+from models.usuarios import Usuarios
 
 usuarios = Blueprint('usuarios', __name__)
 
@@ -87,3 +87,12 @@ def logout():
 #     usuarios = Usuarios.query.all()  
 #     acciones = ["Agregar", "Eliminar", "Activar", "Actualizar"]  
 #     return render_template('tabla_permisos.html', usuarios=usuarios, acciones=acciones)
+
+@usuarios.route('/verificar_usuario', methods=['POST'])
+def verificar_usuario():
+    username = request.json.get('username')
+    usuario_existe = User_queries.verificar_usuario_existente(username)
+    
+    if usuario_existe:
+        return jsonify({'existe': True}), 200
+    return jsonify({'existe': False}), 200

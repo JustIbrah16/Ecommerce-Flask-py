@@ -63,8 +63,11 @@
                         <div id="username-info" class="text-muted small" style="display: none;">
                             Puede contener letras y números, sin caracteres especiales.
                         </div>
-                        <div id="username-error" class="text-danger small" style="display: none;">
-                            El nombre de usuario debe contener primero letras y puede incluir números, sin caracteres especiales.
+                        <div id="username-error-pattern" class="text-danger small" style="display: none;">
+                            El nombre de usuario no cumple con los requisitos.
+                        </div>
+                        <div id="username-error-exists" class="text-danger small" style="display: none;">
+                            El nombre de usuario ya existe. Por favor, elige otro.
                         </div>
                     </div>
 
@@ -96,7 +99,11 @@
                     </div>
                     
                     <div class="form-outline mb-3">
-                        <label class="form-label text-muted small" for="confirm_password">Confirmar Contraseña</label>
+                        <label class="form-label text-muted small" for="confirm_password">Confirmar Contraseña
+                            <span id="toggleConfirmPassword" class="toggle-password ms-2">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </label>
                         <input type="password" id="confirm_password" name="confirm_password" class="form-control form-control-sm rounded-pill" placeholder="Confirme su contraseña" required />
                     </div>
                     
@@ -203,64 +210,122 @@
         setupValidation("telefono", "telefono-info", "telefono-error", patterns.telefono);    
 });
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const passwordField = document.getElementById('password');
-        const togglePassword = document.getElementById('togglePassword');
-        const confirmPasswordField = document.getElementById('confirm_password');
-        const passwordError = document.getElementById('password-error');
-        const passwordInfo = document.getElementById('password-info');
+document.addEventListener("DOMContentLoaded", function() {
+    const passwordField = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const confirmPasswordField = document.getElementById('confirm_password');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const passwordError = document.getElementById('password-error');
+    const passwordInfo = document.getElementById('password-info');
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
 
-        const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-
-        togglePassword.addEventListener('click', function() {
-            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordField.setAttribute('type', type);
-            this.querySelector('i').classList.toggle('fa-eye');
-            this.querySelector('i').classList.toggle('fa-eye-slash');
-        });
-
-        passwordField.addEventListener('focus', function() {
-            passwordInfo.style.display = 'block';
-        });
-
-        passwordField.addEventListener('blur', function() {
-            passwordInfo.style.display = 'none';
-        });
-
-        passwordField.addEventListener('input', function() {
-            if (passwordRegex.test(passwordField.value)) {
-                passwordField.classList.remove('is-invalid');
-                passwordField.classList.add('is-valid');
-                passwordError.style.display = 'none';
-            } else {
-                passwordField.classList.remove('is-valid');
-                passwordField.classList.add('is-invalid');
-                passwordError.style.display = 'block';
-            }
-            validatePasswords();
-        });
-
-
-        confirmPasswordField.addEventListener('input', validatePasswords);
-
-        function validatePasswords() {
-            if (passwordField.value === confirmPasswordField.value && passwordRegex.test(passwordField.value)) {
-                confirmPasswordField.classList.remove('is-invalid');
-                confirmPasswordField.classList.add('is-valid');
-                passwordError.style.display = 'none';
-            } else {
-                confirmPasswordField.classList.remove('is-valid');
-                confirmPasswordField.classList.add('is-invalid');
-                passwordError.style.display = 'block';
-            }
-        }
-
-
-        document.querySelector("form").addEventListener("submit", function(event) {
-            if (!passwordRegex.test(passwordField.value) || passwordField.value !== confirmPasswordField.value) {
-                passwordError.style.display = 'block';
-                event.preventDefault();
-            }
-        });
+    togglePassword.addEventListener('click', function() {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('fa-eye');
+        this.querySelector('i').classList.toggle('fa-eye-slash');
     });
+
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPasswordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordField.setAttribute('type', type);
+        this.querySelector('i').classList.toggle('fa-eye');
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+
+    passwordField.addEventListener('focus', function() {
+        passwordInfo.style.display = 'block';
+    });
+
+    passwordField.addEventListener('blur', function() {
+        passwordInfo.style.display = 'none';
+    });
+
+    passwordField.addEventListener('input', function() {
+        if (passwordRegex.test(passwordField.value)) {
+            passwordField.classList.remove('is-invalid');
+            passwordField.classList.add('is-valid');
+            passwordError.style.display = 'none';
+        } else {
+            passwordField.classList.remove('is-valid');
+            passwordField.classList.add('is-invalid');
+            passwordError.style.display = 'block';
+        }
+        validatePasswords();
+    });
+
+    confirmPasswordField.addEventListener('input', validatePasswords);
+
+    function validatePasswords() {
+        if (passwordField.value === confirmPasswordField.value && passwordRegex.test(passwordField.value)) {
+            confirmPasswordField.classList.remove('is-invalid');
+            confirmPasswordField.classList.add('is-valid');
+            passwordError.style.display = 'none';
+        } else {
+            confirmPasswordField.classList.remove('is-valid');
+            confirmPasswordField.classList.add('is-invalid');
+            passwordError.style.display = 'block';
+        }
+    }
+
+    document.querySelector("form").addEventListener("submit", function(event) {
+        if (!passwordRegex.test(passwordField.value) || passwordField.value !== confirmPasswordField.value) {
+            passwordError.style.display = 'block';
+            event.preventDefault();
+        }
+    });
+});
+    document.addEventListener("DOMContentLoaded", function() {
+    const usernameInput = document.getElementById("username");
+    const usernameInfo = document.getElementById("username-info");
+    const usernameErrorPattern = document.getElementById("username-error-pattern");
+    const usernameErrorExists = document.getElementById("username-error-exists");
+    const usernamePattern = /^(?=.*[A-Za-z])[A-Za-z0-9]+$/;
+    
+    usernameInput.addEventListener("focus", function() {
+        usernameInfo.style.display = "block";
+    });
+
+    usernameInput.addEventListener("input", function() {
+        const username = usernameInput.value;
+
+        if (usernamePattern.test(username)) {
+            usernameErrorPattern.style.display = "none";
+            usernameInput.classList.remove("is-invalid");
+            usernameInput.classList.add("is-valid");
+            checkUsernameExists(username);
+        } else {
+            usernameErrorPattern.style.display = "block";
+            usernameInput.classList.remove("is-valid");
+            usernameInput.classList.add("is-invalid");
+
+            usernameErrorExists.style.display = "none";
+        }
+    });
+
+    usernameInput.addEventListener("blur", function() {
+        usernameInfo.style.display = "none";
+    });
+    function checkUsernameExists(username) {
+        fetch("/verificar_usuario", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.existe) {
+                usernameErrorExists.style.display = "block";
+                usernameInput.classList.remove("is-valid");
+                usernameInput.classList.add("is-invalid");
+            } else {
+                usernameErrorExists.style.display = "none";
+            }
+        })
+        .catch(error => console.error("Error al verificar usuario:", error));
+    }
+});
+
 </script>

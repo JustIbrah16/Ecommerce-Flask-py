@@ -15,7 +15,7 @@
     {% if current_user.is_authenticated and current_user|tiene_permiso('agregar_productos') %}
     <div class="card shadow-sm mb-4 p-3">
         <h4 class="text-center text-primary mb-3">Agregar Producto</h4>
-        <form action="{{ url_for('productos.add_productos') }}" method="POST" class="row g-2">
+        <form id="form-agregar-producto" action="{{ url_for('productos.add_productos') }}" method="POST" class="row g-2">
             <div class="col-md-5">
                 <input type="text" name="nombre" class="form-control form-control-sm rounded-pill" placeholder="Nombre del producto" required>
             </div>
@@ -149,22 +149,49 @@
     </nav>
     
     <script>
+    document.querySelector("#form-agregar-producto").onsubmit = async function(event) {
+        event.preventDefault();  
 
-        function getURLParameter(name){
-            return new URLSearchParams(window.location.search).get(name);
+        const form = event.target;
+        const formData = new FormData(form);
 
-        }
-        const errorMessage = getURLParameter('error');
-        if (errorMessage) {
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                window.location.href = "{{ url_for('productos.index') }}";  
+            } else {
+                const result = await response.json();  
+                if (result.error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.error,
+                        confirmButtonText: 'Aceptar'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Hubo un problema al agregar el producto.',
+                        confirmButtonText: 'Aceptar'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error en la solicitud:", error);
             Swal.fire({
                 icon: 'error',
-                title: 'Error',
-                text: errorMessage,
+                title: 'Error de red',
+                text: 'No se pudo conectar con el servidor. Por favor, intenta de nuevo.',
                 confirmButtonText: 'Aceptar'
-            })
-
-            history.replaceState(null, nulln, window.location.pathname)
+            });
         }
+    }
+
         
         function mostrarHistorial(productoId) {
             fetch(`/productos/${productoId}/historial`)
