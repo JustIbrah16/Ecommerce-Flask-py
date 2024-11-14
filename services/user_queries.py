@@ -7,11 +7,12 @@ from utils.hash import hash_generator, check_password
 class User_queries:
     
     @staticmethod
-    def registrar_usuarios(nombres, apellidos, username, telefono, password, fk_rol):
+    def registrar_usuarios(nombres, apellidos, email,  username, telefono, password, fk_rol):
         hashed_password = hash_generator(password) 
         nuevo_usuario = Usuarios(
             nombres=nombres,
             apellidos=apellidos,
+            email=email,
             username=username,
             telefono=telefono,
             password=hashed_password,
