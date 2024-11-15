@@ -15,7 +15,7 @@ def buscar_prod_id():
         return jsonify({
             'id': producto.id,
             'nombre': producto.nombre,
-            'precio': str(producto.precio)  
+            'precio': str(producto.precio)
         })
     return jsonify({'error': 'Producto no encontrado'}), 404
 
@@ -39,9 +39,9 @@ def agregar_producto_a_pedido(producto_id):
 def filtrar_pedidos():
     estado_id = request.form.get('estado')
     fecha = request.form.get('fecha')
-    
+
     pedidos_filtrados = OrderQueries.filtrar_pedidos(estado_id, fecha)
-    estados = Estados_queries.obtener_estados()  
+    estados = Estados_queries.obtener_estados()
     productos = ProductQueries.obtener_productos_disponibles()
 
     return render_template('index.html', pedidos=pedidos_filtrados, estados=estados, productos = productos)
@@ -67,7 +67,7 @@ def finalizar_compra():
 
     if not data or 'productos' not in data:
         return jsonify({'error': 'Datos de productos no válidos.'}), 400
-    
+
     try:
         nuevo_pedido = OrderQueries.finalizar_pedido(data['productos'])
 
@@ -76,28 +76,28 @@ def finalizar_compra():
         else:
             return jsonify({'error': 'Error al guardar el pedido en la base de datos.'}), 500
     except Exception as e:
-        print("Error al procesar la compra:", e)  
+        print("Error al procesar la compra:", e)
         return jsonify({'error': 'Error en el servidor: ' + str(e)}), 500
 
 
 @pedidos.route('/pedido/<pedido_id>/actualizar', methods=['POST'])
 @requiere_permiso_ajax('actualizar_pedido')
 def actualizar_estado(pedido_id):
-  
+
     data = request.get_json()
     version_enviado = data.get('version')
 
-  
+
     pedido_actualizado = OrderQueries.actualizar_estado_pedido(pedido_id, version_enviado)
 
     if not pedido_actualizado:
-        return jsonify({'success': 'El pedido ha sido actualizado por otro usuario. Intenta nuevamente.'}), 409 
+        return jsonify({'success': 'El pedido ha sido actualizado por otro usuario. Intenta nuevamente.'}), 409
 
-    
+
     return jsonify({
         'success': 'Estado actualizado correctamente!',
         'nuevo_estado': pedido_actualizado.estado.nombre,
-        'version': pedido_actualizado.version  
+        'version': pedido_actualizado.version
     })
 
 

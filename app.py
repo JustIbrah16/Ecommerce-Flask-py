@@ -14,8 +14,7 @@ from routes.permisos import permisos
 from utils.permisos import tiene_permiso_filter
 from utils.hash import hash_generator, check_password
 from datetime import timedelta
-import pymysql
-pymysql.install_as_MySQLdb()
+
 
 
 
@@ -26,18 +25,18 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 app.secret_key = 'secret key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost:3306/flask_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root@localhost:3306/flask_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SECRET_KEY'] = 'secret-password'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'esneiderlastre@gmail.com'
-app.config['MAIL_PASSWORD'] = 'pybe guzp fcgz sxpv'
+app.config['MAIL_USERNAME'] = 'ecommerceflask@gmail.com'
+app.config['MAIL_PASSWORD'] = 'rcte wjdz kswl haxi'
 mail = Mail(app)
 
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
 db.init_app(app)
 

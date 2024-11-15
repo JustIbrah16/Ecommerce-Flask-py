@@ -38,6 +38,7 @@ class User_queries:
                 Usuarios.apellidos,
                 Usuarios.username,
                 Usuarios.telefono,
+                Usuarios.email,
                 Roles.nombre
             )
         ).join(Usuarios, Usuarios.fk_rol == Roles.id).paginate(page=page, per_page=per_page, error_out=False)
