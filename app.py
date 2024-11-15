@@ -33,8 +33,8 @@ app.config['SECRET_KEY'] = 'secret-password'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'esneiderlastre@gmail.com'
-app.config['MAIL_PASSWORD'] = 'pybe guzp fcgz sxpv'
+app.config['MAIL_USERNAME'] = 'ecommerceflask@gmail.com'
+app.config['MAIL_PASSWORD'] = 'rcte wjdz kswl haxi'
 mail = Mail(app)
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
