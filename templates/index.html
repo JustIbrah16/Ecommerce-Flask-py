@@ -46,7 +46,49 @@
                     </li>
                     {% endfor %}
                 </ul>
-                
+                <nav aria-label="Paginación de productos">
+                    <ul class="pagination justify-content-center mt-3">
+                        {% if pagination.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.index', page=pagination.prev_num) }}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                        {% if page_num == pagination.page %}
+                        <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('main.index', page=page_num) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.index', page=pagination.next_num) }}" aria-label="Siguiente">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Siguiente">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
 
 
@@ -139,7 +181,36 @@
                             
                             
                             
+                            
                         </table>
+                        <br>
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                {% if pedidos_pagination.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?pedidos_page={{ pedidos_pagination.prev_num }}" aria-label="Anterior">
+                                        &laquo; Anterior
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% for page in pedidos_pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                                {% if page %}
+                                <li class="page-item {% if page == pedidos_pagination.page %}active{% endif %}">
+                                    <a class="page-link" href="?pedidos_page={{ page }}">{{ page }}</a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                                {% endfor %}
+                                {% if pedidos_pagination.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?pedidos_page={{ pedidos_pagination.next_num }}" aria-label="Siguiente">
+                                        Siguiente &raquo;
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
                         
         
 
