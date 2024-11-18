@@ -88,15 +88,17 @@ def update_productos(id):
 def delete_productos(id):
     producto = ProductQueries.obtener_producto(id)
     if producto:
+        if producto.fk_estado == ESTADO_INACTIVO:
+            return jsonify({'success': False, 'message': 'El producto ya fue desactivado.'})
+        
         categoria = Categorias.query.get(producto.fk_categoria)
-
         if categoria and categoria.fk_estado == ESTADO_ACTIVO:
             ProductQueries.eliminar_producto(id)
             return jsonify({'success': True})
         else:
-            return jsonify({'success': False, 'message': "No se puede eliminar el producto si la categoria no está activa"})
+            return jsonify({'success': False, 'message': 'No se puede eliminar el producto si la categoría no está activa.'})
     else:
-        return jsonify({'success': False, 'message': 'Producto no encontrado'})
+        return jsonify({'success': False, 'message': 'Producto no encontrado.'})
     
 
 @productos.route("/activar_producto/<id>", methods=['POST'])
@@ -105,13 +107,16 @@ def delete_productos(id):
 def activar_producto(id):
     producto = ProductQueries.obtener_producto(id)
     if producto:
+        if producto.fk_estado == ESTADO_ACTIVO:
+            return jsonify({'success': False, 'message': 'El producto ya fue activado.'})
+
         categoria = Categorias.query.get(producto.fk_categoria)
         if categoria and categoria.fk_estado == ESTADO_ACTIVO:
             success = ProductQueries.activar_producto(id)
             if success:
-                return jsonify({'success' : True})
+                return jsonify({'success': True})
             else:
-                return jsonify({'success': False, 'message': 'No se puede activar el producto.'})
+                return jsonify({'success': False, 'message': 'No se pudo activar el producto.'})
         else:
             return jsonify({'success': False, 'message': 'No se puede activar el producto si la categoría no está activa.'})
     else:
@@ -141,3 +146,34 @@ def obtener_historial_productos(producto_id):
 
     return jsonify(response)
 
+@productos.route("/buscar_por_nombre", methods=['GET'])
+@login_required
+def buscar_por_nombre():
+    nombre = request.args.get('nombre', '')
+    productos = ProductQueries.buscar_por_nombre(nombre)
+    return jsonify ([producto.to_dict() for producto in productos] )
+
+
+@productos.route("/buscar_por_categoria", methods=['GET'])
+@login_required
+def buscar_por_categoria():
+    nombre_categoria = request.args.get('nombre_categoria', '')
+    productos = ProductQueries.buscar_por_nombre_categoria(nombre_categoria)
+    return jsonify([producto.to_dict() for producto in productos])
+
+
+
+# @productos.route("/filtrar_por_estado", methods=['GET'])
+# @login_required
+# def filtrar_por_estado():
+#     estado =  request.args.get('estado', type=int)
+#     productos = ProductQueries.filtrar_por_estado(estado)
+#     return jsonify([producto.to_dict() for producto in productos])
+
+# @productos.route("/filtrar_por_precio", methods=['GET'])
+# @login_required
+# def filtrar_por_precio():
+#     precio_min = request.args.get('precio_min', type=float, default=0.0)
+#     precio_max = request.args.get('precio_max', type=float, default=float('inf'))
+#     productos =  ProductQueries.filtrar_por_precio(precio_min, precio_max)
+#     return jsonify([producto.to_dict() for producto in productos])

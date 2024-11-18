@@ -11,8 +11,9 @@ class Productos(db.Model):
     fk_estado = db.Column(db.Integer, ForeignKey('estado.id'), nullable = False)
     nombre = db.Column(db.String, nullable = False)
     precio = db.Column(db.Numeric(12, 2), nullable = False)
-    categorias = relationship('Categorias')
-    estado = relationship('Estado')
+
+    categorias = relationship('Categorias', backref='productos')
+    estado = relationship('Estado', backref='productos')
 
     def __init__(self, fk_categoria, fk_estado, nombre, precio):
         self.fk_categoria = fk_categoria
@@ -24,5 +25,6 @@ class Productos(db.Model):
         return {
             'id': self.id,
             'nombre': self.nombre,
-            'precio': self.precio
+            'precio': self.precio,
+            'Categoria_nombre': self.categorias.nombre if self.categorias else "Sin categoria"
         }    

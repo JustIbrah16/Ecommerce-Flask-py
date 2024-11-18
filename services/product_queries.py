@@ -24,6 +24,7 @@ class ProductQueries:
     @staticmethod
     def agregar_producto(nombre, precio, categoria_id, estado):
         try:
+            Historial.historial_categorias()
             categoria = Categorias.query.get(categoria_id)
             if not categoria or categoria.fk_estado != ESTADO_ACTIVO:
                 raise ValueError("La categoría no existe o no está activa.")
@@ -137,6 +138,44 @@ class ProductQueries:
     @staticmethod
     def obtener_producto(id):
         return Productos.query.filter_by(id=id).first()
+    
+    @staticmethod
+    def buscar_por_nombre(nombre):
+        try:
+            return Productos.query.filter(Productos.nombre.ilike(f"%{nombre}%")).all()
+        except Exception as e:
+            print(f"Error al buscar productos por nombre: {e}")
+            return[]
+    
+    @staticmethod
+    def buscar_por_nombre_categoria(nombre_categoria):
+        try:
+            categoria = Categorias.query.filter(Categorias.nombre.ilike(f"%{nombre_categoria}%")).first()
+            if not categoria:
+                return []  
+            return Productos.query.filter(Productos.fk_categoria == categoria.id).all()  
+        except Exception as e:
+            print(f"Error al buscar productos por categoría: {e}")
+            return []
+
+    
+    # @staticmethod
+    # def filtrar_por_estado(estado_id):
+    #     try:
+    #         return Productos.query.filter_by(fk_estado=estado_id).all()
+    #     except Exception as e:
+    #         print(f"Error al buscar productos por estado: {e}")
+    #         return[]
+    
+    # @staticmethod
+    # def filtrar_por_precio(precio_min, precio_max):
+    #     try:
+    #         return Productos.query.filter(Productos.precio >= precio_min, Productos.precio <= precio_max).all()
+    #     except Exception as e:
+    #         print(f"Error al buscar productos por rango de precio: {e}")
+    #         return[]
+        
+
     
 
 
