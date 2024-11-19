@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from models.permisos import Permisos
+from models.grupos import Grupos
 from models.roles import Roles
 from models.roles_permisos import Rol_permisos
 from utils.db import db
@@ -16,9 +17,18 @@ def mostrar_tabla_permisos():
 @permisos.route('/update_permisos/<id>/permisos', methods=['GET'])
 def update_permisos(id):
     rol = Roles.query.get_or_404(id)
+    productos_permisos = Permisos.query.filter_by(fk_grupo = 1).all()
+    categorias_permisos = Permisos.query.filter_by(fk_grupo= 2).all()
+    pedidos_permisos = Permisos.query.filter_by(fk_grupo = 3).all()
     permisos = rol.obtener_permisos()
     todos_permisos = Permisos.query.all()
-    return render_template('permisos.html', rol = rol, permisos = permisos, todos_permisos = todos_permisos)
+    return render_template('permisos.html', 
+                           rol = rol, 
+                           permisos = permisos, 
+                           todos_permisos = todos_permisos,
+                           productos_permisos = productos_permisos,
+                           categorias_permisos = categorias_permisos,
+                           pedidos_permisos = pedidos_permisos)
 
 @permisos.route('/tabla_permisos')
 def tabla_permisos():  
