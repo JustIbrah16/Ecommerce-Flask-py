@@ -8,8 +8,6 @@ from models.usuarios import Usuarios
 from sqlalchemy.orm import aliased
 from sqlalchemy import label
 
-
-
 ESTADO_INACTIVO = 1
 ESTADO_ACTIVO = 2
 class ProductQueries:
@@ -24,6 +22,7 @@ class ProductQueries:
     @staticmethod
     def agregar_producto(nombre, precio, categoria_id, estado):
         try:
+            Historial.historial_categorias()
             categoria = Categorias.query.get(categoria_id)
             if not categoria or categoria.fk_estado != ESTADO_ACTIVO:
                 raise ValueError("La categoría no existe o no está activa.")
@@ -40,9 +39,6 @@ class ProductQueries:
             db.session.rollback()
             print(f'Ocurrió un error: {e}')
             return None
-
- 
-
 
     @staticmethod
     def actualizar_producto(id, nombre, precio, categoria_id):
@@ -137,6 +133,25 @@ class ProductQueries:
     @staticmethod
     def obtener_producto(id):
         return Productos.query.filter_by(id=id).first()
+    
+    @staticmethod
+    def buscar_productos(filtros):
+        try:
+            query = Productos.query.join(
+                Categorias, Productos.fk_categoria == Categorias.id, isouter=True
+            )
+
+            if "nombre" in filtros:
+                query = query.filter(Productos.nombre.ilike(f"%{filtros['nombre']}%"))
+            if "categoria" in filtros:
+                query = query.filter(Categorias.nombre.ilike(f"%{filtros['categoria']}%"))
+
+            return query.all()
+        except Exception as e:
+            print(f"Error en buscar_productos: {e}")
+            return []
+
+
     
 
 

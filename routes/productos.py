@@ -1,8 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session
 from services.product_queries import ProductQueries
 from models.categorias import Categorias
+from models.usuarios import Usuarios
 from flask_login import login_required
 from utils.permisos import requiere_permiso
+from flask_login import current_user
+from models.productos import Productos
+from utils.permisos import tiene_permiso_filter
 
 productos = Blueprint('productos', __name__)
 
@@ -61,10 +65,6 @@ def add_productos():
         except ValueError as ve:
             return jsonify({'error': str(ve)}), 400
 
-
-
-
-
 @productos.route("/update_productos/<id>", methods=['POST', 'GET'])
 @login_required
 @requiere_permiso('actualizar_productos')
@@ -88,15 +88,17 @@ def update_productos(id):
 def delete_productos(id):
     producto = ProductQueries.obtener_producto(id)
     if producto:
+        if producto.fk_estado == ESTADO_INACTIVO:
+            return jsonify({'success': False, 'message': 'El producto ya fue desactivado.'})
+        
         categoria = Categorias.query.get(producto.fk_categoria)
-
         if categoria and categoria.fk_estado == ESTADO_ACTIVO:
             ProductQueries.eliminar_producto(id)
             return jsonify({'success': True})
         else:
-            return jsonify({'success': False, 'message': "No se puede eliminar el producto si la categoria no está activa"})
+            return jsonify({'success': False, 'message': 'No se puede eliminar el producto si la categoría no está activa.'})
     else:
-        return jsonify({'success': False, 'message': 'Producto no encontrado'})
+        return jsonify({'success': False, 'message': 'Producto no encontrado.'})
     
 
 @productos.route("/activar_producto/<id>", methods=['POST'])
@@ -105,13 +107,16 @@ def delete_productos(id):
 def activar_producto(id):
     producto = ProductQueries.obtener_producto(id)
     if producto:
+        if producto.fk_estado == ESTADO_ACTIVO:
+            return jsonify({'success': False, 'message': 'El producto ya fue activado.'})
+
         categoria = Categorias.query.get(producto.fk_categoria)
         if categoria and categoria.fk_estado == ESTADO_ACTIVO:
             success = ProductQueries.activar_producto(id)
             if success:
-                return jsonify({'success' : True})
+                return jsonify({'success': True})
             else:
-                return jsonify({'success': False, 'message': 'No se puede activar el producto.'})
+                return jsonify({'success': False, 'message': 'No se pudo activar el producto.'})
         else:
             return jsonify({'success': False, 'message': 'No se puede activar el producto si la categoría no está activa.'})
     else:
@@ -140,4 +145,59 @@ def obtener_historial_productos(producto_id):
     } for cambio in cambios_producto]
 
     return jsonify(response)
+
+@productos.route("/buscar_productos", methods=["GET"])
+@login_required
+def buscar_productos():
+    try:
+        nombre = request.args.get("nombre", "").strip()
+        categoria = request.args.get("categoria", "").strip()
+
+        query = Productos.query.join(
+            Categorias, Productos.fk_categoria == Categorias.id, isouter=True
+        ).add_columns(
+            Productos.id.label("id"),
+            Productos.nombre.label("nombre"),
+            Productos.precio.label("precio"),
+            Categorias.nombre.label("categoria"),
+            Productos.fk_estado.label("estado"),
+        )
+        if nombre:
+            query = query.filter(Productos.nombre.ilike(f"%{nombre}%"))
+        if categoria:
+            query = query.filter(Categorias.nombre.ilike(f"%{categoria}%"))
+
+        productos = query.all()
+        resultados = []
+        
+        for p in productos:
+            tiene_permiso_actualizar = tiene_permiso_filter(current_user, 'actualizar_productos')
+            tiene_permiso_eliminar = tiene_permiso_filter(current_user, 'desactivar_productos')
+            tiene_permiso_activar = tiene_permiso_filter(current_user, 'activar_productos')
+            tiene_permiso_historial = tiene_permiso_filter(current_user, 'historial_productos')
+
+            botones = {
+                "detalle": url_for('productos.obtener_historial_productos', producto_id=p.id) if tiene_permiso_historial else None,
+                "actualizar": url_for('productos.update_productos', id=p.id) if tiene_permiso_actualizar else None,
+                "eliminar_activar": None
+            }
+            
+            if tiene_permiso_eliminar and p.estado == ESTADO_ACTIVO:
+                botones["eliminar_activar"] = url_for('productos.delete_productos', id=p.id)
+            elif tiene_permiso_activar and p.estado == ESTADO_INACTIVO:
+                botones["eliminar_activar"] = url_for('productos.activar_producto', id=p.id)
+            
+            resultados.append({
+                "id": p.id,
+                "nombre": p.nombre,
+                "precio": p.precio,
+                "categoria": p.categoria or "Sin categoría",
+                "estado": "Activo" if p.estado == ESTADO_ACTIVO else "Inactivo",
+                "botones": botones
+            })
+
+        return jsonify(resultados), 200
+    except Exception as e:
+        print(f"Error en buscar_productos: {e}")
+        return jsonify({"error": "Error al buscar productos."}), 500
 

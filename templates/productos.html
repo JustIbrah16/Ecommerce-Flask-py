@@ -8,6 +8,9 @@
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+
 
 {% include 'header.html' %}
 
@@ -36,46 +39,61 @@
         </form>
     </div>
     {% endif %}
+    
 
-    <div class="container mt-4">
-        <div class="row g-3">
-            {% for producto in productos %}
-            <div class="col-md-4 col-lg-3">
-                <div class="card shadow-sm h-100 border-0 position-relative">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3240/3240782.png" 
-                         alt="Icono de confirmación" 
-                         class="position-absolute top-0 end-0 p-1" 
-                         style="width: 30px; height: 30px;">
-                    <div class="card-body p-3">
-                        <h6 class="card-title text-truncate">{{ producto.nombre }}</h6>
-                        <p class="mb-1 text-muted small">Precio: ${{ producto.precio }}</p>
-                        <p class="text-muted small"><strong>Categoría:</strong> {{ producto.categorias.nombre }}</p>
+    <div class="input-group mb-4">
+        <select id="search-type" class="form-select form-select-sm" style="width: auto; max-width: 150px;">
+            <option value="productos" selected>Productos</option>
+            <option value="categorias">Categorías</option>
+        </select>
+        <input id="search-bar" type="text" class="form-control form-control-sm" placeholder="Buscar..." style="max-width: 250px;">
+        <button id="search-button" class="btn btn-primary btn-sm">Buscar</button>
+    </div>
+    
+    <div class="d-flex flex-column mb-4">
+        <div class="product-container" id="product-container"> 
+            <div class="container mt-4">
+                <h4 class="text-left text-primary mb-3">Tus productos:</h4>
+                <div class="row g-3">
+                    {% for producto in productos %}
+                    <div class="col-md-4 col-lg-3">
+                        <div class="card shadow-sm h-100 border-0 position-relative">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3240/3240782.png" 
+                                 alt="Icono de confirmación" 
+                                 class="position-absolute top-0 end-0 p-1" 
+                                 style="width: 30px; height: 30px;">
+                            <div class="card-body p-3">
+                                <h6 class="card-title text-truncate">{{ producto.nombre }}</h6>
+                                <p class="mb-1 text-muted small">Precio: ${{ producto.precio }}</p>
+                                <p class="text-muted small"><strong>Categoría:</strong> {{ producto.categorias.nombre }}</p> 
+                            </div>
+                            <div class="card-footer d-flex justify-content-around py-2">
+                                {% if current_user.is_authenticated and current_user|tiene_permiso('historial_productos') %}
+                                    <button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial({{ producto.id }})">Detalles</button>
+                                {% endif %}
+    
+                                {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_productos') %}
+                                    <a href="{{ url_for('productos.update_productos', id=producto.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                                {% endif %}
+    
+                                {% if producto.fk_estado == 2 %}
+                                    {% if current_user.is_authenticated and current_user|tiene_permiso('desactivar_productos') %}
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('productos.delete_productos', id=producto.id) }}" data-id="{{ producto.id }}" onclick="eliminarProducto(this)">Eliminar</button>
+                                    {% endif %}
+                                {% else %}
+                                    {% if current_user.is_authenticated and current_user|tiene_permiso('activar_productos') %}
+                                        <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('productos.activar_producto', id=producto.id) }}" data-id="{{ producto.id }}" onclick="activarProducto(this)">Activar</button>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-footer d-flex justify-content-around py-2">
-
-                        {% if current_user.is_authenticated and current_user|tiene_permiso('historial_productos') %}
-                        <button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial({{ producto.id }})">Detalles</button>
-                        {% endif %}
-
-                        {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_productos') %}
-                        <a href="{{ url_for('productos.update_productos', id=producto.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
-                        {% endif %}
-
-                        {% if producto.fk_estado == 2 %}
-                            {% if current_user.is_authenticated and current_user|tiene_permiso('desactivar_productos') %}
-                            <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('productos.delete_productos', id=producto.id) }}" data-id="{{ producto.id }}" onclick="eliminarProducto(this)">Eliminar</button>
-                            {% endif %}
-                        {% else %}
-                            {% if current_user.is_authenticated and current_user|tiene_permiso('activar_productos') %}
-                            <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('productos.activar_producto', id=producto.id) }}" data-id="{{ producto.id }}" onclick="activarProducto(this)">Activar</button>
-                            {% endif %}
-                        {% endif %}
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
+    
 
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -147,6 +165,32 @@
             {% endif %}
         </ul>
     </nav>
+
+<style>
+    .product-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+#search-bar {
+        max-width: 250px; 
+    }
+
+    #search-type {
+        width: auto; 
+        max-width: 150px;
+    }
+    #search-button {
+        padding: 0.375rem 0.75rem;
+    }
+
+    .input-group {
+        display: flex;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+</style>
     
     <script>
     document.querySelector("#form-agregar-producto").onsubmit = async function(event) {
@@ -233,7 +277,7 @@
         function eliminarProducto(element) {
     const url = element.getAttribute('data-url');
     const id = element.getAttribute('data-id');
-    
+
     Swal.fire({
         title: "¿Estás seguro?",
         text: "Se eliminará el producto",
@@ -257,18 +301,11 @@
                         title: "Eliminado",
                         text: "Tu producto ha sido eliminado",
                         icon: "success"
-                    }).then(() => {
-                        element.textContent = 'Activar';
-                        element.classList.remove('btn-outline-danger');
-                        element.classList.add('btn-outline-success');
-                        element.setAttribute('data-url', `{{ url_for('productos.activar_producto', id='') }}` + id);
-                        element.setAttribute('onclick', 'activarProducto(this)');
-                    });
+                    }).then(() => window.location.reload());
                 } else {
-      
                     Swal.fire({
                         title: "Error",
-                        text: data.message,  
+                        text: data.message,
                         icon: "error"
                     });
                 }
@@ -288,7 +325,7 @@
 function activarProducto(element) {
     const url = element.getAttribute('data-url');
     const id = element.getAttribute('data-id');
-    
+
     Swal.fire({
         title: "¿Estás seguro?",
         text: "Activarás el producto",
@@ -312,15 +349,8 @@ function activarProducto(element) {
                         title: "Activado",
                         text: "El producto ha sido activado",
                         icon: "success"
-                    }).then(() => {
-                        element.textContent = 'Eliminar';
-                        element.classList.remove('btn-outline-success');
-                        element.classList.add('btn-outline-danger');
-                        element.setAttribute('data-url', `{{ url_for('productos.delete_productos', id='') }}` + id);
-                        element.setAttribute('onclick', 'eliminarProducto(this)');
-                    });
+                    }).then(() => window.location.reload());
                 } else {
-                    
                     Swal.fire({
                         title: "Error",
                         text: data.message,
@@ -339,6 +369,100 @@ function activarProducto(element) {
         }
     });
 }
+document.getElementById("search-button").addEventListener("click", function () {
+    const searchBar = document.getElementById("search-bar");
+    const searchType = document.getElementById("search-type").value;
+
+    const params = new URLSearchParams();
+
+    if (searchType === "productos") {
+        const nombre = searchBar.value.trim();
+        if (nombre) {
+            params.append("nombre", nombre);
+        }
+    } else if (searchType === "categorias") {
+        const categoria = searchBar.value.trim();
+        if (categoria) {
+            params.append("categoria", categoria);
+        }
+    }
+
+    const url = `/buscar_productos?${params.toString()}`;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Error al buscar productos.");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const productContainer = document.getElementById("product-container");
+            productContainer.innerHTML = "";
+
+            if (data.length === 0) {
+                productContainer.innerHTML = `<p class="text-center text-muted">No se encontraron resultados.</p>`;
+                return;
+            }
+
+            const rows = document.createElement("div");
+            rows.classList.add("row", "g-3");
+
+            data.forEach(producto => {
+                const col = document.createElement("div");
+                col.classList.add("col-md-4", "col-lg-3");
+
+                let botones = "";
+
+                if (producto.botones.detalle) {
+                    botones += `<button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial(${producto.id})">Detalles</button>`;
+                }
+                if (producto.botones.actualizar) {
+                    botones += `<a href="${producto.botones.actualizar}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>`;
+                }
+                if (producto.botones.eliminar_activar) {
+                    const accion = producto.estado === "Activo" ? "Eliminar" : "Activar";
+                    const clase = producto.estado === "Activo" ? "btn-outline-danger" : "btn-outline-success";
+                    botones += `<button class="btn ${clase} btn-sm rounded-pill" 
+                                    data-url="${producto.botones.eliminar_activar}" 
+                                    data-id="${producto.id}" 
+                                    onclick="${accion === "Eliminar" ? "eliminarProducto" : "activarProducto"}(this)">
+                                ${accion}
+                                </button>`;
+                }
+
+                col.innerHTML = `
+                    <div class="card shadow-sm h-100 border-0 position-relative">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3240/3240782.png" 
+                            alt="Icono de confirmación" 
+                            class="position-absolute top-0 end-0 p-1" 
+                            style="width: 30px; height: 30px;">
+                        <div class="card-body p-3">
+                            <h6 class="card-title text-truncate">${producto.nombre}</h6>
+                            <p class="mb-1 text-muted small">Precio: $${producto.precio}</p>
+                            <p class="text-muted small"><strong>Categoría:</strong> ${producto.categoria}</p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-around py-2">
+                            ${botones}
+                        </div>
+                    </div>
+                `;
+
+                rows.appendChild(col);
+            });
+
+            productContainer.appendChild(rows);
+        })
+        .catch(error => {
+            console.error("Error en la búsqueda:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Hubo un problema al realizar la búsqueda. Intenta nuevamente.",
+                confirmButtonText: "Aceptar"
+            });
+        });
+});
     </script>
     <script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
 
