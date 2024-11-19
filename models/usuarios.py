@@ -29,3 +29,5 @@ class Usuarios(db.Model, UserMixin):
         self.telefono = telefono
         self.password = password
         self.fk_rol = fk_rol
+
+    

@@ -69,20 +69,20 @@
                             </div>
                             <div class="card-footer d-flex justify-content-around py-2">
                                 {% if current_user.is_authenticated and current_user|tiene_permiso('historial_productos') %}
-                                <button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial({{ producto.id }})">Detalles</button>
+                                    <button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial({{ producto.id }})">Detalles</button>
                                 {% endif %}
     
                                 {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_productos') %}
-                                <a href="{{ url_for('productos.update_productos', id=producto.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                                    <a href="{{ url_for('productos.update_productos', id=producto.id) }}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
                                 {% endif %}
     
                                 {% if producto.fk_estado == 2 %}
                                     {% if current_user.is_authenticated and current_user|tiene_permiso('desactivar_productos') %}
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('productos.delete_productos', id=producto.id) }}" data-id="{{ producto.id }}" onclick="eliminarProducto(this)">Eliminar</button>
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="{{ url_for('productos.delete_productos', id=producto.id) }}" data-id="{{ producto.id }}" onclick="eliminarProducto(this)">Eliminar</button>
                                     {% endif %}
                                 {% else %}
                                     {% if current_user.is_authenticated and current_user|tiene_permiso('activar_productos') %}
-                                    <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('productos.activar_producto', id=producto.id) }}" data-id="{{ producto.id }}" onclick="activarProducto(this)">Activar</button>
+                                        <button class="btn btn-outline-success btn-sm rounded-pill" data-url="{{ url_for('productos.activar_producto', id=producto.id) }}" data-id="{{ producto.id }}" onclick="activarProducto(this)">Activar</button>
                                     {% endif %}
                                 {% endif %}
                             </div>
@@ -93,6 +93,7 @@
             </div>
         </div>
     </div>
+    
 
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -368,42 +369,25 @@ function activarProducto(element) {
         }
     });
 }
-// const slider = document.getElementById('price-slider');
-// noUiSlider.create(slider, {
-//     start: [0, 10000000], // Valores iniciales
-//     connect: true,
-//     range: {
-//         'min': 0,
-//         'max': 10000000
-//     },
-//     tooltips: true,
-//     format: {
-//         to: (value) => `$${Math.round(value)}`,
-//         from: (value) => Number(value.replace('$', ''))
-//     }
-// });
+document.getElementById("search-button").addEventListener("click", function () {
+    const searchBar = document.getElementById("search-bar");
+    const searchType = document.getElementById("search-type").value;
 
-// // Actualizar etiquetas de rango al mover el slider
-// slider.noUiSlider.on('update', (values) => {
-//     document.getElementById('price-min-label').textContent = values[0];
-//     document.getElementById('price-max-label').textContent = values[1];
-// });
+    const params = new URLSearchParams();
 
-document.getElementById('search-button').addEventListener('click', function () {
-    const query = document.getElementById('search-bar').value.trim();
-    const searchType = document.getElementById('search-type').value;
-
-    if (!query) {
-        alert("Por favor, ingresa un término de búsqueda.");
-        return;
+    if (searchType === "productos") {
+        const nombre = searchBar.value.trim();
+        if (nombre) {
+            params.append("nombre", nombre);
+        }
+    } else if (searchType === "categorias") {
+        const categoria = searchBar.value.trim();
+        if (categoria) {
+            params.append("categoria", categoria);
+        }
     }
 
-    let url = '';
-    if (searchType === 'productos') {
-        url = `/buscar_por_nombre?nombre=${encodeURIComponent(query)}`;
-    } else if (searchType === 'categorias') {
-        url = `/buscar_por_categoria?nombre_categoria=${encodeURIComponent(query)}`;
-    }
+    const url = `/buscar_productos?${params.toString()}`;
 
     fetch(url)
         .then(response => {
@@ -413,86 +397,72 @@ document.getElementById('search-button').addEventListener('click', function () {
             return response.json();
         })
         .then(data => {
-            const container = document.getElementById('product-container');
-            container.innerHTML = ''; 
+            const productContainer = document.getElementById("product-container");
+            productContainer.innerHTML = "";
 
             if (data.length === 0) {
-                container.innerHTML = '<p>No se encontraron resultados.</p>';
+                productContainer.innerHTML = `<p class="text-center text-muted">No se encontraron resultados.</p>`;
                 return;
             }
 
-            container.classList.add('row', 'g-3'); 
+            const rows = document.createElement("div");
+            rows.classList.add("row", "g-3");
 
             data.forEach(producto => {
-                const card = `
-                    <div class="col-md-4 col-lg-3">
-                        <div class="card shadow-sm h-100 border-0 position-relative">
-                            <img src="https://cdn-icons-png.flaticon.com/512/3240/3240782.png" 
-                                 alt="Icono de confirmación" 
-                                 class="position-absolute top-0 end-0 p-1" 
-                                 style="width: 30px; height: 30px;">
-                            <div class="card-body p-3">
-                                <h6 class="card-title text-truncate">${producto.nombre}</h6>
-                                <p class="mb-1 text-muted small">Precio: $${producto.precio}</p>
-                                <p class="text-muted small"><strong>Categoría:</strong> ${producto.Categoria_nombre || 'Sin categoría'}</p> 
-                            </div>
-                            <div class="card-footer d-flex justify-content-around py-2">
-                                <!-- Botón de Detalles -->
-                                <button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial(${producto.id})">Detalles</button>
+                const col = document.createElement("div");
+                col.classList.add("col-md-4", "col-lg-3");
 
-                                <!-- Botón de Actualizar -->
-                                <a href="/productos/actualizar/${producto.id}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                let botones = "";
 
-                                <!-- Botón de Eliminar (solo si tiene el estado correcto y permisos) -->
-                                ${producto.fk_estado == 2 && currentUserPermiso('desactivar_productos') ? `
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill" 
-                                            data-url="/productos/eliminar/${producto.id}" 
-                                            data-id="${producto.id}" 
-                                            onclick="eliminarProducto(this)">Eliminar</button>
-                                ` : ''}
-                            </div>
+                if (producto.botones.detalle) {
+                    botones += `<button class="btn btn-outline-info btn-sm rounded-pill" onclick="mostrarHistorial(${producto.id})">Detalles</button>`;
+                }
+                if (producto.botones.actualizar) {
+                    botones += `<a href="${producto.botones.actualizar}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>`;
+                }
+                if (producto.botones.eliminar_activar) {
+                    const accion = producto.estado === "Activo" ? "Eliminar" : "Activar";
+                    const clase = producto.estado === "Activo" ? "btn-outline-danger" : "btn-outline-success";
+                    botones += `<button class="btn ${clase} btn-sm rounded-pill" 
+                                    data-url="${producto.botones.eliminar_activar}" 
+                                    data-id="${producto.id}" 
+                                    onclick="${accion === "Eliminar" ? "eliminarProducto" : "activarProducto"}(this)">
+                                ${accion}
+                                </button>`;
+                }
+
+                col.innerHTML = `
+                    <div class="card shadow-sm h-100 border-0 position-relative">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3240/3240782.png" 
+                            alt="Icono de confirmación" 
+                            class="position-absolute top-0 end-0 p-1" 
+                            style="width: 30px; height: 30px;">
+                        <div class="card-body p-3">
+                            <h6 class="card-title text-truncate">${producto.nombre}</h6>
+                            <p class="mb-1 text-muted small">Precio: $${producto.precio}</p>
+                            <p class="text-muted small"><strong>Categoría:</strong> ${producto.categoria}</p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-around py-2">
+                            ${botones}
                         </div>
                     </div>
                 `;
 
-                container.innerHTML += card; 
+                rows.appendChild(col);
             });
+
+            productContainer.appendChild(rows);
         })
         .catch(error => {
-            console.error(error);
-            alert("Ocurrió un error al realizar la búsqueda.");
+            console.error("Error en la búsqueda:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Hubo un problema al realizar la búsqueda. Intenta nuevamente.",
+                confirmButtonText: "Aceptar"
+            });
         });
 });
-
-
-// // Filtrar por estado (activos/inactivos)
-// function filtrarProductos(estado) {
-//     const cards = document.querySelectorAll('.card');
-
-//     cards.forEach(card => {
-//         const esActivo = card.querySelector('.btn-outline-danger') !== null;
-
-//         if (estado === 'activos' && !esActivo) {
-//             card.style.display = 'none';
-//         } else if (estado === 'inactivos' && esActivo) {
-//             card.style.display = 'none';
-//         } else {
-//             card.style.display = '';
-//         }
-//     });
-// }
-
-// // Aplicar filtro de precio al hacer clic en el botón
-// document.getElementById('price-filter-button').addEventListener('click', function () {
-//     const [minPrice, maxPrice] = slider.noUiSlider.get().map(value => parseFloat(value.replace('$', '')));
-//     const cards = document.querySelectorAll('.card');
-
-//     cards.forEach(card => {
-//         const precio = parseFloat(card.querySelector('.text-muted').textContent.replace('Precio: $', ''));
-
-//         card.style.display = (precio >= minPrice && precio <= maxPrice) ? '' : 'none';
-//     });
-// });
     </script>
     <script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
 
