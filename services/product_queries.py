@@ -27,17 +27,21 @@ class ProductQueries:
             if not categoria or categoria.fk_estado != ESTADO_ACTIVO:
                 raise ValueError("La categoría no existe o no está activa.")
             
-            producto_existente = Productos.query.filter_by(nombre=nombre).first()
+            producto_existente = Productos.query.filter_by(nombre=nombre, fk_categoria=categoria_id).first()
             if producto_existente:
-                return None  
+               raise ValueError(f"El producto {nombre} ya existe en esta categoria")  
             
             nuevo_producto = Productos(fk_categoria=categoria_id, nombre=nombre, precio=precio, fk_estado=estado)
             db.session.add(nuevo_producto)
             db.session.commit()
             return nuevo_producto
+        except ValueError as ve:
+            db.session.rollback()
+            print(f"Error: {ve}")
+            raise ve
         except Exception as e:
             db.session.rollback()
-            print(f'Ocurrió un error: {e}')
+            print(f"Ocurrio un error inesperado: {e}")
             return None
 
     @staticmethod
@@ -135,21 +139,34 @@ class ProductQueries:
         return Productos.query.filter_by(id=id).first()
     
     @staticmethod
-    def buscar_productos(filtros):
+    def buscar_productos_filtros(nombre, categoria, estado_filtro, precio_min, precio_max):
         try:
             query = Productos.query.join(
                 Categorias, Productos.fk_categoria == Categorias.id, isouter=True
+            ).add_columns(
+                Productos.id.label("id"),
+                Productos.nombre.label("nombre"),
+                Productos.precio.label("precio"),
+                Categorias.nombre.label("categoria"),
+                Productos.fk_estado.label("estado"),
             )
 
-            if "nombre" in filtros:
-                query = query.filter(Productos.nombre.ilike(f"%{filtros['nombre']}%"))
-            if "categoria" in filtros:
-                query = query.filter(Categorias.nombre.ilike(f"%{filtros['categoria']}%"))
+            if nombre:
+                query = query.filter(Productos.nombre.ilike(f"%{nombre}%"))
+            if categoria:
+                query = query.filter(Categorias.nombre.ilike(f"%{categoria}%"))
+            if estado_filtro is not None:
+                query = query.filter(Productos.fk_estado == estado_filtro)
+            if precio_min is not None and precio_min >= 0:
+                query = query.filter(Productos.precio >= precio_min)
+            if precio_max is not None and precio_max >= precio_min:
+                query = query.filter(Productos.precio <= precio_max)
 
             return query.all()
         except Exception as e:
-            print(f"Error en buscar_productos: {e}")
+            print(f"Error en buscar_productos_filtros: {e}")
             return []
+
 
 
     
