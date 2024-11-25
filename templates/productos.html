@@ -12,7 +12,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
 
 
+
 {% include 'header.html' %}
+
+
 
 <div class="container mt-4">
     {% if current_user.is_authenticated and current_user|tiene_permiso('agregar_productos') %}
@@ -39,21 +42,48 @@
         </form>
     </div>
     {% endif %}
-    
 
-    <div class="input-group mb-4">
-        <select id="search-type" class="form-select form-select-sm" style="width: auto; max-width: 150px;">
-            <option value="productos" selected>Productos</option>
-            <option value="categorias">Categorías</option>
-        </select>
-        <input id="search-bar" type="text" class="form-control form-control-sm" placeholder="Buscar..." style="max-width: 250px;">
-        <button id="search-button" class="btn btn-primary btn-sm">Buscar</button>
+    <div class="d-flex justify-content-center mb-4">
+        <div class="input-group" style="max-width: 500px;">
+            <select id="search-type" class="form-select form-select-sm" style="width: auto;">
+                <option value="productos" selected>Productos</option>
+                <option value="categorias">Categorías</option>
+            </select>
+            <input id="search-bar" type="text" class="form-control form-control-sm" placeholder="Buscar...">
+            <button id="search-button" class="btn btn-primary btn-sm">Buscar</button>
+        </div>
     </div>
     
-    <div class="d-flex flex-column mb-4">
-        <div class="product-container" id="product-container"> 
+    <div class="container mb-4">
+        <div class="mb-3 text-center">
+            <label for="precio-range" class="form-label fw-bold">Rango de Precios</label>
+            <div>
+                <input type="checkbox" id="activar-precio" class="form-check-input">
+                <label for="activar-precio" class="form-check-label">Aplicar filtro de precio</label>
+            </div>
+            <div id="precio-filtro" class="d-flex flex-column align-items-center mt-3">
+                <input type="range" class="form-range w-50" id="precio-range" min="0" max="10000000" step="50000" style="max-width: 300px;">
+                <div class="d-flex justify-content-between position-relative w-50" style="max-width: 300px;">
+                    <span id="precio-min" class="text-muted small">Min ($0)</span>
+                    <span id="precio-max" class="text-muted small" style="position: absolute; right: 0;">Max ($10M)</span>
+                </div>
+                <p id="precio-valor" class="text-center mt-2">Precio: $0</p>
+            </div>
+        </div>
+    </div>
+    
+    
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="text-left text-primary">Tus productos:</h4>
+            <div>
+                <button id="filter-activos" class="btn btn-outline-success btn-sm mx-1">Activos</button>
+                <button id="filter-inactivos" class="btn btn-outline-danger btn-sm mx-1">Eliminados</button>
+                <button id="filter-todos" class="btn btn-outline-primary btn-sm mx-1">Todos</button>
+            </div>
+        </div>
+    
+        <div class="product-container" id="product-container">
             <div class="container mt-4">
-                <h4 class="text-left text-primary mb-3">Tus productos:</h4>
                 <div class="row g-3">
                     {% for producto in productos %}
                     <div class="col-md-4 col-lg-3">
@@ -65,7 +95,7 @@
                             <div class="card-body p-3">
                                 <h6 class="card-title text-truncate">{{ producto.nombre }}</h6>
                                 <p class="mb-1 text-muted small">Precio: ${{ producto.precio }}</p>
-                                <p class="text-muted small"><strong>Categoría:</strong> {{ producto.categorias.nombre }}</p> 
+                                <p class="text-muted small"><strong>Categoría:</strong> {{ producto.categorias.nombre }}</p>
                             </div>
                             <div class="card-footer d-flex justify-content-around py-2">
                                 {% if current_user.is_authenticated and current_user|tiene_permiso('historial_productos') %}
@@ -93,6 +123,8 @@
             </div>
         </div>
     </div>
+    
+    
     
 
     <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
@@ -166,31 +198,33 @@
         </ul>
     </nav>
 
-<style>
-    .product-container {
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-}
-#search-bar {
-        max-width: 250px; 
-    }
-
-    #search-type {
-        width: auto; 
-        max-width: 150px;
-    }
-    #search-button {
-        padding: 0.375rem 0.75rem;
-    }
-
-    .input-group {
-        display: flex;
-        justify-content: flex-start;
-        gap: 10px;
-    }
-</style>
+    <style>
+        #precio-filtro {
+            display: none;
+        }
+        .product-container {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        #search-bar {
+            max-width: 250px;
+        }
+        #search-type {
+            width: auto;
+            max-width: 150px;
+        }
+        #search-button {
+            padding: 0.375rem 0.75rem;
+        }
+        .input-group {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+    </style>
+    
     
     <script>
     document.querySelector("#form-agregar-producto").onsubmit = async function(event) {
@@ -369,9 +403,66 @@ function activarProducto(element) {
         }
     });
 }
+
+document.getElementById("filter-activos").addEventListener("click", function () {
+    cambiarEstadoBotones("activo");
+    realizarBusqueda("activo");
+});
+
+document.getElementById("filter-inactivos").addEventListener("click", function () {
+    cambiarEstadoBotones("inactivo");
+    realizarBusqueda("inactivo");
+});
+
+document.getElementById("filter-todos").addEventListener("click", function () {
+    cambiarEstadoBotones("");
+    realizarBusqueda("");
+});
+
 document.getElementById("search-button").addEventListener("click", function () {
+    realizarBusqueda("");
+});
+
+document.getElementById("activar-precio").addEventListener("change", function () {
+    const precioFiltro = document.getElementById("precio-filtro");
+    if (this.checked) {
+        precioFiltro.style.display = "flex"; 
+    } else {
+        precioFiltro.style.display = "none"; 
+    }
+});
+
+const precioRange = document.getElementById("precio-range");
+const precioValorLabel = document.getElementById("precio-valor");
+const precioMinLabel = document.getElementById("precio-min");
+const precioMaxLabel = document.getElementById("precio-max");
+
+function actualizarEtiquetasRango() {
+    const min = parseFloat(precioRange.min);
+    const max = parseFloat(precioRange.max);
+
+    precioMinLabel.textContent = `Min ($${min.toLocaleString()})`;
+    precioMaxLabel.textContent = `Max ($${max.toLocaleString()})`;
+}
+actualizarEtiquetasRango();
+
+
+precioRange.addEventListener("input", function () {
+    const valor = parseFloat(precioRange.value);
+    precioValorLabel.textContent = `Precio: $${valor.toLocaleString()}`;
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const precioFiltro = document.getElementById("precio-filtro");
+    const checkbox = document.getElementById("activar-precio");
+    precioFiltro.style.display = checkbox.checked ? "flex" : "none";
+});
+
+function realizarBusqueda(estado) {
     const searchBar = document.getElementById("search-bar");
     const searchType = document.getElementById("search-type").value;
+    const precioMax = parseFloat(precioRange.value);
+    const aplicarPrecio = document.getElementById("activar-precio").checked; 
 
     const params = new URLSearchParams();
 
@@ -385,6 +476,14 @@ document.getElementById("search-button").addEventListener("click", function () {
         if (categoria) {
             params.append("categoria", categoria);
         }
+    }
+
+    if (estado) {
+        params.append("estado", estado);
+    }
+
+    if (aplicarPrecio) { 
+        params.append("precio_max", precioMax);
     }
 
     const url = `/buscar_productos?${params.toString()}`;
@@ -426,9 +525,7 @@ document.getElementById("search-button").addEventListener("click", function () {
                     botones += `<button class="btn ${clase} btn-sm rounded-pill" 
                                     data-url="${producto.botones.eliminar_activar}" 
                                     data-id="${producto.id}" 
-                                    onclick="${accion === "Eliminar" ? "eliminarProducto" : "activarProducto"}(this)">
-                                ${accion}
-                                </button>`;
+                                    onclick="${accion === "Eliminar" ? "eliminarProducto" : "activarProducto"}(this)">${accion}</button>`;
                 }
 
                 col.innerHTML = `
@@ -462,7 +559,26 @@ document.getElementById("search-button").addEventListener("click", function () {
                 confirmButtonText: "Aceptar"
             });
         });
-});
+}
+
+function cambiarEstadoBotones(estado) {
+    document.getElementById("filter-activos").classList.remove("btn-primary", "active", "btn-outline-success", "btn-outline-danger");
+    document.getElementById("filter-inactivos").classList.remove("btn-primary", "active", "btn-outline-success", "btn-outline-danger");
+    document.getElementById("filter-todos").classList.remove("btn-primary", "active", "btn-outline-success", "btn-outline-danger");
+
+    if (estado === "activo") {
+        document.getElementById("filter-activos").classList.add("btn-outline-success", "active");
+    } else if (estado === "inactivo") {
+        document.getElementById("filter-inactivos").classList.add("btn-outline-danger", "active");
+    } else {
+        document.getElementById("filter-todos").classList.add("btn-outline-primary", "active");
+    }
+}
+
+
+
+
+
     </script>
     <script src="{{url_for('static', filename='js/cierreinactividad.js')}}"></script>
 

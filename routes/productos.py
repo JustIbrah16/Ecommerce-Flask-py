@@ -60,10 +60,12 @@ def add_productos():
             nuevo_producto = ProductQueries.agregar_producto(nombre, precio, categoria_id, estado)
             if nuevo_producto:
                 return redirect(url_for('productos.index'))
-            else:
-                return jsonify({'error': f'El producto {nombre} ya existe'}), 400
         except ValueError as ve:
             return jsonify({'error': str(ve)}), 400
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            return jsonify({'error': 'Ocurrio un eror al intentar agregar el producto'}), 500
+            
 
 @productos.route("/update_productos/<id>", methods=['POST', 'GET'])
 @login_required
@@ -152,24 +154,19 @@ def buscar_productos():
     try:
         nombre = request.args.get("nombre", "").strip()
         categoria = request.args.get("categoria", "").strip()
+        estado = request.args.get("estado", "").strip()  
+        precio_min = request.args.get("precio_min", type=float, default=0)
+        precio_max = request.args.get("precio_max", type=float, default=10000000)
 
-        query = Productos.query.join(
-            Categorias, Productos.fk_categoria == Categorias.id, isouter=True
-        ).add_columns(
-            Productos.id.label("id"),
-            Productos.nombre.label("nombre"),
-            Productos.precio.label("precio"),
-            Categorias.nombre.label("categoria"),
-            Productos.fk_estado.label("estado"),
-        )
-        if nombre:
-            query = query.filter(Productos.nombre.ilike(f"%{nombre}%"))
-        if categoria:
-            query = query.filter(Categorias.nombre.ilike(f"%{categoria}%"))
+        estado_filtro = None
+        if estado == "activo":
+            estado_filtro = ESTADO_ACTIVO
+        elif estado == "inactivo":
+            estado_filtro = ESTADO_INACTIVO
 
-        productos = query.all()
-        resultados = []
+        productos = ProductQueries.buscar_productos_filtros(nombre, categoria, estado_filtro, precio_min, precio_max)
         
+        resultados = []
         for p in productos:
             tiene_permiso_actualizar = tiene_permiso_filter(current_user, 'actualizar_productos')
             tiene_permiso_eliminar = tiene_permiso_filter(current_user, 'desactivar_productos')
@@ -200,4 +197,5 @@ def buscar_productos():
     except Exception as e:
         print(f"Error en buscar_productos: {e}")
         return jsonify({"error": "Error al buscar productos."}), 500
+
 
