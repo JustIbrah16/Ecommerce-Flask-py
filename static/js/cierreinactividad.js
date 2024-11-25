@@ -1,4 +1,4 @@
-const idleTimeLimit = 600000; 
+const idleTimeLimit = 3600000; 
     let idleTimer;
 
     

@@ -36,7 +36,7 @@ app.config['MAIL_USERNAME'] = 'ecommerceflask@gmail.com'
 app.config['MAIL_PASSWORD'] = 'rcte wjdz kswl haxi'
 mail = Mail(app)
 
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 
 db.init_app(app)
 
