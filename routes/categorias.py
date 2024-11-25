@@ -25,7 +25,6 @@ def index():
         visible_pages=visible_pages
     )
 
-
 @categorias.route("/add", methods=['POST'])
 @login_required
 @requiere_permiso('agregar_categorias')
@@ -40,8 +39,6 @@ def add():
             return redirect(url_for('categorias.index'))
         else:
             return jsonify({'error': 'Esta categoria ya está creada'}), 400
-
-
 
 @categorias.route("/update/<id>", methods=['POST', 'GET'])
 @login_required
@@ -97,5 +94,59 @@ def obtener_historial_categorias(categoria_id):
 
     return jsonify(response)
 
+@categorias.route("/buscar", methods=['GET'])
+@login_required
+@requiere_permiso('mostrar_categorias')
+def buscar():
+    nombre = request.args.get('nombre', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
 
+    categorias_filtradas = CategoryQueries.buscar_categorias_por_nombre(nombre, page, per_page)
+
+    if not categorias_filtradas:
+        return jsonify({'error': 'No se encontraron categorías.'}), 404
+
+    resultado = [
+        {
+            'id': categoria.id,
+            'nombre': categoria.nombre,
+            'fk_estado': categoria.fk_estado,
+        }
+        for categoria in categorias_filtradas.items
+    ]
+
+    return jsonify({
+        'categorias': resultado,
+        'page': categorias_filtradas.page,
+        'total_pages': categorias_filtradas.pages,
+    })
+
+@categorias.route("/filtrar", methods=['GET'])
+@login_required
+@requiere_permiso('mostrar_categorias')
+def filtrar_por_estado():
+    estado = request.args.get('estado', 'todos').strip().lower()
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+
+    categorias_filtradas = CategoryQueries.filtrar_categorias_por_estado(estado, page, per_page)
+
+    if not categorias_filtradas:
+        return jsonify({'error': 'No se encontraron categorías.'}), 404
+
+    resultado = [
+        {
+            'id': categoria.id,
+            'nombre': categoria.nombre,
+            'fk_estado': categoria.fk_estado,
+        }
+        for categoria in categorias_filtradas.items
+    ]
+
+    return jsonify({
+        'categorias': resultado,
+        'page': categorias_filtradas.page,
+        'total_pages': categorias_filtradas.pages,
+    })
 

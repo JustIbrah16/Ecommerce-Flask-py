@@ -121,6 +121,31 @@ class CategoryQueries:
             print(f"Error al obtener el historial de la categoría [id_categoria]: {e}")
             return []
         
+    @staticmethod
+    def buscar_categorias_por_nombre(nombre, page=1, per_page=6):
+        try:
+            query = Categorias.query.filter(Categorias.nombre.ilike(f"%{nombre}%"))
+            return query.paginate(page=page, per_page=per_page, error_out=False)
+        except Exception as e:
+            print(f"Ocurrió un error al buscar categorías: {e}")
+            return None
+        
+    @staticmethod
+    def filtrar_categorias_por_estado(estado, page=1, per_page=6):
+        try:
+            query = Categorias.query
+
+            if estado == 'activos':
+                query = query.filter(Categorias.fk_estado == ESTADO_ACTIVO)
+            elif estado == 'inactivos':
+                query = query.filter(Categorias.fk_estado == ESTADO_INACTIVO)
+
+            return query.paginate(page=page, per_page=per_page, error_out=False)
+        except Exception as e:
+            print(f"Ocurrió un error al filtrar categorías: {e}")
+            return None
+
+        
     
 
 

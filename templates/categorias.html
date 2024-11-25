@@ -26,6 +26,45 @@
         </form>        
     </div>
     {% endif %}
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center">
+                <input 
+                    id="search-bar" 
+                    type="text" 
+                    class="form-control form-control-sm" 
+                    placeholder="Buscar categoría..." 
+                    style="max-width: 300px;"
+                >
+                <button 
+                    class="btn btn-primary btn-sm ms-2" 
+                    onclick="realizarBusquedaCategorias()" 
+                    style="border-radius: 5px;"
+                >
+                    Buscar
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 d-flex justify-content-end">
+            <div class="d-flex align-items-center">
+                <button id="btn-todos" class="btn btn-outline-primary btn-sm me-2" onclick="filtrarCategorias('todos')">Todos</button>
+                <button id="btn-activos" class="btn btn-outline-success btn-sm me-2" onclick="filtrarCategorias('activos')">Activos</button>
+                <button id="btn-inactivos" class="btn btn-outline-danger btn-sm" onclick="filtrarCategorias('inactivos')">Inactivos</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div id="category-container" class="row g-3">
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
     <div class="card shadow-sm p-3">
         <h4 class="text-center text-primary mb-3">Categorías Disponibles</h4>
         <ul class="list-group">
@@ -89,10 +128,12 @@
             </ul>
         </nav>
     </div>
-    
+</div>
 
 
-    <div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
+
+
+<div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -123,10 +164,13 @@
                 </div>
             </div>
         </div>
-    </div>
 </div>
 
 <style>
+    .input-group {
+    max-width: 320px;
+    margin: 0 auto; 
+}
     .card-title {
         font-size: 1rem;
         font-weight: bold;
@@ -286,10 +330,148 @@ function activarCategoria(element) {
     });
 }
 
+document.getElementById("search-button").addEventListener("click", function () {
+        realizarBusquedaCategorias();
+    });
 
-           
-            
-        </script>
+    async function realizarBusquedaCategorias() {
+    const searchBar = document.getElementById("search-bar");
+    const query = searchBar.value.trim();
+    const url = `/buscar?nombre=${encodeURIComponent(query)}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Error al buscar categorías.");
+        }
+
+        const data = await response.json();
+        const categoryContainer = document.getElementById("category-container");
+        categoryContainer.innerHTML = "";
+
+        if (!data.categorias || data.categorias.length === 0) {
+            categoryContainer.innerHTML = `<p class="text-center text-muted">No se encontraron resultados.</p>`;
+            return;
+        }
+
+        data.categorias.forEach(categoria => {
+            const col = document.createElement("div");
+            col.classList.add("col-md-4");
+
+            let botones = `
+                <a href="/update/${categoria.id}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                <button class="btn btn-outline-info btn-sm rounded-pill" data-id="${categoria.id}" data-nombre="${categoria.nombre}" onclick="mostrarHistorial(this)">Detalles</button>
+            `;
+
+            if (categoria.fk_estado === 2) {
+                botones += `
+                    <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="/delete/${categoria.id}" onclick="eliminarCategoria(this)">Eliminar</button>
+                `;
+            } else {
+                botones += `
+                    <button class="btn btn-outline-success btn-sm rounded-pill" data-url="/activar/${categoria.id}" onclick="activarCategoria(this)">Activar</button>
+                `;
+            }
+
+            col.innerHTML = `
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate">${categoria.nombre}</h6>
+                        <div class="btn-group" style="gap: 0.5rem;">
+                            ${botones}
+                        </div>
+                    </div>
+                </div>
+            `;
+            categoryContainer.appendChild(col);
+        });
+    } catch (error) {
+        console.error("Error al realizar la búsqueda:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Hubo un problema al realizar la búsqueda. Intenta nuevamente.",
+        });
+    }
+}
+async function filtrarCategorias(estado) {
+    resetearBotones();
+    document.getElementById(`btn-${estado}`).classList.add('active');
+
+    const url = `/filtrar?estado=${estado}`;
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Error al obtener categorías filtradas.");
+        }
+
+        const data = await response.json();
+        const categoryContainer = document.getElementById("category-container");
+        categoryContainer.innerHTML = ""; 
+
+        if (data.categorias.length === 0) {
+            categoryContainer.innerHTML = `<p class="text-center text-muted">No se encontraron resultados.</p>`;
+            return;
+        }
+
+        data.categorias.forEach(categoria => {
+            const col = document.createElement("div");
+            col.classList.add("col-md-4");
+
+            let botones = `
+                <a href="/update/${categoria.id}" class="btn btn-outline-warning btn-sm rounded-pill">Actualizar</a>
+                <button class="btn btn-outline-info btn-sm rounded-pill" data-id="${categoria.id}" data-nombre="${categoria.nombre}" onclick="mostrarHistorial(this)">Detalles</button>
+            `;
+
+            if (categoria.fk_estado === 2) {
+                botones += `
+                    <button class="btn btn-outline-danger btn-sm rounded-pill" data-url="/delete/${categoria.id}" onclick="eliminarCategoria(this)">Eliminar</button>
+                `;
+            } else {
+                botones += `
+                    <button class="btn btn-outline-success btn-sm rounded-pill" data-url="/activar/${categoria.id}" onclick="activarCategoria(this)">Activar</button>
+                `;
+            }
+
+            col.innerHTML = `
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate">${categoria.nombre}</h6>
+                        <div class="btn-group" style="gap: 0.5rem;">
+                            ${botones}
+                        </div>
+                    </div>
+                </div>
+            `;
+            categoryContainer.appendChild(col);
+        });
+    } catch (error) {
+        console.error("Error al realizar la búsqueda:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Hubo un problema al obtener las categorías filtradas. Intenta nuevamente.",
+        });
+    }
+}
+
+function resetearBotones() {
+    const botones = document.querySelectorAll('.btn-outline-primary, .btn-outline-success, .btn-outline-danger');
+    botones.forEach(btn => {
+        btn.classList.remove('active');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    filtrarCategorias('todos');
+});
+
+
+</script>
+
 
     </div>
 </div>
