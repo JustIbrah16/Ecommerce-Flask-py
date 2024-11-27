@@ -40,11 +40,25 @@ def filtrar_pedidos():
     estado_id = request.form.get('estado')
     fecha = request.form.get('fecha')
 
-    pedidos_filtrados = OrderQueries.filtrar_pedidos(estado_id, fecha)
-    estados = Estados_queries.obtener_estados()
-    productos = ProductQueries.obtener_productos_disponibles()
+    page_pedidos = request.args.get('pedidos_page', 1, type=int)
+    pedidos_per_page = 8
+    pedidos_filtrados = OrderQueries.filtrar_pedidos(estado_id, fecha).paginate(page=page_pedidos, per_page=pedidos_per_page, error_out=False)
 
-    return render_template('index.html', pedidos=pedidos_filtrados, estados=estados, productos = productos)
+    page_productos = request.args.get('page', 1, type=int)
+    productos_per_page = 5
+    productos_paginate = ProductQueries.obtener_productos_disponibles().paginate(page=page_productos, per_page=productos_per_page, error_out=False)
+
+    estados = Estados_queries.obtener_estados()
+
+    return render_template(
+        'index.html',
+        pedidos=pedidos_filtrados.items,
+        estados=estados,
+        productos=productos_paginate.items,
+        pagination=productos_paginate,
+        pedidos_pagination=pedidos_filtrados
+    )
+
 
 @pedidos.route("/pedidos/<id>/detalles", methods=['GET'])
 @requiere_permiso('detalle_pedido')

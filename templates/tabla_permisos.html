@@ -103,40 +103,40 @@
             <div class="col-md-3 mb-3">
                 <div class="card text-center shadow-sm">
                     <div class="card-header bg-danger text-white rounded-top">
-                        Permisos para Eliminar
+                        Permisos de pedidos
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">{{ permisos_data | selectattr("eliminar", "equalto", True) | list | length }}</h5>
+                        
                     </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="card text-center shadow-sm">
                     <div class="card-header bg-success text-white rounded-top">
-                        Permisos de Activación
+                        Permisos de productos
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">{{ permisos_data | selectattr("activar", "equalto", True) | list | length }}</h5>
+                        
                     </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="card text-center shadow-sm">
                     <div class="card-header bg-warning text-white rounded-top">
-                        Permisos para Agregar
+                        Permisos de categorias
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">{{ permisos_data | selectattr("agregar", "equalto", True) | list | length }}</h5>
+                        
                     </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="card text-center shadow-sm">
                     <div class="card-header bg-info text-white rounded-top">
-                        Permisos para Actualizar
+                        Permisos revocados
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">{{ permisos_data | selectattr("actualizar", "equalto", True) | list | length }}</h5>
+                        
                     </div>
                 </div>
             </div>

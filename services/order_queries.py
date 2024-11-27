@@ -39,7 +39,8 @@ class OrderQueries:
             query = query.filter(Pedidos.fk_estado == estado_id)
         if fecha:
             query = query.filter(db.func.date(Pedidos.fecha) == fecha)
-        return query.all()
+        return query
+
 
     @staticmethod
     def obtener_detalles_pedido(pedido_id):

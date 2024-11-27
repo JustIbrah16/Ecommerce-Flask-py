@@ -48,9 +48,9 @@
                 </ul>
                 <nav aria-label="Paginación de productos">
                     <ul class="pagination justify-content-center mt-3">
-                        {% if pagination.has_prev %}
+                        {% if pagination and pagination.has_prev %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('main.index', page=pagination.prev_num) }}" aria-label="Anterior">
+                            <a class="page-link" href="?page={{ pagination.prev_num }}" aria-label="Anterior">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
@@ -67,16 +67,16 @@
                         {% if page_num == pagination.page %}
                         <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
                         {% else %}
-                        <li class="page-item"><a class="page-link" href="{{ url_for('main.index', page=page_num) }}">{{ page_num }}</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
                         {% endif %}
                         {% else %}
                         <li class="page-item disabled"><span class="page-link">…</span></li>
                         {% endif %}
                         {% endfor %}
                         
-                        {% if pagination.has_next %}
+                        {% if pagination and pagination.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('main.index', page=pagination.next_num) }}" aria-label="Siguiente">
+                            <a class="page-link" href="?page={{ pagination.next_num }}" aria-label="Siguiente">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
@@ -148,7 +148,6 @@
                                     <td class="text-center small">{{ pedido.id }}</td>
                                     <td class="text-center small">{{ pedido.fecha.strftime('%Y-%m-%d') }}</td>
                                     <td class="text-center small">${{ pedido.total }}</td>
-                                    <!-- Asignamos un id único para la versión -->
                                     <td class="text-center small" id="version-{{ pedido.id }}" name="version">{{ pedido.version }}</td>
                                     <td class="text-center">
                                         <span id="estado-{{ pedido.id }}" class="badge rounded-pill text-bg-{{ 'success' if pedido.estado.nombre == 'Entregado' else 'secondary' }} small">{{ pedido.estado.nombre }}</span>
@@ -157,7 +156,6 @@
                                         {% if current_user.is_authenticated and current_user|tiene_permiso('actualizar_pedido') %}
                                         <form id="form-{{ pedido.id }}" action="{{ url_for('pedidos.actualizar_estado', pedido_id=pedido.id) }}" method="POST">
                                             <input type="hidden" name="version" value="{{ pedido.version }}"> 
-                                            <!-- Botón de actualización -->
                                             <button type="button" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-2 botonActualizar" 
                                             id="update-btn-{{ pedido.id }}" 
                                             data-pedido-id="{{ pedido.id }}"
@@ -184,9 +182,9 @@
                             
                         </table>
                         <br>
-                        <nav>
+                        <nav aria-label="Paginación de pedidos">
                             <ul class="pagination justify-content-center">
-                                {% if pedidos_pagination.has_prev %}
+                                {% if pedidos_pagination and pedidos_pagination.has_prev %}
                                 <li class="page-item">
                                     <a class="page-link" href="?pedidos_page={{ pedidos_pagination.prev_num }}" aria-label="Anterior">
                                         &laquo; Anterior
@@ -202,7 +200,7 @@
                                 <li class="page-item disabled"><span class="page-link">…</span></li>
                                 {% endif %}
                                 {% endfor %}
-                                {% if pedidos_pagination.has_next %}
+                                {% if pedidos_pagination and pedidos_pagination.has_next %}
                                 <li class="page-item">
                                     <a class="page-link" href="?pedidos_page={{ pedidos_pagination.next_num }}" aria-label="Siguiente">
                                         Siguiente &raquo;
@@ -399,8 +397,7 @@ document.querySelectorAll('.btn-outline-primary').forEach(button => {
                     const detalle = document.createElement('div');
                     detalle.classList.add('detalle-cambio');
 
-                    // Formatear la fecha
-                    const fecha = new Date(cambio.fecha_cambio); // 'Wed, 13 Nov 2024 11:42:16 GMT'
+                    const fecha = new Date(cambio.fecha_cambio); 
                     const opciones = { 
                         weekday: 'long', 
                         year: 'numeric', 
