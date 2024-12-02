@@ -669,7 +669,7 @@ async function enviarPedido() {
         return;
     }
 
-    console.log("Datos enviados:", productos_carrito); 
+    console.log("Datos enviados:", productos_carrito);
 
     try {
         const respuesta = await fetch(window.location.origin + '/finalizar_compra', {
@@ -688,6 +688,11 @@ async function enviarPedido() {
                 showConfirmButton: false,
                 timer: 1500
             });
+
+            productos_carrito = [];
+            actualizarLocalStorage(); 
+            renderCarrito();         
+            actualizarTotal();        
 
             setTimeout(() => {
                 window.location.href = data.redirect;
@@ -714,6 +719,7 @@ async function enviarPedido() {
         });
     }
 }
+
 
 const btnFinalizarCompra = document.getElementById('btnFinalizarCompra');
 if (btnFinalizarCompra) {

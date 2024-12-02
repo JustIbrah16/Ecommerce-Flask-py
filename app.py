@@ -60,39 +60,32 @@ def reset_password_request():
     if request.method == 'POST':
         email = request.form['email']
 
-        # Verificar si el campo de correo electrónico está vacío
-        if email and email.strip():  # Si el correo no está vacío
+        if email and email.strip(): 
             user = Usuarios.query.filter_by(email=email).first()
 
-            if user:  # Si el usuario existe en la base de datos
+            if user:  
                 s = Serializer(app.config['SECRET_KEY'])
                 token = s.dumps({'email': email}, salt='reset-password')
                 reset_url = url_for('reset_password', token=token, _external=True)
 
-                # Crear y enviar el mensaje de correo
                 message = Message('Restablecimiento de contraseña',
                                   sender='no-reply@tuapp.com',
                                   recipients=[email])
                 message.body = f'Haz clic en el siguiente enlace para restablecer tu contraseña: {reset_url}'
                 mail.send(message)
 
-                # Mensaje de éxito
                 flash('Te hemos enviado un enlace para restablecer tu contraseña por correo electrónico', 'info')
 
-                # Redirigir a la página de login
                 return redirect(url_for('usuarios.login'))
 
             else:
-                # Si el correo no está en la base de datos
                 flash('No encontramos ese correo electrónico en nuestros registros', 'error')
-                return render_template('reset_request.html')  # Volver a la misma página
+                return render_template('reset_request.html')  
 
         else:
-            # Si el campo de correo electrónico está vacío
             flash('Por favor ingresa un correo electrónico válido', 'error')
-            return render_template('reset_request.html')  # Volver a la misma página
+            return render_template('reset_request.html')  
 
-    # Si la solicitud es GET o si el POST no pasa las validaciones
     return render_template('reset_request.html')
 
 

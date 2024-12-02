@@ -13,10 +13,8 @@
             </button>
         </div>
         <div class="card-body">
-            <!-- Permisos Asignados -->
             <h5 class="text-primary mt-4 mb-3 fw-semibold">Permisos del Rol: {{ rol.nombre }}</h5>
 
-<!-- Productos -->
 <h6 class="mt-4">Productos</h6>
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-primary text-center">
@@ -45,7 +43,6 @@
     </tbody>
 </table>
 
-<!-- Categorías -->
 <h6 class="mt-4">Categorías</h6>
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-primary text-center">
@@ -74,7 +71,6 @@
     </tbody>
 </table>
 
-<!-- Pedidos -->
 <h6 class="mt-4">Pedidos</h6>
 <table class="table table-bordered table-hover align-middle">
     <thead class="table-primary text-center">
@@ -103,13 +99,11 @@
     </tbody>
 </table>
 
-<!-- Permisos Generales -->
 
         </div>
     </div>
 </div>
 
-<!-- Modal de Ayuda -->
 <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -133,7 +127,6 @@
 </div>
 
 <script>
-    // Función para revocar un permiso
     function revocarPermiso(rolId, permisoId) {
     Swal.fire({
         title: "¿Estás seguro?",
@@ -156,10 +149,8 @@
                 if (data.status === "success") {
                     Swal.fire("¡Revocado!", data.message, "success")
                         .then(() => {
-                            // Obtener la fila del permiso
                             const permisoRow = document.getElementById(`permiso-${permisoId}`);
                             
-                            // Mantener el nombre del permiso y cambiar solo el botón
                             permisoRow.innerHTML = `
                                 <td class="text-truncate">${permisoRow.querySelector('td').textContent}</td>
                                 <td class="text-center">
@@ -177,7 +168,6 @@
     });
 }
 
-// Función para asignar un permiso
 function asignarPermiso(rolId, permisoId) {
     Swal.fire({
         title: "¿Estás seguro?",
@@ -200,10 +190,8 @@ function asignarPermiso(rolId, permisoId) {
                 if (data.status === "success") {
                     Swal.fire("¡Asignado!", data.message, "success")
                         .then(() => {
-                            // Obtener la fila del permiso
                             const permisoRow = document.getElementById(`permiso-${permisoId}`);
                             
-                            // Mantener el nombre del permiso y cambiar solo el botón
                             permisoRow.innerHTML = `
                                 <td class="text-truncate">${permisoRow.querySelector('td').textContent}</td>
                                 <td class="text-center">
