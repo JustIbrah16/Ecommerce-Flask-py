@@ -1,0 +1,794 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 19-03-2025 a las 21:28:12
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `flask_db`
+--
+CREATE DATABASE IF NOT EXISTS `flask_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `flask_db`;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `categorias`
+--
+
+CREATE TABLE `categorias` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `fk_estado` int(2) UNSIGNED DEFAULT NULL,
+  `nombre` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `categorias`
+--
+
+INSERT INTO `categorias` (`id`, `fk_estado`, `nombre`) VALUES
+(132, 2, 'Habitaciones'),
+(133, 2, 'Comida'),
+(138, 2, 'Hogar'),
+(139, 2, 'Vida'),
+(140, 2, 'asdasdasdas'),
+(141, 1, 'zapatos'),
+(142, 2, 'Baño');
+
+--
+-- Disparadores `categorias`
+--
+DELIMITER $$
+CREATE TRIGGER `insert_categorias` AFTER INSERT ON `categorias` FOR EACH ROW BEGIN
+    DECLARE temp_user_id INT;
+
+    -- Asegúrate de que solo se toma un id_user
+    SELECT id_user INTO temp_user_id FROM tabla_temporal ORDER BY id DESC LIMIT 1;
+
+    -- Solo inserta en historial_categorias si temp_user_id no es NULL
+    IF temp_user_id IS NOT NULL THEN
+        INSERT INTO historial_categorias (fk_categoria, fk_user, cambio, fecha, estado_antiguo, estado_nuevo, nombre_anterior, nombre_nuevo)
+        VALUES (NEW.id, temp_user_id, 'creacion', NOW(), '', NEW.fk_estado ,'', NEW.nombre);
+    END IF;
+
+    -- Eliminar el registro de tabla_temporal
+    DELETE FROM tabla_temporal;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `update_categorias` AFTER UPDATE ON `categorias` FOR EACH ROW BEGIN
+    DECLARE temp_user_id INT;
+
+    -- Asegúrate de que solo se toma un id_user
+    SELECT id_user INTO temp_user_id FROM tabla_temporal ORDER BY id DESC LIMIT 1;
+
+    -- Solo inserta en historial_categorias si temp_user_id no es NULL
+    IF temp_user_id IS NOT NULL THEN
+        INSERT INTO historial_categorias (fk_categoria, fk_user, cambio, fecha, estado_antiguo, estado_nuevo, nombre_anterior, nombre_nuevo)
+        VALUES (NEW.id, temp_user_id, 'actualizacion', NOW(), OLD.fk_estado, NEW.fk_estado, OLD.nombre, NEW.nombre);
+    END IF;
+
+    -- Eliminar el registro de tabla_temporal
+    DELETE FROM tabla_temporal;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_pedido`
+--
+
+CREATE TABLE `detalle_pedido` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `fk_pedido` int(11) UNSIGNED NOT NULL,
+  `fk_producto` int(11) UNSIGNED NOT NULL,
+  `subtotal` decimal(12,2) UNSIGNED NOT NULL,
+  `cantidad` int(2) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_pedido`
+--
+
+INSERT INTO `detalle_pedido` (`id`, `fk_pedido`, `fk_producto`, `subtotal`, `cantidad`) VALUES
+(195, 95, 96, 40000.00, 1),
+(196, 95, 97, 99999999.99, 1),
+(197, 96, 97, 99999999.99, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `estado`
+--
+
+CREATE TABLE `estado` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `nombre` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `estado`
+--
+
+INSERT INTO `estado` (`id`, `nombre`) VALUES
+(1, 'inactivo'),
+(2, 'activo'),
+(3, 'espera'),
+(4, 'preparacion'),
+(5, 'reparto'),
+(6, 'entregado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `grupos`
+--
+
+CREATE TABLE `grupos` (
+  `id` int(2) NOT NULL,
+  `nombre` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `grupos`
+--
+
+INSERT INTO `grupos` (`id`, `nombre`) VALUES
+(1, 'productos'),
+(2, 'categorias'),
+(3, 'pedidos'),
+(4, 'permisos');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `historial_categorias`
+--
+
+CREATE TABLE `historial_categorias` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `fk_categoria` int(2) UNSIGNED NOT NULL,
+  `fk_user` int(2) UNSIGNED DEFAULT NULL,
+  `cambio` varchar(100) NOT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `estado_antiguo` int(2) UNSIGNED NOT NULL,
+  `estado_nuevo` int(2) UNSIGNED NOT NULL,
+  `nombre_anterior` varchar(100) NOT NULL,
+  `nombre_nuevo` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `historial_categorias`
+--
+
+INSERT INTO `historial_categorias` (`id`, `fk_categoria`, `fk_user`, `cambio`, `fecha`, `estado_antiguo`, `estado_nuevo`, `nombre_anterior`, `nombre_nuevo`) VALUES
+(307, 132, 40, 'actualizacion', '2025-03-14 19:30:50', 1, 2, 'Habitaciones', 'Habitaciones'),
+(308, 132, 40, 'actualizacion', '2025-03-14 19:31:03', 2, 1, 'Habitaciones', 'Habitaciones'),
+(309, 132, 40, 'actualizacion', '2025-03-14 19:49:33', 1, 2, 'Habitaciones', 'Habitaciones'),
+(310, 141, 40, 'actualizacion', '2025-03-14 20:08:03', 2, 1, 'zapatos', 'zapatos');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `historial_pedidos`
+--
+
+CREATE TABLE `historial_pedidos` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `fk_pedido` int(2) UNSIGNED NOT NULL,
+  `fk_user` int(2) UNSIGNED DEFAULT NULL,
+  `fk_estado` int(2) UNSIGNED NOT NULL,
+  `cambio` varchar(100) NOT NULL,
+  `fecha_cambio` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `estado_antiguo` int(2) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `historial_productos`
+--
+
+CREATE TABLE `historial_productos` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `fk_producto` int(2) UNSIGNED NOT NULL,
+  `fk_user` int(2) UNSIGNED DEFAULT NULL,
+  `cambio` varchar(100) DEFAULT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `estado_antiguo` int(2) UNSIGNED NOT NULL,
+  `estado_nuevo` int(2) UNSIGNED NOT NULL,
+  `nombre_anterior` varchar(100) NOT NULL,
+  `nombre_nuevo` varchar(100) NOT NULL,
+  `precio_antiguo` decimal(10,2) UNSIGNED DEFAULT NULL,
+  `precio_actual` decimal(10,2) UNSIGNED NOT NULL,
+  `categoria_antigua` int(2) UNSIGNED DEFAULT NULL,
+  `categoria_actual` int(2) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `historial_productos`
+--
+
+INSERT INTO `historial_productos` (`id`, `fk_producto`, `fk_user`, `cambio`, `fecha`, `estado_antiguo`, `estado_nuevo`, `nombre_anterior`, `nombre_nuevo`, `precio_antiguo`, `precio_actual`, `categoria_antigua`, `categoria_actual`) VALUES
+(269, 87, 40, 'actualizacion', '2025-03-14 19:24:16', 1, 2, 'Armario', 'Armario', 2000000.00, 2000000.00, 132, 132),
+(270, 88, 40, 'actualizacion', '2025-03-14 19:52:19', 2, 1, 'Ventilador', 'Ventilador', 500000.00, 500000.00, 132, 132),
+(271, 96, 40, 'actualizacion', '2025-03-14 19:52:22', 2, 1, 'Queso', 'Queso', 40000.00, 40000.00, 133, 133),
+(272, 88, 40, 'actualizacion', '2025-03-14 20:08:11', 1, 2, 'Ventilador', 'Ventilador', 500000.00, 500000.00, 132, 132);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `imagenes_categorias`
+--
+
+CREATE TABLE `imagenes_categorias` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `categoria_id` int(10) UNSIGNED NOT NULL,
+  `ruta` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `pedidos`
+--
+
+CREATE TABLE `pedidos` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `fk_estado` int(11) UNSIGNED NOT NULL,
+  `total` decimal(12,2) UNSIGNED NOT NULL,
+  `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `version` int(2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pedidos`
+--
+
+INSERT INTO `pedidos` (`id`, `fk_estado`, `total`, `fecha`, `version`) VALUES
+(95, 3, 100039999.99, '2025-02-11 02:30:44', 1),
+(96, 3, 99999999.99, '2025-02-11 02:36:50', 1);
+
+--
+-- Disparadores `pedidos`
+--
+DELIMITER $$
+CREATE TRIGGER `insert_pedidos` AFTER INSERT ON `pedidos` FOR EACH ROW BEGIN
+    DECLARE temp_user_id INT;
+
+    -- Asegúrate de que solo se toma un id_user
+    SELECT id_user INTO temp_user_id FROM tabla_temporal ORDER BY id DESC LIMIT 1;
+
+    -- Solo inserta en historial_categorias si temp_user_id no es NULL
+    IF temp_user_id IS NOT NULL THEN
+        INSERT INTO historial_pedidos (fk_pedido, fk_user, fk_estado, cambio, fecha_cambio, estado_antiguo)
+        VALUES (NEW.id, temp_user_id, NEW.fk_estado, 'creacion', NOW(), '');
+    END IF;
+
+    -- Eliminar el registro de tabla_temporal
+    DELETE FROM tabla_temporal;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `update_pedidos` AFTER UPDATE ON `pedidos` FOR EACH ROW BEGIN
+    DECLARE temp_user_id INT;
+
+    -- Asegúrate de que solo se toma un id_user
+    SELECT id_user INTO temp_user_id FROM tabla_temporal ORDER BY id DESC LIMIT 1;
+
+    -- Solo inserta en historial_categorias si temp_user_id no es NULL
+    IF temp_user_id IS NOT NULL THEN
+        INSERT INTO historial_pedidos (fk_pedido, fk_user, fk_estado, cambio, fecha_cambio, estado_antiguo)
+        VALUES (NEW.id, temp_user_id, NEW.fk_estado, 'actualizacion', NOW(), OLD.fk_estado);
+    END IF;
+
+    -- Eliminar el registro de tabla_temporal
+    DELETE FROM tabla_temporal;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `permisos`
+--
+
+CREATE TABLE `permisos` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `fk_grupo` int(2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `permisos`
+--
+
+INSERT INTO `permisos` (`id`, `nombre`, `fk_grupo`) VALUES
+(3, 'agregar_categorias', 2),
+(4, 'actualizar_categorias', 2),
+(5, 'desactivar_categorias', 2),
+(6, 'activar_categorias', 2),
+(7, 'mostrar_categorias', 2),
+(8, 'mostrar_productos', 1),
+(9, 'agregar_productos', 1),
+(10, 'actualizar_productos', 1),
+(11, 'desactivar_productos', 1),
+(12, 'activar_productos', 1),
+(13, 'historial_productos', 1),
+(14, 'historial_categorias', 2),
+(15, 'filtrar_pedido', 3),
+(16, 'detalle_pedido', 3),
+(17, 'guardar_pedido', 3),
+(18, 'actualizar_pedido', 3),
+(19, 'historial_pedido', 3),
+(20, 'mostrar_permisos', 4);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `productos`
+--
+
+CREATE TABLE `productos` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `fk_categoria` int(11) UNSIGNED NOT NULL,
+  `fk_estado` int(11) UNSIGNED NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `precio` decimal(10,2) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `productos`
+--
+
+INSERT INTO `productos` (`id`, `fk_categoria`, `fk_estado`, `nombre`, `precio`) VALUES
+(86, 132, 2, 'Camas', 1500000.00),
+(87, 132, 2, 'Armario', 2000000.00),
+(88, 132, 2, 'Ventilador', 500000.00),
+(89, 132, 2, 'Aire acondicionado', 2000000.00),
+(90, 132, 2, 'Sabanas', 50000.00),
+(95, 132, 2, 'Aguacate', 550000.00),
+(96, 133, 1, 'Queso', 40000.00),
+(97, 140, 2, 'dfsdfs', 99999999.99),
+(98, 141, 1, 'nike', 99999999.99);
+
+--
+-- Disparadores `productos`
+--
+DELIMITER $$
+CREATE TRIGGER `insert_productos` AFTER INSERT ON `productos` FOR EACH ROW BEGIN
+    DECLARE temp_user_id INT;
+
+    -- Asegúrate de que solo se toma un id_user
+    SELECT id_user INTO temp_user_id FROM tabla_temporal ORDER BY id DESC LIMIT 1;
+
+    -- Solo inserta en historial_categorias si temp_user_id no es NULL
+    IF temp_user_id IS NOT NULL THEN
+        INSERT INTO historial_productos (fk_producto, fk_user, cambio, fecha, estado_antiguo, estado_nuevo, nombre_anterior, nombre_nuevo, precio_antiguo, precio_actual, categoria_antigua, categoria_actual)
+        VALUES (NEW.id, temp_user_id, 'creacion', NOW(), '', NEW.fk_estado ,'', NEW.nombre, '', NEW.precio, '', NEW.fk_categoria);
+    END IF;
+
+    -- Eliminar el registro de tabla_temporal
+    DELETE FROM tabla_temporal;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `update_productos` AFTER UPDATE ON `productos` FOR EACH ROW BEGIN
+    DECLARE temp_user_id INT;
+
+    -- Asegúrate de que solo se toma un id_user
+    SELECT id_user INTO temp_user_id FROM tabla_temporal ORDER BY id DESC LIMIT 1;
+
+    -- Solo inserta en historial_categorias si temp_user_id no es NULL
+    IF temp_user_id IS NOT NULL THEN
+        INSERT INTO historial_productos (fk_producto, fk_user, cambio, fecha, estado_antiguo, estado_nuevo, nombre_anterior, nombre_nuevo, precio_antiguo, precio_actual, categoria_antigua, categoria_actual)
+        VALUES (NEW.id, temp_user_id, 'actualizacion', NOW(), OLD.fk_estado, NEW.fk_estado ,OLD.nombre, NEW.nombre, OLD.precio, NEW.precio, OLD.fk_categoria, NEW.fk_categoria);
+    END IF;
+
+    -- Eliminar el registro de tabla_temporal
+    DELETE FROM tabla_temporal;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `nombre` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `roles`
+--
+
+INSERT INTO `roles` (`id`, `nombre`) VALUES
+(3, 'administrador'),
+(4, 'super administrador');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `rol_permisos`
+--
+
+CREATE TABLE `rol_permisos` (
+  `rol_id` int(2) UNSIGNED NOT NULL,
+  `permiso_id` int(2) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `rol_permisos`
+--
+
+INSERT INTO `rol_permisos` (`rol_id`, `permiso_id`) VALUES
+(3, 3),
+(3, 4),
+(3, 5),
+(3, 6),
+(3, 7),
+(3, 8),
+(3, 9),
+(3, 10),
+(3, 11),
+(3, 12),
+(3, 13),
+(3, 14),
+(3, 15),
+(3, 16),
+(3, 17),
+(3, 18),
+(3, 19),
+(3, 20),
+(4, 3),
+(4, 4),
+(4, 5),
+(4, 6),
+(4, 7),
+(4, 8),
+(4, 9),
+(4, 10),
+(4, 11),
+(4, 12),
+(4, 13),
+(4, 14),
+(4, 15),
+(4, 16),
+(4, 17),
+(4, 18),
+(4, 19);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tabla_temporal`
+--
+
+CREATE TABLE `tabla_temporal` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `id_user` int(2) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuarios`
+--
+
+CREATE TABLE `usuarios` (
+  `id` int(2) UNSIGNED NOT NULL,
+  `nombres` varchar(100) NOT NULL,
+  `apellidos` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `telefono` int(2) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `fk_rol` int(2) UNSIGNED NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `reset_token` varchar(100) DEFAULT NULL,
+  `reset_token_expiration` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nombres`, `apellidos`, `username`, `telefono`, `password`, `fk_rol`, `email`, `reset_token`, `reset_token_expiration`) VALUES
+(40, 'Ibrahim Josue', 'Echeverria Peralta', 'Ibrah', 2147483647, '$2b$12$sYuDPsl3AT9F4oXQtxUITugmMgvM.16ssEwQL8tTBmK8dso2k7Vf2', 3, 'ibrahimecheverria123@gmail.com', NULL, NULL);
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `categorias`
+--
+ALTER TABLE `categorias`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_estado` (`fk_estado`);
+
+--
+-- Indices de la tabla `detalle_pedido`
+--
+ALTER TABLE `detalle_pedido`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_producto` (`fk_producto`),
+  ADD KEY `fk_pedido` (`fk_pedido`);
+
+--
+-- Indices de la tabla `estado`
+--
+ALTER TABLE `estado`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `grupos`
+--
+ALTER TABLE `grupos`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `historial_categorias`
+--
+ALTER TABLE `historial_categorias`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_user` (`fk_user`);
+
+--
+-- Indices de la tabla `historial_pedidos`
+--
+ALTER TABLE `historial_pedidos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_user` (`fk_user`),
+  ADD KEY `fk_estado` (`fk_estado`);
+
+--
+-- Indices de la tabla `historial_productos`
+--
+ALTER TABLE `historial_productos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_user` (`fk_user`);
+
+--
+-- Indices de la tabla `imagenes_categorias`
+--
+ALTER TABLE `imagenes_categorias`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `categoria_id` (`categoria_id`);
+
+--
+-- Indices de la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_estado` (`fk_estado`);
+
+--
+-- Indices de la tabla `permisos`
+--
+ALTER TABLE `permisos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_grupo` (`fk_grupo`);
+
+--
+-- Indices de la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_categoria` (`fk_categoria`),
+  ADD KEY `fk_estado` (`fk_estado`);
+
+--
+-- Indices de la tabla `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `rol_permisos`
+--
+ALTER TABLE `rol_permisos`
+  ADD PRIMARY KEY (`rol_id`,`permiso_id`),
+  ADD KEY `permiso_id` (`permiso_id`);
+
+--
+-- Indices de la tabla `tabla_temporal`
+--
+ALTER TABLE `tabla_temporal`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_rol` (`fk_rol`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `categorias`
+--
+ALTER TABLE `categorias`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=143;
+
+--
+-- AUTO_INCREMENT de la tabla `detalle_pedido`
+--
+ALTER TABLE `detalle_pedido`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
+
+--
+-- AUTO_INCREMENT de la tabla `estado`
+--
+ALTER TABLE `estado`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `grupos`
+--
+ALTER TABLE `grupos`
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `historial_categorias`
+--
+ALTER TABLE `historial_categorias`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=311;
+
+--
+-- AUTO_INCREMENT de la tabla `historial_pedidos`
+--
+ALTER TABLE `historial_pedidos`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=167;
+
+--
+-- AUTO_INCREMENT de la tabla `historial_productos`
+--
+ALTER TABLE `historial_productos`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=273;
+
+--
+-- AUTO_INCREMENT de la tabla `imagenes_categorias`
+--
+ALTER TABLE `imagenes_categorias`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=97;
+
+--
+-- AUTO_INCREMENT de la tabla `permisos`
+--
+ALTER TABLE `permisos`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT de la tabla `productos`
+--
+ALTER TABLE `productos`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
+
+--
+-- AUTO_INCREMENT de la tabla `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `tabla_temporal`
+--
+ALTER TABLE `tabla_temporal`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=851;
+
+--
+-- AUTO_INCREMENT de la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  MODIFY `id` int(2) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `categorias`
+--
+ALTER TABLE `categorias`
+  ADD CONSTRAINT `categorias_ibfk_1` FOREIGN KEY (`fk_estado`) REFERENCES `estado` (`id`);
+
+--
+-- Filtros para la tabla `detalle_pedido`
+--
+ALTER TABLE `detalle_pedido`
+  ADD CONSTRAINT `detalle_pedido_ibfk_1` FOREIGN KEY (`fk_producto`) REFERENCES `productos` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `detalle_pedido_ibfk_3` FOREIGN KEY (`fk_pedido`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `historial_categorias`
+--
+ALTER TABLE `historial_categorias`
+  ADD CONSTRAINT `historial_categorias_ibfk_1` FOREIGN KEY (`fk_user`) REFERENCES `usuarios` (`id`);
+
+--
+-- Filtros para la tabla `historial_pedidos`
+--
+ALTER TABLE `historial_pedidos`
+  ADD CONSTRAINT `historial_pedidos_ibfk_1` FOREIGN KEY (`fk_user`) REFERENCES `usuarios` (`id`),
+  ADD CONSTRAINT `historial_pedidos_ibfk_2` FOREIGN KEY (`fk_estado`) REFERENCES `estado` (`id`);
+
+--
+-- Filtros para la tabla `historial_productos`
+--
+ALTER TABLE `historial_productos`
+  ADD CONSTRAINT `historial_productos_ibfk_1` FOREIGN KEY (`fk_user`) REFERENCES `usuarios` (`id`);
+
+--
+-- Filtros para la tabla `imagenes_categorias`
+--
+ALTER TABLE `imagenes_categorias`
+  ADD CONSTRAINT `imagenes_categorias_ibfk_1` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  ADD CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`fk_estado`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `permisos`
+--
+ALTER TABLE `permisos`
+  ADD CONSTRAINT `permisos_ibfk_1` FOREIGN KEY (`fk_grupo`) REFERENCES `grupos` (`id`);
+
+--
+-- Filtros para la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD CONSTRAINT `productos_ibfk_1` FOREIGN KEY (`fk_categoria`) REFERENCES `categorias` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `productos_ibfk_2` FOREIGN KEY (`fk_estado`) REFERENCES `estado` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `rol_permisos`
+--
+ALTER TABLE `rol_permisos`
+  ADD CONSTRAINT `rol_permisos_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`),
+  ADD CONSTRAINT `rol_permisos_ibfk_2` FOREIGN KEY (`permiso_id`) REFERENCES `permisos` (`id`);
+
+--
+-- Filtros para la tabla `usuarios`
+--
+ALTER TABLE `usuarios`
+  ADD CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`fk_rol`) REFERENCES `roles` (`id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

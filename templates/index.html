@@ -212,8 +212,8 @@
                         
         
 
-          <script>
-            function updateState(pedidoId) {
+    <script>
+    function updateState(pedidoId) {
     const url = `/pedido/${pedidoId}/actualizar`;
     const versionElemento = document.querySelector(`#version-${pedidoId}`);
     const version = parseInt(versionElemento.textContent.trim(), 10); 
@@ -601,7 +601,7 @@ function renderCarrito() {
                 <td>${producto.precio.toFixed(2)}</td>
                 <td>
                     <select id="cantidad-select-${producto.id}" onchange="updateCantidad(${producto.id}, this.value)" class="limited-select">
-                        ${Array.from({ length: 30 }, (_, i) => 
+                        ${Array.from({ length: 34 }, (_, i) => 
                             `<option value="${i + 1}" ${i + 1 === producto.cantidad ? 'selected' : ''}>${i + 1}</option>`
                         ).join('')}
                     </select>

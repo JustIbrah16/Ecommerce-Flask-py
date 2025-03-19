@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario Estilizado</title>
-    <!-- Incluyendo Bootstrap desde CDN -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            height: 100vh; /* Para que ocupe toda la altura de la pantalla */
+            height: 100vh; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -45,7 +44,6 @@
     <div class="form-container">
         <h3 class="text-center text-primary fw-bold mb-4">Restablecer contraseña</h3>
         
-        <!-- Bloque para mostrar mensajes flash -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="alert-container">
@@ -70,7 +68,6 @@
         </form>
     </div>
 
-    <!-- Incluyendo Bootstrap JS desde CDN (opcional si es necesario) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

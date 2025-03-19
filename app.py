@@ -15,9 +15,6 @@ from utils.permisos import tiene_permiso_filter
 from utils.hash import hash_generator, check_password
 from datetime import timedelta
 
-
-
-
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 login_manager = LoginManager(app)
@@ -31,7 +28,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'secret-password'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_TLS'] = True   
 app.config['MAIL_USERNAME'] = 'ecommerceflask@gmail.com'
 app.config['MAIL_PASSWORD'] = 'rcte wjdz kswl haxi'
 mail = Mail(app)

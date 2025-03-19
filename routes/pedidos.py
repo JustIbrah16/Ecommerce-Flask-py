@@ -19,6 +19,7 @@ def buscar_prod_id():
         })
     return jsonify({'error': 'Producto no encontrado'}), 404
 
+
 @pedidos.route("/add_to_pedido/<producto_id>", methods=['POST'])
 def agregar_producto_a_pedido(producto_id):
     producto = OrderQueries.buscar_producto_por_id(producto_id)
@@ -33,6 +34,7 @@ def agregar_producto_a_pedido(producto_id):
     OrderQueries.marcar_producto_inactivo(producto)
 
     return redirect(url_for('productos.index'))
+
 
 @pedidos.route("/filtrar_pedidos", methods=['GET', 'POST'])
 @requiere_permiso_ajax('filtrar_pedido')
@@ -74,6 +76,7 @@ def detalle_pedido(id):
 
     return jsonify(resultados)
 
+
 @pedidos.route('/finalizar_compra', methods=['POST'])
 @requiere_permiso('guardar_pedido')
 def finalizar_compra():
@@ -113,8 +116,6 @@ def actualizar_estado(pedido_id):
         'nuevo_estado': pedido_actualizado.estado.nombre,
         'version': pedido_actualizado.version
     })
-
-
 
 
 @pedidos.route('/pedidos/<pedido_id>/historial', methods=['GET'])

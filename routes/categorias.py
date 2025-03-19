@@ -40,6 +40,7 @@ def add():
         else:
             return jsonify({'error': 'Esta categoria ya está creada'}), 400
 
+
 @categorias.route("/update/<id>", methods=['POST', 'GET'])
 @login_required
 @requiere_permiso('actualizar_categorias')
@@ -64,6 +65,7 @@ def delete(id):
     CategoryQueries.eliminar_categoria(id)
     return jsonify({'success': True})
 
+
 @categorias.route("/activar/<id>", methods=['POST'])
 @login_required
 @requiere_permiso('activar_categorias')
@@ -74,6 +76,7 @@ def activar(id):
     
     CategoryQueries.activar_categoria(id)
     return jsonify({'success': True})
+
 
 @categorias.route('/categorias/<categoria_id>/historial', methods=['GET'])
 @login_required
@@ -93,6 +96,7 @@ def obtener_historial_categorias(categoria_id):
     } for cambio in cambios_categoria]
 
     return jsonify(response)
+
 
 @categorias.route("/buscar", methods=['GET'])
 @login_required
@@ -121,6 +125,7 @@ def buscar():
         'page': categorias_filtradas.page,
         'total_pages': categorias_filtradas.pages,
     })
+
 
 @categorias.route("/filtrar", methods=['GET'])
 @login_required
