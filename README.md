@@ -1,1 +1,1 @@
-Aplicación desarrollada con python, flask y sqlalchemy, para un proyecto de practicas.
+Este es un proyecto de práctica que se desarrolló durante aproximadamente 2 meses, donde aprendimos Python con el microframework Flask y reforzamos nuestros conocimientos en bases de datos utilizando SQLAlchemy. Como resultado, creamos un software de e-commerce enfocado en la gestión para administradores y superadministradores, priorizando el desarrollo del backend y sus funcionalidades sobre el frontend o las vistas.
